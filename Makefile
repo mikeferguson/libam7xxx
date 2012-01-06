@@ -41,9 +41,9 @@ bindir := $(PREFIX)/sbin
 
 all: picoproj
 
-CFLAGS += -D_BSD_SOURCE
-picoproj: picoproj.o
+CFLAGS += -D_BSD_SOURCE # for htole32()
 
+picoproj: picoproj.o
 
 install: picoproj
 	install -d $(DESTDIR)$(bindir)
