@@ -23,6 +23,37 @@
 #include <endian.h>
 #include <errno.h>
 
+typedef enum {
+	AM7x01_PACKET_TYPE_INIT	   = 0x01,
+	AM7x01_PACKET_TYPE_IMAGE   = 0x02,
+	AM7x01_PACKET_TYPE_POWER   = 0x04,
+	AM7x01_PACKET_TYPE_UNKNOWN = 0x05,
+} am7x01_packet_type;
+
+typedef enum {
+	AM7x01_IMAGE_FORMAT_JPEG = 1,
+} am7x01_image_format;
+
+typedef enum {
+	AM7x01_POWER_OFF  = 0,
+	AM7x01_POWER_LOW  = 1,
+	AM7x01_POWER_MID  = 2,
+	AM7x01_POWER_HIGH = 3,
+} am7x01_power_mode;
+
+struct image_header {
+	uint32_t format;
+	uint32_t width;
+	uint32_t height;
+	uint32_t image_size;
+};
+
+struct power_header {
+	uint32_t power_low;
+	uint32_t power_mid;
+	uint32_t power_high;
+};
+
 /*
  * Examples of packet headers:
  *
@@ -37,221 +68,146 @@
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-#define AM7x01_PACKET_TYPE_INIT	   0x01
-#define AM7x01_PACKET_TYPE_IMAGE   0x02
-#define AM7x01_PACKET_TYPE_POWER   0x04
-#define AM7x01_PACKET_TYPE_UNKNOWN 0x05
-
-struct buffer {
-	unsigned int len;
-	uint8_t *data;
+static uint8_t reference_image_header[] = {
+	0x02, 0x00, 0x00, 0x00,
+	0x00,
+	0x10,
+	0x3e,
+	0x10,
+	0x01, 0x00, 0x00, 0x00,
+	0x20, 0x03, 0x00, 0x00,
+	0xe0, 0x01, 0x00, 0x00,
+	0x53, 0xE8, 0x00, 0x00
 };
 
-struct header{
+struct header {
 	uint32_t packet_type;
-	uint32_t unknown1;
-	uint32_t unknown2;
-	uint32_t width;
-	uint32_t height;
-	uint32_t payload_size;
+	uint8_t unknown0;
+	uint8_t header_len;
+	uint8_t unknown2;
+	uint8_t unknown3;
+	union {
+		struct image_header image;
+		struct power_header power;
+	} header_data;
 };
 
-struct packet {
-	struct header header;
-	uint8_t payload[];
-};
 
-static struct buffer *packet_allocate_buffer(struct packet *p)
+static void dump_image_header(struct image_header *i)
 {
-	struct buffer *buffer;
-
-	if (p == NULL) {
-		perror("packet NULL");
-		return NULL;
-	}
-
-	buffer = malloc(sizeof(*buffer));
-	if (buffer == NULL) {
-		perror("malloc buffer");
-		return NULL;
-	}
-
-	buffer->len = sizeof(p->header); /* + p->header.payload_size; */
-
-	buffer->data = malloc(buffer->len);
-	if (buffer->data == NULL) {
-		perror("malloc buffer->data");
-		free(buffer);
-		return NULL;
-	}
-	return buffer;
-}
-
-static void packet_free_buffer(struct buffer *buffer)
-{
-	free(buffer->data);
-	free(buffer);
-	buffer = NULL;
-}
-
-static int packet_pack(struct packet *p, struct buffer *buffer)
-{
-	unsigned int offset;
-	uint32_t tmp;
-
-	if (p == NULL || buffer == NULL)
-		return -EINVAL;
-
-	/* TODO: check for packet payload being NULL? */
-	if (buffer->data == NULL || buffer->len < sizeof(*p))
-		return -EINVAL;
-
-	offset = 0;
-
-	tmp = htole32(p->header.packet_type);
-	memcpy(buffer->data + offset, &tmp, sizeof(p->header.packet_type));
-	offset += sizeof(p->header.packet_type);
-
-	tmp = htole32(p->header.unknown1);
-	memcpy(buffer->data + offset, &tmp, sizeof(p->header.unknown1));
-	offset += sizeof(p->header.unknown1);
-
-	tmp = htole32(p->header.unknown2);
-	memcpy(buffer->data + offset, &tmp, sizeof(p->header.unknown2));
-	offset += sizeof(p->header.unknown2);
-
-	tmp = htole32(p->header.width);
-	memcpy(buffer->data + offset, &tmp, sizeof(p->header.width));
-	offset += sizeof(p->header.width);
-
-	tmp = htole32(p->header.height);
-	memcpy(buffer->data + offset, &tmp, sizeof(p->header.height));
-	offset += sizeof(p->header.height);
-
-	tmp = htole32(p->header.payload_size);
-	memcpy(buffer->data + offset, &tmp, sizeof(p->header.payload_size));
-	offset += sizeof(p->header.payload_size);
-
-	/* TODO memcpy payload of size */
-
-	return 0;
-}
-
-static int packet_unpack(struct buffer *buffer, struct packet *p)
-{
-	unsigned int offset;
-	uint32_t tmp;
-
-	if (p == NULL || buffer == NULL)
-		return -EINVAL;
-
-	/* TODO: check for packet payload being NULL? */
-	if (buffer->data == NULL || buffer->len < sizeof(*p))
-		return -EINVAL;
-
-	offset = 0;
-
-	memcpy(&tmp, buffer->data + offset, sizeof(p->header.packet_type));
-	p->header.packet_type = le32toh(tmp);
-	offset += sizeof(p->header.packet_type);
-
-	memcpy(&tmp, buffer->data + offset, sizeof(p->header.unknown1));
-	p->header.unknown1 = le32toh(tmp);
-	offset += sizeof(p->header.unknown1);
-
-	memcpy(&tmp, buffer->data + offset, sizeof(p->header.unknown2));
-	p->header.unknown2 = le32toh(tmp);
-	offset += sizeof(p->header.unknown2);
-
-	memcpy(&tmp, buffer->data + offset, sizeof(p->header.width));
-	p->header.width = le32toh(tmp);
-	offset += sizeof(p->header.width);
-
-	memcpy(&tmp, buffer->data + offset, sizeof(p->header.height));
-	p->header.height = le32toh(tmp);
-	offset += sizeof(p->header.height);
-
-	memcpy(&tmp, buffer->data + offset, sizeof(p->header.payload_size));
-	p->header.payload_size = le32toh(tmp);
-	offset += sizeof(p->header.payload_size);
-
-	/* malloc & memcpy payload of size p->header.payload_size */
-
-	return 0;
-}
-
-static void packet_dump_header(struct packet *p)
-{
-	if (p == NULL)
+	if (i == NULL)
 		return;
 
-	printf("packet_type: 0x%08x (%u)\n", p->header.packet_type, p->header.packet_type);
-	printf("unknown1:    0x%08x (%u)\n", p->header.unknown1, p->header.unknown1);
-	printf("unknown2:    0x%08x (%u)\n", p->header.unknown2, p->header.unknown2);
-	printf("width:       0x%08x (%u)\n", p->header.width, p->header.width);
-	printf("height:      0x%08x (%u)\n", p->header.height, p->header.height);
-	printf("size:        0x%08x (%u)\n", p->header.payload_size, p->header.payload_size);
+	printf("Image header:\n");
+	printf("format:      0x%08x (%u)\n", i->format, i->format);
+	printf("width:       0x%08x (%u)\n", i->width, i->width);
+	printf("height:      0x%08x (%u)\n", i->height, i->height);
+	printf("image size:  0x%08x (%u)\n", i->image_size, i->image_size);
+}
+
+static void dump_header(struct header *h)
+{
+	if (h == NULL)
+		return;
+
+	printf("packet_type: 0x%08x (%u)\n", h->packet_type, h->packet_type);
+	printf("unknown0:    0x%02hhx (%hhu)\n", h->unknown0, h->unknown0);
+	printf("header_len:  0x%02hhx (%hhu)\n", h->header_len, h->header_len);
+	printf("unknown2:    0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
+	printf("unknown3:    0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
+
+	switch(h->packet_type) {
+	case AM7x01_PACKET_TYPE_IMAGE:
+		dump_image_header(&(h->header_data.image));
+		break;
+
+	default:
+		printf("Packet type not supported!\n");
+		break;
+	}
+
 	fflush(stdout);
 }
 
-static void packet_dump_buffer(struct buffer *buffer)
+static void dump_buffer(uint8_t *buffer, unsigned int len)
 {
 	unsigned int i;
 
-	if (buffer == NULL)
+	if (buffer == NULL || len == 0)
 		return;
 
-	if (buffer->data == NULL)
-		return;
-
-	for (i = 0; i < buffer->len; i++) {
-		printf("%02hhX%c", buffer->data[i], (i < buffer->len - 1) ? ' ' : '\n');
+	for (i = 0; i < len; i++) {
+		printf("%02hhX%c", buffer[i], (i < len - 1) ? ' ' : '\n');
 	}
 	fflush(stdout);
 }
 
-int main(void)
+static int send_data(uint8_t *buffer, unsigned int len)
 {
-	struct packet p1  = {
-		.header = {
-			.packet_type  = AM7x01_PACKET_TYPE_IMAGE,
-			.unknown1     = le32toh(0x103e1000),
-			.unknown2     = le32toh(0x00000001),
-			.width        = 800,
-			.height       = 480,
-			.payload_size = 59475,
+	dump_buffer(buffer, len);
+	return 0;
+}
+
+static int send_header(struct header *h)
+{
+	union {
+		struct header header;
+		uint8_t buffer[sizeof (struct header)];
+	} data;
+
+	data.header = *h;
+
+	return send_data(data.buffer, sizeof (struct header));
+}
+
+static int send_image(am7x01_image_format format,
+		      unsigned int width,
+		      unsigned int height,
+		      uint8_t *image,
+		      unsigned int size)
+{
+	int ret;
+	struct header h = {
+		.packet_type = htole32(AM7x01_PACKET_TYPE_IMAGE),
+		.unknown0    = 0x00,
+		.header_len  = sizeof(struct image_header),
+		.unknown2    = 0x3e,
+		.unknown3    = 0x10,
+		.header_data = {
+			.image = {
+				.format     = htole32(format),
+				.width      = htole32(width),
+				.height     = htole32(height),
+				.image_size = htole32(size),
+			},
 		},
-		/* TODO initialize payload */
 	};
-	struct buffer *buffer = NULL;
-	struct packet p2;
+
+	dump_header(&h);
+	printf("\n");
+
+	printf("Dump Buffers\n");
+	dump_buffer(reference_image_header, sizeof(struct header));
+
+	ret = send_header(&h);
+	if (ret < 0)
+		return ret;
+
+	if (image == NULL || size == 0)
+		return 0;
+
+	return send_data(image, size);
+}
+
+
+int main(int argc, char *argv[])
+{
 	int ret;
 
-	packet_dump_header(&p1);
-
-	buffer = packet_allocate_buffer(&p1);
-	if (buffer == NULL) {
-		fprintf(stderr, "Cannot allocate the buffer.\n");
-		exit(EXIT_FAILURE);
-	}
-
-	ret = packet_pack(&p1, buffer);
+	ret = send_image(AM7x01_IMAGE_FORMAT_JPEG, 800, 480, 59475);
 	if (ret < 0) {
-		fprintf(stderr, "Cannot pack the packet.\n");
+		perror("send_image");
 		exit(EXIT_FAILURE);
 	}
-
-	packet_dump_buffer(buffer);
-
-	ret = packet_unpack(buffer, &p2);
-	if (ret < 0) {
-		fprintf(stderr, "Cannot unpack the packet.\n");
-		exit(EXIT_FAILURE);
-	}
-
-	packet_dump_header(&p2);
-
-	packet_free_buffer(buffer);
-
 	exit(EXIT_SUCCESS);
 }
