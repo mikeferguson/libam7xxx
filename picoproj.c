@@ -22,6 +22,7 @@
 #include <string.h>
 #include <endian.h>
 #include <errno.h>
+#include <unistd.h>
 
 typedef enum {
 	AM7x01_PACKET_TYPE_INIT	   = 0x01,
@@ -199,15 +200,68 @@ static int send_image(am7x01_image_format format,
 	return send_data(image, size);
 }
 
+static void usage(char *name)
+{
+	printf("usage: %s [OPTIONS]\n\n", name);
+	printf("OPTIONS:\n");
+	printf("\t-f <filename>\t\tthe image file to upload\n");
+	printf("\t-F <format>\t\tthe image format to use (default is JPEG).\n");
+	printf("\t\t\t\tSUPPORTED FORMATS:\n");
+	printf("\t\t\t\t\t1 - JPEG\n");
+	printf("\t-W <image width>\tthe width of the image to upload\n");
+	printf("\t-H <image height>\tthe height of the image to upload\n");
+	printf("\t-h \t\t\tthis help message\n");
+}
 
 int main(int argc, char *argv[])
 {
 	int ret;
+	int opt;
 
-	ret = send_image(AM7x01_IMAGE_FORMAT_JPEG, 800, 480, 59475);
+	char filename[FILENAME_MAX] = {0};
+	int format = AM7x01_IMAGE_FORMAT_JPEG;
+	int width = 800;
+	int height = 480;
+	uint8_t *image = NULL;
+	int size = 59475;
+
+	while ((opt = getopt(argc, argv, "f:F:W:H:h")) != -1) {
+		switch (opt) {
+		case 'f':
+			strncpy(filename, optarg, FILENAME_MAX);
+			break;
+		case 'F':
+			format = atoi(optarg);
+			if (format != 1) {
+				fprintf(stderr, "Unsupported format\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case 'W':
+			width = atoi(optarg);
+			if (width < 0) {
+				fprintf(stderr, "Unsupported width\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case 'H':
+			height = atoi(optarg);
+			if (height < 0) {
+				fprintf(stderr, "Unsupported height\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
+		default: /* '?' */
+			usage(argv[0]);
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	ret = send_image(format, width, height, image, size);
 	if (ret < 0) {
 		perror("send_image");
 		exit(EXIT_FAILURE);
 	}
+
 	exit(EXIT_SUCCESS);
 }

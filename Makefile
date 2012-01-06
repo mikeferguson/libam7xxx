@@ -42,6 +42,7 @@ bindir := $(PREFIX)/sbin
 all: picoproj
 
 CFLAGS += -D_BSD_SOURCE # for htole32()
+CFLAGS += -D_POSIX_C_SOURCE=2 # for getopt()
 
 picoproj: picoproj.o
 
