@@ -50,5 +50,15 @@ install: picoproj
 	install -d $(DESTDIR)$(bindir)
 	install -m 755 picoproj $(DESTDIR)$(bindir)
 
+BACKUP_PREFIX=libpicoproj-$(shell date +%Y%m%d%H%M)
+backup:
+	git archive \
+	  -o $(BACKUP_PREFIX).tar.gz \
+	  --prefix=$(BACKUP_PREFIX)/ \
+	  HEAD
+
+changelog:
+	git log --pretty="format:%ai  %aN  <%aE>%n%n%x09* %s%d%n" > ChangeLog
+
 clean:
 	rm -rf *~ *.o picoproj
