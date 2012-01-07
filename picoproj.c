@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 	int width = 800;
 	int height = 480;
 	uint8_t *image = NULL;
-	int size = 59475;
+	unsigned int size = 59475;
 
 	while ((opt = getopt(argc, argv, "f:F:W:H:h")) != -1) {
 		switch (opt) {
