@@ -22,6 +22,10 @@
 #include <string.h>
 #include <endian.h>
 #include <errno.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 
 typedef enum {
@@ -221,9 +225,11 @@ static void usage(char *name)
 int main(int argc, char *argv[])
 {
 	int ret;
+	int exit_code = EXIT_SUCCESS;
 	int opt;
 
 	char filename[FILENAME_MAX] = {0};
+	int image_fd = -1;
 	int format = AM7x01_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
@@ -262,11 +268,53 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	if (filename[0] != '\0') {
+		struct stat st;
+		
+		image_fd = open(filename, O_RDONLY);
+		if (image_fd < 0) {
+			perror("open");
+			exit_code = EXIT_FAILURE;
+			goto out;
+		}
+		if (fstat(image_fd, &st) < 0) {
+			perror("fstat");
+			exit_code = EXIT_FAILURE;
+			goto out_close_image_fd;
+		}
+		size = st.st_size;
+
+		image = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, image_fd, 0);
+		if (image == NULL) {
+			perror("mmap");
+			exit_code = EXIT_FAILURE;
+			goto out_close_image_fd;
+		}
+	}
+
 	ret = send_image(format, width, height, image, size);
 	if (ret < 0) {
 		perror("send_image");
-		exit(EXIT_FAILURE);
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
 	}
 
-	exit(EXIT_SUCCESS);
+	exit_code = EXIT_SUCCESS;
+
+cleanup:
+	if (image != NULL) {
+		ret = munmap(image, size);
+		if (ret < 0)
+			perror("munmap");
+	}
+
+out_close_image_fd:
+	if (image_fd >= 0) {
+		ret = close(image_fd);
+		if (ret < 0)
+			perror("close");
+	}
+
+out:
+	exit(exit_code);
 }
