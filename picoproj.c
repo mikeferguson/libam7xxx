@@ -24,7 +24,7 @@
 #include <errno.h>
 
 /*
- * Examples of a packet headers:
+ * Examples of packet headers:
  *
  * Image widget:
  * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
