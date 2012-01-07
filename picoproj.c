@@ -28,6 +28,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <libusb.h>
+
+#define AM7x01_VENDOR_ID  0x1de1
+#define AM7x01_PRODUCT_ID 0xc101
+
+static libusb_device_handle *dev;
+
 typedef enum {
 	AM7x01_PACKET_TYPE_INIT	   = 0x01,
 	AM7x01_PACKET_TYPE_IMAGE   = 0x02,
@@ -154,7 +161,18 @@ static void dump_buffer(uint8_t *buffer, unsigned int len)
 
 static int send_data(uint8_t *buffer, unsigned int len)
 {
+	int ret;
+	int transferred;
+
 	dump_buffer(buffer, len);
+
+	ret = libusb_bulk_transfer(dev, 1, buffer, len, &transferred, 0);
+	if (ret != 0 || (unsigned int)transferred != len) {
+		fprintf(stderr, "Error: ret: %d\ttransferred: %d (expected %u)\n",
+			ret, transferred, len);
+		return ret;
+	}
+
 	return 0;
 }
 
@@ -292,6 +310,22 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	libusb_init(NULL);
+	libusb_set_debug(NULL, 3);
+
+	dev = libusb_open_device_with_vid_pid(NULL,
+					      AM7x01_VENDOR_ID,
+					      AM7x01_PRODUCT_ID);
+	if (dev == NULL) {
+		errno = ENODEV;
+		perror("libusb_open_device_with_vid_pid");
+		exit_code = EXIT_FAILURE;
+		goto out_libusb_exit;
+	}
+
+	libusb_set_configuration(dev, 1);
+	libusb_claim_interface(dev, 0);
+
 	ret = send_image(format, width, height, image, size);
 	if (ret < 0) {
 		perror("send_image");
@@ -302,6 +336,11 @@ int main(int argc, char *argv[])
 	exit_code = EXIT_SUCCESS;
 
 cleanup:
+	libusb_close(dev);
+
+out_libusb_exit:
+	libusb_exit(NULL);
+
 	if (image != NULL) {
 		ret = munmap(image, size);
 		if (ret < 0)
