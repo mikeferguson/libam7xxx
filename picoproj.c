@@ -1,4 +1,4 @@
-/* picoproj - communication with AM7xxx based USB pico projectors
+/* picoproj - test program for libam7xxx
  *
  * Copyright (C) 2011  Antonio Ospite <ospite@studenti.unina.it>
  *
@@ -18,214 +18,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include <endian.h>
-#include <errno.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <libusb.h>
-
-#define AM7x01_VENDOR_ID  0x1de1
-#define AM7x01_PRODUCT_ID 0xc101
-
-static libusb_device_handle *dev;
-
-typedef enum {
-	AM7x01_PACKET_TYPE_INIT	   = 0x01,
-	AM7x01_PACKET_TYPE_IMAGE   = 0x02,
-	AM7x01_PACKET_TYPE_POWER   = 0x04,
-	AM7x01_PACKET_TYPE_UNKNOWN = 0x05,
-} am7x01_packet_type;
-
-typedef enum {
-	AM7x01_IMAGE_FORMAT_JPEG = 1,
-} am7x01_image_format;
-
-typedef enum {
-	AM7x01_POWER_OFF  = 0,
-	AM7x01_POWER_LOW  = 1,
-	AM7x01_POWER_MID  = 2,
-	AM7x01_POWER_HIGH = 3,
-} am7x01_power_mode;
-
-struct image_header {
-	uint32_t format;
-	uint32_t width;
-	uint32_t height;
-	uint32_t image_size;
-};
-
-struct power_header {
-	uint32_t power_low;
-	uint32_t power_mid;
-	uint32_t power_high;
-};
-
-/*
- * Examples of packet headers:
- *
- * Image widget:
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * +02|00|00|00|00|10|3e|10|01|00|00|00|20|03|00|00|e0|01|00|00|53|E8|00|00+
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- *
- * Brightness widget:
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * +04|00|00|00|00|0c|ff|ff|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00|00+
- * +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- */
-
-static uint8_t reference_image_header[] = {
-	0x02, 0x00, 0x00, 0x00,
-	0x00,
-	0x10,
-	0x3e,
-	0x10,
-	0x01, 0x00, 0x00, 0x00,
-	0x20, 0x03, 0x00, 0x00,
-	0xe0, 0x01, 0x00, 0x00,
-	0x53, 0xE8, 0x00, 0x00
-};
-
-struct header {
-	uint32_t packet_type;
-	uint8_t unknown0;
-	uint8_t header_len;
-	uint8_t unknown2;
-	uint8_t unknown3;
-	union {
-		struct image_header image;
-		struct power_header power;
-	} header_data;
-};
-
-
-static void dump_image_header(struct image_header *i)
-{
-	if (i == NULL)
-		return;
-
-	printf("Image header:\n");
-	printf("format:      0x%08x (%u)\n", i->format, i->format);
-	printf("width:       0x%08x (%u)\n", i->width, i->width);
-	printf("height:      0x%08x (%u)\n", i->height, i->height);
-	printf("image size:  0x%08x (%u)\n", i->image_size, i->image_size);
-}
-
-static void dump_header(struct header *h)
-{
-	if (h == NULL)
-		return;
-
-	printf("packet_type: 0x%08x (%u)\n", h->packet_type, h->packet_type);
-	printf("unknown0:    0x%02hhx (%hhu)\n", h->unknown0, h->unknown0);
-	printf("header_len:  0x%02hhx (%hhu)\n", h->header_len, h->header_len);
-	printf("unknown2:    0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
-	printf("unknown3:    0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
-
-	switch(h->packet_type) {
-	case AM7x01_PACKET_TYPE_IMAGE:
-		dump_image_header(&(h->header_data.image));
-		break;
-
-	default:
-		printf("Packet type not supported!\n");
-		break;
-	}
-
-	fflush(stdout);
-}
-
-static inline unsigned int in_80chars(unsigned int i)
-{
-	return ((i+1) % (80/3));
-}
-
-static void dump_buffer(uint8_t *buffer, unsigned int len)
-{
-	unsigned int i;
-
-	if (buffer == NULL || len == 0)
-		return;
-
-	for (i = 0; i < len; i++) {
-		printf("%02hhX%c", buffer[i], (in_80chars(i) && (i < len - 1)) ? ' ' : '\n');
-	}
-	fflush(stdout);
-}
-
-static int send_data(uint8_t *buffer, unsigned int len)
-{
-	int ret;
-	int transferred;
-
-	dump_buffer(buffer, len);
-
-	ret = libusb_bulk_transfer(dev, 1, buffer, len, &transferred, 0);
-	if (ret != 0 || (unsigned int)transferred != len) {
-		fprintf(stderr, "Error: ret: %d\ttransferred: %d (expected %u)\n",
-			ret, transferred, len);
-		return ret;
-	}
-
-	return 0;
-}
-
-static int send_header(struct header *h)
-{
-	union {
-		struct header header;
-		uint8_t buffer[sizeof (struct header)];
-	} data;
-
-	data.header = *h;
-
-	return send_data(data.buffer, sizeof (struct header));
-}
-
-static int send_image(am7x01_image_format format,
-		      unsigned int width,
-		      unsigned int height,
-		      uint8_t *image,
-		      unsigned int size)
-{
-	int ret;
-	struct header h = {
-		.packet_type = htole32(AM7x01_PACKET_TYPE_IMAGE),
-		.unknown0    = 0x00,
-		.header_len  = sizeof(struct image_header),
-		.unknown2    = 0x3e,
-		.unknown3    = 0x10,
-		.header_data = {
-			.image = {
-				.format     = htole32(format),
-				.width      = htole32(width),
-				.height     = htole32(height),
-				.image_size = htole32(size),
-			},
-		},
-	};
-
-	dump_header(&h);
-	printf("\n");
-
-	printf("Dump Buffers\n");
-	dump_buffer(reference_image_header, sizeof(struct header));
-
-	ret = send_header(&h);
-	if (ret < 0)
-		return ret;
-
-	if (image == NULL || size == 0)
-		return 0;
-
-	return send_data(image, size);
-}
+#include "am7xxx.h"
 
 static void usage(char *name)
 {
@@ -248,7 +48,8 @@ int main(int argc, char *argv[])
 
 	char filename[FILENAME_MAX] = {0};
 	int image_fd = -1;
-	int format = AM7x01_IMAGE_FORMAT_JPEG;
+	am7xxx_device dev;
+	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
 	uint8_t *image = NULL;
@@ -310,25 +111,16 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	libusb_init(NULL);
-	libusb_set_debug(NULL, 3);
-
-	dev = libusb_open_device_with_vid_pid(NULL,
-					      AM7x01_VENDOR_ID,
-					      AM7x01_PRODUCT_ID);
+	dev = am7xxx_init();
 	if (dev == NULL) {
-		errno = ENODEV;
-		perror("libusb_open_device_with_vid_pid");
+		perror("am7xxx_init");
 		exit_code = EXIT_FAILURE;
-		goto out_libusb_exit;
+		goto out_munmap;
 	}
 
-	libusb_set_configuration(dev, 1);
-	libusb_claim_interface(dev, 0);
-
-	ret = send_image(format, width, height, image, size);
+	ret = am7xxx_send_image(dev, format, width, height, image, size);
 	if (ret < 0) {
-		perror("send_image");
+		perror("am7xxx_send_image");
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
@@ -336,11 +128,9 @@ int main(int argc, char *argv[])
 	exit_code = EXIT_SUCCESS;
 
 cleanup:
-	libusb_close(dev);
+	am7xxx_shutdown(dev);
 
-out_libusb_exit:
-	libusb_exit(NULL);
-
+out_munmap:
 	if (image != NULL) {
 		ret = munmap(image, size);
 		if (ret < 0)

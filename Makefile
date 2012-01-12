@@ -44,7 +44,7 @@ all: picoproj
 CFLAGS += -D_BSD_SOURCE # for htole32()
 CFLAGS += -D_POSIX_C_SOURCE=2 # for getopt()
 
-picoproj: picoproj.o
+picoproj: picoproj.o am7xxx.o
 
 install: picoproj
 	install -d $(DESTDIR)$(bindir)
