@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: @PROJECT_NAME@
+Description: @PROJECT_DESCRIPTION@
+Requires: libusb-1.0
+Version: @PROJECT_APIVER@
+Libs: -L${libdir} -lam7xxx
+Cflags: -I${includedir}
