@@ -22,6 +22,10 @@
 #include <stdint.h>
 #include <libusb-1.0/libusb.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef libusb_device_handle *am7xxx_device;
 
 typedef enum {
@@ -86,5 +90,9 @@ int am7xxx_send_image(am7xxx_device dev,
 		      unsigned int height,
 		      uint8_t *image,
 		      unsigned int size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __AM7XXX_H */
