@@ -56,11 +56,11 @@ static void dump_header(struct am7xxx_header *h)
 	if (h == NULL)
 		return;
 
-	printf("packet_type: 0x%08x (%u)\n", h->packet_type, h->packet_type);
-	printf("unknown0:    0x%02hhx (%hhu)\n", h->unknown0, h->unknown0);
-	printf("header_len:  0x%02hhx (%hhu)\n", h->header_len, h->header_len);
-	printf("unknown2:    0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
-	printf("unknown3:    0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
+	printf("packet_type:     0x%08x (%u)\n", h->packet_type, h->packet_type);
+	printf("unknown0:        0x%02hhx (%hhu)\n", h->unknown0, h->unknown0);
+	printf("header_data_len: 0x%02hhx (%hhu)\n", h->header_data_len, h->header_data_len);
+	printf("unknown2:        0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
+	printf("unknown3:        0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
 
 	switch(h->packet_type) {
 	case AM7XXX_PACKET_TYPE_IMAGE:
@@ -165,11 +165,11 @@ int am7xxx_send_image(am7xxx_device dev,
 {
 	int ret;
 	struct am7xxx_header h = {
-		.packet_type = htole32(AM7XXX_PACKET_TYPE_IMAGE),
-		.unknown0    = 0x00,
-		.header_len  = sizeof(struct am7xxx_image_header),
-		.unknown2    = 0x3e,
-		.unknown3    = 0x10,
+		.packet_type     = htole32(AM7XXX_PACKET_TYPE_IMAGE),
+		.unknown0        = 0x00,
+		.header_data_len = sizeof(struct am7xxx_image_header),
+		.unknown2        = 0x3e,
+		.unknown3        = 0x10,
 		.header_data = {
 			.image = {
 				.format     = htole32(format),

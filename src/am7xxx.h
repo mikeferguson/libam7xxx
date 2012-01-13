@@ -72,7 +72,7 @@ struct am7xxx_power_header {
 struct am7xxx_header {
 	uint32_t packet_type;
 	uint8_t unknown0;
-	uint8_t header_len;
+	uint8_t header_data_len;
 	uint8_t unknown2;
 	uint8_t unknown3;
 	union {
@@ -82,6 +82,7 @@ struct am7xxx_header {
 };
 
 am7xxx_device am7xxx_init(void);
+
 void am7xxx_shutdown(am7xxx_device dev);
 
 int am7xxx_send_image(am7xxx_device dev,
