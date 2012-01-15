@@ -1,6 +1,6 @@
 /* picoproj - test program for libam7xxx
  *
- * Copyright (C) 2011  Antonio Ospite <ospite@studenti.unina.it>
+ * Copyright (C) 2012  Antonio Ospite <ospite@studenti.unina.it>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
