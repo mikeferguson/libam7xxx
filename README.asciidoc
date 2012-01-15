@@ -1,0 +1,58 @@
+= libam7xxx
+
+libam7xxx is an Open Source library to communicate via USB with Projectors and
+Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+
+libam7xxx makes it possible to use these devices as USB displays on
+non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+a few, and on non-PC platforms like for instance mobile phones, tablets or
+game consoles.
+
+The first driver supporting these devices was acerc11xdrv from Reto Schnider:
+https://github.com/rettichschnidi/acerc11xdrv
+
+== AM7XXX
+
+An overview of some AM7XXX chips (AM7211A AM7212 AM7212P AM7318 AM7213D
+AM7213V) can be found in http://www.actions-micro.com/dpf_psg.pdf
+
+An example of datasheet illustrating the functionalities of such ICs (AM7531)
+is at: http://wenku.baidu.com/view/543c8b4d852458fb770b56ee.html
+
+== Supported devices
+
+The devices supported by libam7xxx use USB bulk trasfers and a simple packet
+based protocol to exchange data and commands to and from a host system and the
+AM7XXX chip.
+
+Those with USB VendorID ''1de1'' are devices based on Actions Micro/Action Media
+designs, usually having two modes:
+
+ - USB Mass Storage mode (ProductID: ''1101'')
+ - Generic bulk data transfer mode (ProductID: ''c101'')
+
+Examples of devices based on AM7XXX are:
+
+  - Acer Series C pico projectors (C20 C110 C112 C120):
+      * http://www.acer.it/ac/it/IT/content/models/projector-c
+      * http://support.acer.com/product/default.aspx?modelId=3888
+    
+  - Philips/SagemCom PicoPix projectors (PPX 1020, PPX 1230, PPX 1430, PPX
+    1630):
+      * http://www.philips.co.uk/c/pocket-projector/179840/cat/
+      * http://www.sagemcom.com/EN/products/image-sound/pico-video-projectors.html
+
+  - CEL-TEC MP-01:
+      * http://www.kabelmanie.cz/miniprojektor-cel-tec-mp-01/
+
+  - Other unbranded projectors:
+      * http://www.dealextreme.com/p/portable-home-office-mini-usb-2-0-lcos-projector-16-9-45019
+
+  - HannSpree Digital picture frames (but it has not been verified yet if
+    those can be actually used as USB displays):
+      * http://europe.hannspree.net/onweb.jsp?prod_no=3333333621&webno=3333333317
+      * http://europe.hannspree.net/onweb.jsp?prod_no=33333337:4&webno=3333333317
+
+Maybe other devices reported as supporting "Display over USB (DoUSB)" like
+Acer K330 or some Optoma projectors could be used with this library, but
+this needs still needs to be verified.
