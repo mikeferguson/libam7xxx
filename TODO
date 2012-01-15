@@ -1,3 +1,3 @@
 - Document the API with Doxygen.
 - Support more than one am7xxx device at a time.
-- Generate Language bindings in order to use libam7xxx from other languages.
+- Generate language bindings in order to use libam7xxx from other languages.

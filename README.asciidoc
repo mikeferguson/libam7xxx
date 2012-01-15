@@ -1,6 +1,6 @@
 = libam7xxx
 
-libam7xxx is an Open Source library to communicate via USB with Projectors and
+libam7xxx is an Open Source library to communicate via USB with projectors and
 Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
 
 libam7xxx makes it possible to use these devices as USB displays on
@@ -8,7 +8,7 @@ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
 a few, and on non-PC platforms like for instance mobile phones, tablets or
 game consoles.
 
-The first driver supporting these devices was acerc11xdrv from Reto Schnider:
+The first driver supporting these devices was acerc11xdrv from Reto Schneider:
 https://github.com/rettichschnidi/acerc11xdrv
 
 == AM7XXX
@@ -48,7 +48,7 @@ Examples of devices based on AM7XXX are:
   - Other unbranded projectors:
       * http://www.dealextreme.com/p/portable-home-office-mini-usb-2-0-lcos-projector-16-9-45019
 
-  - HannSpree Digital picture frames (but it has not been verified yet if
+  - HannSpree digital picture frames (but it has not been verified yet if
     those can be actually used as USB displays):
       * http://europe.hannspree.net/onweb.jsp?prod_no=3333333621&webno=3333333317
       * http://europe.hannspree.net/onweb.jsp?prod_no=33333337:4&webno=3333333317
