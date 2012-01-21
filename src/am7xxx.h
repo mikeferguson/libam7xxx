@@ -36,7 +36,8 @@ typedef enum {
 } am7xxx_packet_type;
 
 typedef enum {
-	AM7XXX_IMAGE_FORMAT_JPEG = 1,
+	AM7XXX_IMAGE_FORMAT_JPEG     = 1,
+	AM7XXX_IMAGE_FORMAT_YUV_NV12 = 2,
 } am7xxx_image_format;
 
 typedef enum {

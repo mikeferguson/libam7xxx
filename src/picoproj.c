@@ -35,6 +35,7 @@ static void usage(char *name)
 	printf("\t-F <format>\t\tthe image format to use (default is JPEG).\n");
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
 	printf("\t\t\t\t\t1 - JPEG\n");
+	printf("\t\t\t\t\t2 - YUV - NV12\n");
 	printf("\t-W <image width>\tthe width of the image to upload\n");
 	printf("\t-H <image height>\tthe height of the image to upload\n");
 	printf("\t-h \t\t\tthis help message\n");
@@ -62,7 +63,14 @@ int main(int argc, char *argv[])
 			break;
 		case 'F':
 			format = atoi(optarg);
-			if (format != 1) {
+			switch(format) {
+			case AM7XXX_IMAGE_FORMAT_JPEG:
+				fprintf(stdout, "JPEG format\n");
+				break;
+			case AM7XXX_IMAGE_FORMAT_YUV_NV12:
+				fprintf(stdout, "NV12 format\n");
+				break;
+			default:
 				fprintf(stderr, "Unsupported format\n");
 				exit(EXIT_FAILURE);
 			}
