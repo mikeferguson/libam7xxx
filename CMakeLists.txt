@@ -45,6 +45,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
   add_flags(CMAKE_C_FLAGS
     -fno-common
     -Wall
+    -Werror
     -Wextra
     -Wformat=2
     -Winit-self
