@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 			case AM7XXX_IMAGE_FORMAT_JPEG:
 				fprintf(stdout, "JPEG format\n");
 				break;
-			case AM7XXX_IMAGE_FORMAT_YUV_NV12:
+			case AM7XXX_IMAGE_FORMAT_NV12:
 				fprintf(stdout, "NV12 format\n");
 				break;
 			default:
