@@ -32,10 +32,10 @@ static void dump_image_header(struct am7xxx_image_header *i)
 		return;
 
 	printf("Image header:\n");
-	printf("format:      0x%08x (%u)\n", i->format, i->format);
-	printf("width:       0x%08x (%u)\n", i->width, i->width);
-	printf("height:      0x%08x (%u)\n", i->height, i->height);
-	printf("image size:  0x%08x (%u)\n", i->image_size, i->image_size);
+	printf("\tformat:     0x%08x (%u)\n", i->format, i->format);
+	printf("\twidth:      0x%08x (%u)\n", i->width, i->width);
+	printf("\theight:     0x%08x (%u)\n", i->height, i->height);
+	printf("\timage size: 0x%08x (%u)\n", i->image_size, i->image_size);
 }
 
 static void dump_header(struct am7xxx_header *h)
