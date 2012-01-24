@@ -89,6 +89,10 @@ int main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 			break;
+		case 'h':
+			usage(argv[0]);
+			exit(EXIT_SUCCESS);
+			break;
 		default: /* '?' */
 			usage(argv[0]);
 			exit(EXIT_FAILURE);
