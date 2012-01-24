@@ -48,13 +48,14 @@ int main(int argc, char *argv[])
 	int opt;
 
 	char filename[FILENAME_MAX] = {0};
-	int image_fd = -1;
+	int image_fd;
+	struct stat st;
 	am7xxx_device dev;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
-	uint8_t *image = NULL;
-	unsigned int size = 59475;
+	uint8_t *image;
+	unsigned int size;
 
 	while ((opt = getopt(argc, argv, "f:F:W:H:h")) != -1) {
 		switch (opt) {
@@ -99,28 +100,30 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (filename[0] != '\0') {
-		struct stat st;
-		
-		image_fd = open(filename, O_RDONLY);
-		if (image_fd < 0) {
-			perror("open");
-			exit_code = EXIT_FAILURE;
-			goto out;
-		}
-		if (fstat(image_fd, &st) < 0) {
-			perror("fstat");
-			exit_code = EXIT_FAILURE;
-			goto out_close_image_fd;
-		}
-		size = st.st_size;
+	if (filename[0] == '\0') {
+		fprintf(stderr, "An image file MUST be specified.\n");
+		exit_code = EXIT_FAILURE;
+		goto out;
+	}
 
-		image = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, image_fd, 0);
-		if (image == NULL) {
-			perror("mmap");
-			exit_code = EXIT_FAILURE;
-			goto out_close_image_fd;
-		}
+	image_fd = open(filename, O_RDONLY);
+	if (image_fd < 0) {
+		perror("open");
+		exit_code = EXIT_FAILURE;
+		goto out;
+	}
+	if (fstat(image_fd, &st) < 0) {
+		perror("fstat");
+		exit_code = EXIT_FAILURE;
+		goto out_close_image_fd;
+	}
+	size = st.st_size;
+
+	image = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, image_fd, 0);
+	if (image == NULL) {
+		perror("mmap");
+		exit_code = EXIT_FAILURE;
+		goto out_close_image_fd;
 	}
 
 	dev = am7xxx_init();
@@ -150,18 +153,14 @@ cleanup:
 	am7xxx_shutdown(dev);
 
 out_munmap:
-	if (image != NULL) {
-		ret = munmap(image, size);
-		if (ret < 0)
-			perror("munmap");
-	}
+	ret = munmap(image, size);
+	if (ret < 0)
+		perror("munmap");
 
 out_close_image_fd:
-	if (image_fd >= 0) {
-		ret = close(image_fd);
-		if (ret < 0)
-			perror("close");
-	}
+	ret = close(image_fd);
+	if (ret < 0)
+		perror("close");
 
 out:
 	exit(exit_code);
