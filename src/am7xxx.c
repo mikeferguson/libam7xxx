@@ -17,10 +17,11 @@
  */
 
 #include <stdio.h>
-#include <endian.h>
+#include <stdlib.h>
 #include <errno.h>
 
 #include "am7xxx.h"
+#include "serialize.h"
 
 #define AM7XXX_VENDOR_ID  0x1de1
 #define AM7XXX_PRODUCT_ID 0xc101
@@ -110,16 +111,39 @@ static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 	return 0;
 }
 
+static void serialize_header(struct am7xxx_header *h, uint8_t *buffer)
+{
+	uint8_t **buffer_iterator = &buffer;
+
+	put_le32(h->packet_type, buffer_iterator);
+	put_8(h->unknown0, buffer_iterator);
+	put_8(h->header_data_len, buffer_iterator);
+	put_8(h->unknown2, buffer_iterator);
+	put_8(h->unknown3, buffer_iterator);
+	put_le32(h->header_data.data.field0, buffer_iterator);
+	put_le32(h->header_data.data.field1, buffer_iterator);
+	put_le32(h->header_data.data.field2, buffer_iterator);
+	put_le32(h->header_data.data.field3, buffer_iterator);
+}
+
 static int send_header(am7xxx_device dev, struct am7xxx_header *h)
 {
-	union {
-		struct am7xxx_header header;
-		uint8_t buffer[sizeof (struct am7xxx_header)];
-	} data;
+	uint8_t *buffer;
+	int ret;
 
-	data.header = *h;
+	buffer = calloc(AM7XXX_HEADER_WIRE_SIZE, 1);
+	if (buffer == NULL) {
+		perror("calloc buffer");
+		return -ENOMEM;
+	}
 
-	return send_data(dev, data.buffer, sizeof (struct am7xxx_header));
+	serialize_header(h, buffer);
+	ret = send_data(dev, buffer, AM7XXX_HEADER_WIRE_SIZE);
+	if (ret < 0)
+		fprintf(stderr, "send_header: failed to send data.\n");
+
+	free(buffer);
+	return ret;
 }
 
 am7xxx_device am7xxx_init(void)
@@ -165,17 +189,17 @@ int am7xxx_send_image(am7xxx_device dev,
 {
 	int ret;
 	struct am7xxx_header h = {
-		.packet_type     = htole32(AM7XXX_PACKET_TYPE_IMAGE),
+		.packet_type     = AM7XXX_PACKET_TYPE_IMAGE,
 		.unknown0        = 0x00,
 		.header_data_len = sizeof(struct am7xxx_image_header),
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
 		.header_data = {
 			.image = {
-				.format     = htole32(format),
-				.width      = htole32(width),
-				.height     = htole32(height),
-				.image_size = htole32(size),
+				.format     = format,
+				.width      = width,
+				.height     = height,
+				.image_size = size,
 			},
 		},
 	};

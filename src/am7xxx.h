@@ -47,6 +47,13 @@ typedef enum {
 	AM7XXX_POWER_HIGH = 3,
 } am7xxx_power_mode;
 
+struct am7xxx_generic_header {
+	uint32_t field0;
+	uint32_t field1;
+	uint32_t field2;
+	uint32_t field3;
+};
+
 struct am7xxx_image_header {
 	uint32_t format;
 	uint32_t width;
@@ -70,6 +77,12 @@ struct am7xxx_power_header {
  * 04 00 00 00 00 0c ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
  */
 
+/* The header size on the wire is known to be always 24 bytes, regardless of
+ * the memory configuration enforced by different architechtures or compilers
+ * for struct am7xxx_header
+ */
+#define AM7XXX_HEADER_WIRE_SIZE 24
+
 struct am7xxx_header {
 	uint32_t packet_type;
 	uint8_t unknown0;
@@ -77,6 +90,7 @@ struct am7xxx_header {
 	uint8_t unknown2;
 	uint8_t unknown3;
 	union {
+		struct am7xxx_generic_header data;
 		struct am7xxx_image_header image;
 		struct am7xxx_power_header power;
 	} header_data;

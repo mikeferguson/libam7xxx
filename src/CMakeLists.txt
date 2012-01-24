@@ -5,7 +5,7 @@ add_definitions("-D_POSIX_C_SOURCE=2") # for getopt()
 find_package(libusb-1.0 REQUIRED)
 include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
-set(SRC am7xxx.c)
+set(SRC am7xxx.c serialize.c)
 
 # Build the library
 add_library(am7xxx SHARED ${SRC})
