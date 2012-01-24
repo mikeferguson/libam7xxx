@@ -130,6 +130,13 @@ int main(int argc, char *argv[])
 		goto out_munmap;
 	}
 
+	ret = am7xxx_set_power_mode(dev, AM7XXX_POWER_LOW);
+	if (ret < 0) {
+		perror("am7xxx_set_power_mode");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
+
 	ret = am7xxx_send_image(dev, format, width, height, image, size);
 	if (ret < 0) {
 		perror("am7xxx_send_image");

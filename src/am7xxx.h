@@ -41,10 +41,11 @@ typedef enum {
 } am7xxx_image_format;
 
 typedef enum {
-	AM7XXX_POWER_OFF  = 0,
-	AM7XXX_POWER_LOW  = 1,
-	AM7XXX_POWER_MID  = 2,
-	AM7XXX_POWER_HIGH = 3,
+	AM7XXX_POWER_OFF    = 0,
+	AM7XXX_POWER_LOW    = 1,
+	AM7XXX_POWER_MIDDLE = 2,
+	AM7XXX_POWER_HIGH   = 3,
+	AM7XXX_POWER_TURBO  = 4,
 } am7xxx_power_mode;
 
 struct am7xxx_generic_header {
@@ -62,9 +63,9 @@ struct am7xxx_image_header {
 };
 
 struct am7xxx_power_header {
-	uint32_t power_low;
-	uint32_t power_mid;
-	uint32_t power_high;
+	uint32_t bit2;
+	uint32_t bit1;
+	uint32_t bit0;
 };
 
 /*
@@ -106,6 +107,14 @@ int am7xxx_send_image(am7xxx_device dev,
 		      unsigned int height,
 		      uint8_t *image,
 		      unsigned int size);
+
+/*
+ * NOTE: if we set the mode to AM7XXX_POWER_OFF we can't turn the
+ * display on again by using only am7xxx_set_power_mode().
+ *
+ * Remember to mention that when writing the API doc.
+ */
+int am7xxx_set_power_mode(am7xxx_device dev, am7xxx_power_mode mode);
 
 #ifdef __cplusplus
 }

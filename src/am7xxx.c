@@ -38,6 +38,17 @@ static void dump_image_header(struct am7xxx_image_header *i)
 	printf("\timage size: 0x%08x (%u)\n", i->image_size, i->image_size);
 }
 
+static void dump_power_header(struct am7xxx_power_header *p)
+{
+	if (p == NULL)
+		return;
+
+	printf("Power header:\n");
+	printf("\tbit2: 0x%08x (%u)\n", p->bit2, p->bit2);
+	printf("\tbit1: 0x%08x (%u)\n", p->bit1, p->bit1);
+	printf("\tbit0: 0x%08x (%u)\n", p->bit0, p->bit0);
+}
+
 static void dump_header(struct am7xxx_header *h)
 {
 	if (h == NULL)
@@ -52,6 +63,10 @@ static void dump_header(struct am7xxx_header *h)
 	switch(h->packet_type) {
 	case AM7XXX_PACKET_TYPE_IMAGE:
 		dump_image_header(&(h->header_data.image));
+		break;
+
+	case AM7XXX_PACKET_TYPE_POWER:
+		dump_power_header(&(h->header_data.power));
 		break;
 
 	default:
@@ -208,4 +223,57 @@ int am7xxx_send_image(am7xxx_device dev,
 		return 0;
 
 	return send_data(dev, image, size);
+}
+
+int am7xxx_set_power_mode(am7xxx_device dev, am7xxx_power_mode mode)
+{
+	int ret;
+	struct am7xxx_header h = {
+		.packet_type     = AM7XXX_PACKET_TYPE_POWER,
+		.unknown0        = 0x00,
+		.header_data_len = sizeof(struct am7xxx_power_header),
+		.unknown2        = 0x3e,
+		.unknown3        = 0x10,
+	};
+
+	switch(mode) {
+	case AM7XXX_POWER_OFF:
+		h.header_data.power.bit2 = 0;
+		h.header_data.power.bit1 = 0;
+		h.header_data.power.bit0 = 0;
+		break;
+
+	case AM7XXX_POWER_LOW:
+		h.header_data.power.bit2 = 0;
+		h.header_data.power.bit1 = 0;
+		h.header_data.power.bit0 = 1;
+
+	case AM7XXX_POWER_MIDDLE:
+		h.header_data.power.bit2 = 0;
+		h.header_data.power.bit1 = 1;
+		h.header_data.power.bit0 = 0;
+		break;
+
+	case AM7XXX_POWER_HIGH:
+		h.header_data.power.bit2 = 0;
+		h.header_data.power.bit1 = 1;
+		h.header_data.power.bit0 = 1;
+		break;
+
+	case AM7XXX_POWER_TURBO:
+		h.header_data.power.bit2 = 1;
+		h.header_data.power.bit1 = 0;
+		h.header_data.power.bit0 = 0;
+		break;
+
+	default:
+		fprintf(stderr, "Unsupported power mode.\n");
+		return -EINVAL;
+	};
+
+	ret = send_header(dev, &h);
+	if (ret < 0)
+		return ret;
+
+	return 0;
 }
