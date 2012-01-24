@@ -26,20 +26,6 @@
 #define AM7XXX_VENDOR_ID  0x1de1
 #define AM7XXX_PRODUCT_ID 0xc101
 
-#if 1
-static uint8_t reference_image_header[] = {
-	0x02, 0x00, 0x00, 0x00,
-	0x00,
-	0x10,
-	0x3e,
-	0x10,
-	0x01, 0x00, 0x00, 0x00,
-	0x20, 0x03, 0x00, 0x00,
-	0xe0, 0x01, 0x00, 0x00,
-	0x53, 0xE8, 0x00, 0x00
-};
-#endif
-
 static void dump_image_header(struct am7xxx_image_header *i)
 {
 	if (i == NULL)
@@ -78,6 +64,8 @@ static void dump_header(struct am7xxx_header *h)
 
 static inline unsigned int in_80chars(unsigned int i)
 {
+	/* The 3 below is the length of "xx " where xx is the hex string
+	 * representation of a byte */
 	return ((i+1) % (80/3));
 }
 
