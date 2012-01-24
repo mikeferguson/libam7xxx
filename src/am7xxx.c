@@ -99,7 +99,10 @@ static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 	int ret;
 	int transferred;
 
+#if DEBUG
 	dump_buffer(buffer, len);
+	printf("\n");
+#endif
 
 	ret = libusb_bulk_transfer(dev, 1, buffer, len, &transferred, 0);
 	if (ret != 0 || (unsigned int)transferred != len) {
@@ -130,6 +133,11 @@ static int send_header(am7xxx_device dev, struct am7xxx_header *h)
 {
 	uint8_t *buffer;
 	int ret;
+
+#if DEBUG
+	dump_header(h);
+	printf("\n");
+#endif
 
 	buffer = calloc(AM7XXX_HEADER_WIRE_SIZE, 1);
 	if (buffer == NULL) {
@@ -203,12 +211,6 @@ int am7xxx_send_image(am7xxx_device dev,
 			},
 		},
 	};
-
-	dump_header(&h);
-	printf("\n");
-
-	printf("Dump Buffers\n");
-	dump_buffer(reference_image_header, sizeof(struct am7xxx_header));
 
 	ret = send_header(dev, &h);
 	if (ret < 0)
