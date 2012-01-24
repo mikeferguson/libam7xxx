@@ -31,6 +31,13 @@ designs, usually having two modes:
  - USB Mass Storage mode (ProductID: ''1101'')
  - Generic bulk data transfer mode (ProductID: ''c101'')
 
+The mode can be switched with the command:
+
+ $ sudo usb_modeswitch \
+   --default-vendor 0x1de1 \
+   --default-product 0x1101 \
+   --message-content 55534243087052890000000000000cff020000000000000000000000000000
+
 Examples of devices based on AM7XXX are:
 
   - Acer Series C pico projectors (C20 C110 C112 C120):
