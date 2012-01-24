@@ -1,0 +1,24 @@
+== Hacking libam7xxx
+
+=== Coding style
+
+libam7xxx uses the linux kernel coding style:
+http://kernel.org/doc/Documentation/CodingStyle
+
+=== Debug builds
+
+The suggested way to hack on the project is:
+
+  $ mkdir build
+  $ cd build
+  $ cmake ../ -DCMAKE_BUILD_TYPE=debug
+  $ make
+
+If you want to check the code with the ''sparse'' static analysis tool you
+can run:
+
+  $ mkdir build
+  $ cd build
+  $ cmake ../ -DCMAKE_C_COMPILER=cgcc
+  $ make
+
