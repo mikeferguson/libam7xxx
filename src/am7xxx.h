@@ -19,7 +19,6 @@
 #ifndef __AM7XXX_H
 #define __AM7XXX_H
 
-#include <stdint.h>
 #include <libusb-1.0/libusb.h>
 
 #ifdef __cplusplus
@@ -55,7 +54,7 @@ int am7xxx_send_image(am7xxx_device dev,
 		      am7xxx_image_format format,
 		      unsigned int width,
 		      unsigned int height,
-		      uint8_t *image,
+		      unsigned char *image,
 		      unsigned int size);
 
 /*

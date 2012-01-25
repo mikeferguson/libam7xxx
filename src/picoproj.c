@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
-	uint8_t *image;
+	unsigned char *image;
 	unsigned int size;
 	unsigned int native_width;
 	unsigned int native_height;
