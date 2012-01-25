@@ -26,6 +26,71 @@
 #define AM7XXX_VENDOR_ID  0x1de1
 #define AM7XXX_PRODUCT_ID 0xc101
 
+typedef enum {
+	AM7XXX_PACKET_TYPE_DEVINFO = 0x01,
+	AM7XXX_PACKET_TYPE_IMAGE   = 0x02,
+	AM7XXX_PACKET_TYPE_POWER   = 0x04,
+	AM7XXX_PACKET_TYPE_UNKNOWN = 0x05,
+} am7xxx_packet_type;
+
+struct am7xxx_generic_header {
+	uint32_t field0;
+	uint32_t field1;
+	uint32_t field2;
+	uint32_t field3;
+};
+
+struct am7xxx_devinfo_header {
+	uint32_t native_width;
+	uint32_t native_height;
+	uint32_t unknown0;
+	uint32_t unknown1;
+};
+
+struct am7xxx_image_header {
+	uint32_t format;
+	uint32_t width;
+	uint32_t height;
+	uint32_t image_size;
+};
+
+struct am7xxx_power_header {
+	uint32_t bit2;
+	uint32_t bit1;
+	uint32_t bit0;
+};
+
+/*
+ * Examples of packet headers:
+ *
+ * Image header:
+ * 02 00 00 00 00 10 3e 10 01 00 00 00 20 03 00 00 e0 01 00 00 53 E8 00 00
+ *
+ * Power header:
+ * 04 00 00 00 00 0c ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+ */
+
+/* The header size on the wire is known to be always 24 bytes, regardless of
+ * the memory configuration enforced by different architechtures or compilers
+ * for struct am7xxx_header
+ */
+#define AM7XXX_HEADER_WIRE_SIZE 24
+
+struct am7xxx_header {
+	uint32_t packet_type;
+	uint8_t unknown0;
+	uint8_t header_data_len;
+	uint8_t unknown2;
+	uint8_t unknown3;
+	union {
+		struct am7xxx_generic_header data;
+		struct am7xxx_devinfo_header devinfo;
+		struct am7xxx_image_header image;
+		struct am7xxx_power_header power;
+	} header_data;
+};
+
+
 static void dump_devinfo_header(struct am7xxx_devinfo_header *d)
 {
 	if (d == NULL)
