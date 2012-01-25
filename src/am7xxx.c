@@ -26,6 +26,18 @@
 #define AM7XXX_VENDOR_ID  0x1de1
 #define AM7XXX_PRODUCT_ID 0xc101
 
+static void dump_devinfo_header(struct am7xxx_devinfo_header *d)
+{
+	if (d == NULL)
+		return;
+
+	printf("Info header:\n");
+	printf("\tnative_width:  0x%08x (%u)\n", d->native_width, d->native_width);
+	printf("\tnative_height: 0x%08x (%u)\n", d->native_height, d->native_height);
+	printf("\tunknown0:      0x%08x (%u)\n", d->unknown0, d->unknown0);
+	printf("\tunknown1:      0x%08x (%u)\n", d->unknown1, d->unknown1);
+}
+
 static void dump_image_header(struct am7xxx_image_header *i)
 {
 	if (i == NULL)
@@ -61,6 +73,10 @@ static void dump_header(struct am7xxx_header *h)
 	printf("unknown3:        0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
 
 	switch(h->packet_type) {
+	case AM7XXX_PACKET_TYPE_DEVINFO:
+		dump_devinfo_header(&(h->header_data.devinfo));
+		break;
+
 	case AM7XXX_PACKET_TYPE_IMAGE:
 		dump_image_header(&(h->header_data.image));
 		break;
@@ -97,6 +113,27 @@ static void dump_buffer(uint8_t *buffer, unsigned int len)
 	fflush(stdout);
 }
 
+static int read_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
+{
+	int ret;
+	int transferred;
+
+	ret = libusb_bulk_transfer(dev, 0x81, buffer, len, &transferred, 0);
+	if (ret != 0 || (unsigned int)transferred != len) {
+		fprintf(stderr, "Error: ret: %d\ttransferred: %d (expected %u)\n",
+			ret, transferred, len);
+		return ret;
+	}
+
+#if DEBUG
+	printf("\n<-- received\n");
+	dump_buffer(buffer, len);
+	printf("\n");
+#endif
+
+	return 0;
+}
+
 static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 {
 	int ret;
@@ -131,6 +168,51 @@ static void serialize_header(struct am7xxx_header *h, uint8_t *buffer)
 	put_le32(h->header_data.data.field1, buffer_iterator);
 	put_le32(h->header_data.data.field2, buffer_iterator);
 	put_le32(h->header_data.data.field3, buffer_iterator);
+}
+
+static void unserialize_header(uint8_t *buffer, struct am7xxx_header *h)
+{
+	uint8_t **buffer_iterator = &buffer;
+
+	h->packet_type = get_le32(buffer_iterator);
+	h->unknown0 = get_8(buffer_iterator);
+	h->header_data_len = get_8(buffer_iterator);
+	h->unknown2 = get_8(buffer_iterator);
+	h->unknown3 = get_8(buffer_iterator);
+	h->header_data.data.field0 = get_le32(buffer_iterator);
+	h->header_data.data.field1 = get_le32(buffer_iterator);
+	h->header_data.data.field2 = get_le32(buffer_iterator);
+	h->header_data.data.field3 = get_le32(buffer_iterator);
+}
+
+static int read_header(am7xxx_device dev, struct am7xxx_header *h)
+{
+	uint8_t *buffer;
+	int ret;
+
+	buffer = calloc(AM7XXX_HEADER_WIRE_SIZE, 1);
+	if (buffer == NULL) {
+		perror("calloc buffer");
+		return -ENOMEM;
+	}
+
+	ret = read_data(dev, buffer, AM7XXX_HEADER_WIRE_SIZE);
+	if (ret < 0)
+		goto out;
+
+	unserialize_header(buffer, h);
+
+#if DEBUG
+	printf("\n");
+	dump_header(h);
+	printf("\n");
+#endif
+
+	ret = 0;
+
+out:
+	free(buffer);
+	return ret;
 }
 
 static int send_header(am7xxx_device dev, struct am7xxx_header *h)
@@ -191,6 +273,45 @@ void am7xxx_shutdown(am7xxx_device dev)
 		libusb_close(dev);
 		libusb_exit(NULL);
 	}
+}
+
+int am7xxx_get_device_info(am7xxx_device dev,
+			   unsigned int *native_width,
+			   unsigned int *native_height,
+			   unsigned int *unknown0,
+			   unsigned int *unknown1)
+{
+	int ret;
+	struct am7xxx_header h = {
+		.packet_type     = AM7XXX_PACKET_TYPE_DEVINFO,
+		.unknown0        = 0x00,
+		.header_data_len = 0x00,
+		.unknown2        = 0x3e,
+		.unknown3        = 0x10,
+		.header_data = {
+			.devinfo = {
+				.native_width  = 0,
+				.native_height = 0,
+				.unknown0      = 0,
+				.unknown1      = 0,
+			},
+		},
+	};
+
+	ret = send_header(dev, &h);
+	if (ret < 0)
+		return ret;
+
+	ret = read_header(dev, &h);
+	if (ret < 0)
+		return ret;
+
+	*native_width = h.header_data.devinfo.native_width;
+	*native_height = h.header_data.devinfo.native_height;
+	*unknown0 = h.header_data.devinfo.unknown0;
+	*unknown1 = h.header_data.devinfo.unknown1;
+
+	return 0;
 }
 
 int am7xxx_send_image(am7xxx_device dev,

@@ -29,7 +29,7 @@ extern "C" {
 typedef libusb_device_handle *am7xxx_device;
 
 typedef enum {
-	AM7XXX_PACKET_TYPE_INIT	   = 0x01,
+	AM7XXX_PACKET_TYPE_DEVINFO = 0x01,
 	AM7XXX_PACKET_TYPE_IMAGE   = 0x02,
 	AM7XXX_PACKET_TYPE_POWER   = 0x04,
 	AM7XXX_PACKET_TYPE_UNKNOWN = 0x05,
@@ -53,6 +53,13 @@ struct am7xxx_generic_header {
 	uint32_t field1;
 	uint32_t field2;
 	uint32_t field3;
+};
+
+struct am7xxx_devinfo_header {
+	uint32_t native_width;
+	uint32_t native_height;
+	uint32_t unknown0;
+	uint32_t unknown1;
 };
 
 struct am7xxx_image_header {
@@ -92,6 +99,7 @@ struct am7xxx_header {
 	uint8_t unknown3;
 	union {
 		struct am7xxx_generic_header data;
+		struct am7xxx_devinfo_header devinfo;
 		struct am7xxx_image_header image;
 		struct am7xxx_power_header power;
 	} header_data;
@@ -100,6 +108,12 @@ struct am7xxx_header {
 am7xxx_device am7xxx_init(void);
 
 void am7xxx_shutdown(am7xxx_device dev);
+
+int am7xxx_get_device_info(am7xxx_device dev,
+			   unsigned int *native_width,
+			   unsigned int *native_height,
+			   unsigned int *unknown0,
+			   unsigned int *unknown1);
 
 int am7xxx_send_image(am7xxx_device dev,
 		      am7xxx_image_format format,
