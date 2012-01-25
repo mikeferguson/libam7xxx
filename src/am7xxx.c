@@ -103,6 +103,7 @@ static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 	int transferred;
 
 #if DEBUG
+	printf("\nsending -->\n");
 	dump_buffer(buffer, len);
 	printf("\n");
 #endif
@@ -138,6 +139,7 @@ static int send_header(am7xxx_device dev, struct am7xxx_header *h)
 	int ret;
 
 #if DEBUG
+	printf("\n");
 	dump_header(h);
 	printf("\n");
 #endif
