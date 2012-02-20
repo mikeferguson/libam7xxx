@@ -28,13 +28,16 @@ The devices supported by libam7xxx use USB bulk transfers and a simple packet
 based protocol to exchange data and commands to and from a host system and the
 AM7XXX chip.
 
-Those with USB VendorID +1de1+ are devices based on Actions Micro/Action Media
-designs, usually having two modes:
+Devices based on Actions Micro/Action Media designs generally use the USB
+VendorID +1de1+, and they can have two operational modes:
 
- - USB Mass Storage mode (ProductID: +1101+)
- - Generic bulk data transfer mode (ProductID: +c101+)
+ - USB Mass Storage mode (e.g. ProductID: +1101+)
+ - Generic bulk data transfer mode, or Display mode (e.g. ProductID: +c101+)
 
-The mode can be switched with the command:
+On recent GNU/Linux systems the switch from Mass Storage mode to Display mode
+is performed automatically by
+http://www.draisberghof.de/usb_modeswitch/[USB_ModeSwitch], or can be done
+manually with the command:
 
  $ sudo usb_modeswitch \
    --default-vendor 0x1de1 \
