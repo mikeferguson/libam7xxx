@@ -8,8 +8,11 @@ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
 a few, and on non-PC platforms like for instance mobile phones, tablets or
 game consoles.
 
-The first driver supporting these devices was acerc11xdrv from Reto Schneider:
+The first driver supporting these devices was _acerc11xdrv_ from Reto Schneider:
 https://github.com/rettichschnidi/acerc11xdrv
+
+Another project with the same purpose is _acerc110_ from Thomas Baquet:
+https://github.com/lordblackfox/acerc110
 
 == AM7XXX
 
