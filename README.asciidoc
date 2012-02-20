@@ -24,7 +24,7 @@ is at: http://wenku.baidu.com/view/543c8b4d852458fb770b56ee.html
 
 == Supported devices
 
-The devices supported by libam7xxx use USB bulk trasfers and a simple packet
+The devices supported by libam7xxx use USB bulk transfers and a simple packet
 based protocol to exchange data and commands to and from a host system and the
 AM7XXX chip.
 
