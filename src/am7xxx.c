@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
 #include "am7xxx.h"
 #include "serialize.h"
