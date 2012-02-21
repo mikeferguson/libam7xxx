@@ -46,7 +46,7 @@ manually with the command:
 
 Examples of devices based on AM7XXX are:
 
-  - Acer Series C pico projectors (C20 C110 C112 C120):
+  - Acer Series C pico projectors (C20 C110 C112):
       * http://www.acer.it/ac/it/IT/content/models/projector-c
       * http://support.acer.com/product/default.aspx?modelId=3888
     
