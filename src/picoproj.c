@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 	char filename[FILENAME_MAX] = {0};
 	int image_fd;
 	struct stat st;
-	am7xxx_device dev;
+	am7xxx_device *dev;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;

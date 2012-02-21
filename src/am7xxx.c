@@ -18,13 +18,26 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <errno.h>
+#include <libusb-1.0/libusb.h>
 
 #include "am7xxx.h"
 #include "serialize.h"
 
 #define AM7XXX_VENDOR_ID  0x1de1
 #define AM7XXX_PRODUCT_ID 0xc101
+
+/* The header size on the wire is known to be always 24 bytes, regardless of
+ * the memory configuration enforced by different architechtures or compilers
+ * for struct am7xxx_header
+ */
+#define AM7XXX_HEADER_WIRE_SIZE 24
+
+struct _am7xxx_device {
+	libusb_device_handle *usb_device;
+	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
+};
 
 typedef enum {
 	AM7XXX_PACKET_TYPE_DEVINFO = 0x01,
@@ -69,12 +82,6 @@ struct am7xxx_power_header {
  * Power header:
  * 04 00 00 00 00 0c ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
  */
-
-/* The header size on the wire is known to be always 24 bytes, regardless of
- * the memory configuration enforced by different architechtures or compilers
- * for struct am7xxx_header
- */
-#define AM7XXX_HEADER_WIRE_SIZE 24
 
 struct am7xxx_header {
 	uint32_t packet_type;
@@ -178,12 +185,12 @@ static void dump_buffer(uint8_t *buffer, unsigned int len)
 	fflush(stdout);
 }
 
-static int read_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
+static int read_data(am7xxx_device *dev, uint8_t *buffer, unsigned int len)
 {
 	int ret;
 	int transferred = 0;
 
-	ret = libusb_bulk_transfer(dev, 0x81, buffer, len, &transferred, 0);
+	ret = libusb_bulk_transfer(dev->usb_device, 0x81, buffer, len, &transferred, 0);
 	if (ret != 0 || (unsigned int)transferred != len) {
 		fprintf(stderr, "Error: ret: %d\ttransferred: %d (expected %u)\n",
 			ret, transferred, len);
@@ -199,7 +206,7 @@ static int read_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 	return 0;
 }
 
-static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
+static int send_data(am7xxx_device *dev, uint8_t *buffer, unsigned int len)
 {
 	int ret;
 	int transferred = 0;
@@ -210,7 +217,7 @@ static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 	printf("\n");
 #endif
 
-	ret = libusb_bulk_transfer(dev, 1, buffer, len, &transferred, 0);
+	ret = libusb_bulk_transfer(dev->usb_device, 1, buffer, len, &transferred, 0);
 	if (ret != 0 || (unsigned int)transferred != len) {
 		fprintf(stderr, "Error: ret: %d\ttransferred: %d (expected %u)\n",
 			ret, transferred, len);
@@ -250,22 +257,15 @@ static void unserialize_header(uint8_t *buffer, struct am7xxx_header *h)
 	h->header_data.data.field3 = get_le32(buffer_iterator);
 }
 
-static int read_header(am7xxx_device dev, struct am7xxx_header *h)
+static int read_header(am7xxx_device *dev, struct am7xxx_header *h)
 {
-	uint8_t *buffer;
 	int ret;
 
-	buffer = calloc(AM7XXX_HEADER_WIRE_SIZE, 1);
-	if (buffer == NULL) {
-		perror("calloc buffer");
-		return -ENOMEM;
-	}
-
-	ret = read_data(dev, buffer, AM7XXX_HEADER_WIRE_SIZE);
+	ret = read_data(dev, dev->buffer, AM7XXX_HEADER_WIRE_SIZE);
 	if (ret < 0)
 		goto out;
 
-	unserialize_header(buffer, h);
+	unserialize_header(dev->buffer, h);
 
 #if DEBUG
 	printf("\n");
@@ -276,13 +276,11 @@ static int read_header(am7xxx_device dev, struct am7xxx_header *h)
 	ret = 0;
 
 out:
-	free(buffer);
 	return ret;
 }
 
-static int send_header(am7xxx_device dev, struct am7xxx_header *h)
+static int send_header(am7xxx_device *dev, struct am7xxx_header *h)
 {
-	uint8_t *buffer;
 	int ret;
 
 #if DEBUG
@@ -291,56 +289,60 @@ static int send_header(am7xxx_device dev, struct am7xxx_header *h)
 	printf("\n");
 #endif
 
-	buffer = calloc(AM7XXX_HEADER_WIRE_SIZE, 1);
-	if (buffer == NULL) {
-		perror("calloc buffer");
-		return -ENOMEM;
-	}
-
-	serialize_header(h, buffer);
-	ret = send_data(dev, buffer, AM7XXX_HEADER_WIRE_SIZE);
+	serialize_header(h, dev->buffer);
+	ret = send_data(dev, dev->buffer, AM7XXX_HEADER_WIRE_SIZE);
 	if (ret < 0)
 		fprintf(stderr, "send_header: failed to send data.\n");
 
-	free(buffer);
 	return ret;
 }
 
-am7xxx_device am7xxx_init(void)
+am7xxx_device *am7xxx_init(void)
 {
-	am7xxx_device dev;
+	unsigned int i;
+
+	am7xxx_device *dev = malloc(sizeof(*dev));
+	if (dev == NULL) {
+		perror("malloc");
+		goto out;
+	}
+	memset(dev, 0, sizeof(*dev));
 
 	libusb_init(NULL);
 	libusb_set_debug(NULL, 3);
 
-	dev = libusb_open_device_with_vid_pid(NULL,
+	dev->usb_device = libusb_open_device_with_vid_pid(NULL,
 					      AM7XXX_VENDOR_ID,
 					      AM7XXX_PRODUCT_ID);
-	if (dev == NULL) {
+	if (dev->usb_device == NULL) {
 		errno = ENODEV;
 		perror("libusb_open_device_with_vid_pid");
 		goto out_libusb_exit;
 	}
 
-	libusb_set_configuration(dev, 1);
-	libusb_claim_interface(dev, 0);
+	libusb_set_configuration(dev->usb_device, 1);
+	libusb_claim_interface(dev->usb_device, 0);
 
 	return dev;
 
 out_libusb_exit:
 	libusb_exit(NULL);
+	free(dev);
+out:
 	return NULL;
 }
 
-void am7xxx_shutdown(am7xxx_device dev)
+void am7xxx_shutdown(am7xxx_device *dev)
 {
 	if (dev) {
-		libusb_close(dev);
+		libusb_close(dev->usb_device);
 		libusb_exit(NULL);
+		free(dev);
+		dev = NULL;
 	}
 }
 
-int am7xxx_get_device_info(am7xxx_device dev,
+int am7xxx_get_device_info(am7xxx_device *dev,
 			   unsigned int *native_width,
 			   unsigned int *native_height,
 			   unsigned int *unknown0,
@@ -379,7 +381,7 @@ int am7xxx_get_device_info(am7xxx_device dev,
 	return 0;
 }
 
-int am7xxx_send_image(am7xxx_device dev,
+int am7xxx_send_image(am7xxx_device *dev,
 		      am7xxx_image_format format,
 		      unsigned int width,
 		      unsigned int height,
@@ -413,7 +415,7 @@ int am7xxx_send_image(am7xxx_device dev,
 	return send_data(dev, image, size);
 }
 
-int am7xxx_set_power_mode(am7xxx_device dev, am7xxx_power_mode mode)
+int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
 {
 	int ret;
 	struct am7xxx_header h = {

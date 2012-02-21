@@ -19,13 +19,12 @@
 #ifndef __AM7XXX_H
 #define __AM7XXX_H
 
-#include <libusb-1.0/libusb.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef libusb_device_handle *am7xxx_device;
+struct _am7xxx_device;
+typedef struct _am7xxx_device am7xxx_device;
 
 typedef enum {
 	AM7XXX_IMAGE_FORMAT_JPEG = 1,
@@ -40,17 +39,17 @@ typedef enum {
 	AM7XXX_POWER_TURBO  = 4,
 } am7xxx_power_mode;
 
-am7xxx_device am7xxx_init(void);
+am7xxx_device *am7xxx_init(void);
 
-void am7xxx_shutdown(am7xxx_device dev);
+void am7xxx_shutdown(am7xxx_device *dev);
 
-int am7xxx_get_device_info(am7xxx_device dev,
+int am7xxx_get_device_info(am7xxx_device *dev,
 			   unsigned int *native_width,
 			   unsigned int *native_height,
 			   unsigned int *unknown0,
 			   unsigned int *unknown1);
 
-int am7xxx_send_image(am7xxx_device dev,
+int am7xxx_send_image(am7xxx_device *dev,
 		      am7xxx_image_format format,
 		      unsigned int width,
 		      unsigned int height,
@@ -63,7 +62,7 @@ int am7xxx_send_image(am7xxx_device dev,
  *
  * Remember to mention that when writing the API doc.
  */
-int am7xxx_set_power_mode(am7xxx_device dev, am7xxx_power_mode mode);
+int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode);
 
 #ifdef __cplusplus
 }
