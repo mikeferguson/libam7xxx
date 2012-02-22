@@ -25,8 +25,26 @@
 #include "am7xxx.h"
 #include "serialize.h"
 
-#define AM7XXX_VENDOR_ID  0x1de1
-#define AM7XXX_PRODUCT_ID 0xc101
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+struct am7xxx_usb_device_descriptor {
+	const char *name;
+	uint16_t vendor_id;
+	uint16_t product_id;
+};
+
+static struct am7xxx_usb_device_descriptor supported_devices[] = {
+	{
+		.name       = "Acer C110",
+		.vendor_id  = 0x1de1,
+		.product_id = 0xc101,
+	},
+	{
+		.name       = "Philips/Sagemcom PicoPix 1020",
+		.vendor_id  = 0x21e7,
+		.product_id = 0x000e,
+	},
+};
 
 /* The header size on the wire is known to be always 24 bytes, regardless of
  * the memory configuration enforced by different architechtures or compilers
@@ -311,9 +329,15 @@ am7xxx_device *am7xxx_init(void)
 	libusb_init(NULL);
 	libusb_set_debug(NULL, 3);
 
-	dev->usb_device = libusb_open_device_with_vid_pid(NULL,
-					      AM7XXX_VENDOR_ID,
-					      AM7XXX_PRODUCT_ID);
+	for (i = 0; i < ARRAY_SIZE(supported_devices); i++) {
+		dev->usb_device = libusb_open_device_with_vid_pid(NULL,
+						      supported_devices[i].vendor_id,
+						      supported_devices[i].product_id);
+		if (dev->usb_device) {
+			printf("%s: device found: %s\n", __func__, supported_devices[i].name);
+			break;
+		}
+	}
 	if (dev->usb_device == NULL) {
 		errno = ENODEV;
 		perror("libusb_open_device_with_vid_pid");
