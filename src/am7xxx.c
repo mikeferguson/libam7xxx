@@ -181,7 +181,7 @@ static void dump_buffer(uint8_t *buffer, unsigned int len)
 static int read_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 {
 	int ret;
-	int transferred;
+	int transferred = 0;
 
 	ret = libusb_bulk_transfer(dev, 0x81, buffer, len, &transferred, 0);
 	if (ret != 0 || (unsigned int)transferred != len) {
@@ -202,7 +202,7 @@ static int read_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 static int send_data(am7xxx_device dev, uint8_t *buffer, unsigned int len)
 {
 	int ret;
-	int transferred;
+	int transferred = 0;
 
 #if DEBUG
 	printf("\nsending -->\n");
