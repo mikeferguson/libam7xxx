@@ -23,6 +23,10 @@
 extern "C" {
 #endif
 
+
+struct _am7xxx_context;
+typedef struct _am7xxx_context am7xxx_context;
+
 struct _am7xxx_device;
 typedef struct _am7xxx_device am7xxx_device;
 
@@ -39,9 +43,15 @@ typedef enum {
 	AM7XXX_POWER_TURBO  = 4,
 } am7xxx_power_mode;
 
-am7xxx_device *am7xxx_init(void);
+int am7xxx_init(am7xxx_context **ctx);
 
-void am7xxx_shutdown(am7xxx_device *dev);
+void am7xxx_shutdown(am7xxx_context *ctx);
+
+int am7xxx_open_device(am7xxx_context *ctx,
+		       am7xxx_device **dev,
+		       unsigned int device_index);
+
+int am7xxx_close_device(am7xxx_device *dev);
 
 int am7xxx_get_device_info(am7xxx_device *dev,
 			   unsigned int *native_width,

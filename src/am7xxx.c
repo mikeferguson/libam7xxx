@@ -55,6 +55,12 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 struct _am7xxx_device {
 	libusb_device_handle *usb_device;
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
+	am7xxx_device *next;
+};
+
+struct _am7xxx_context {
+	libusb_context *usb_context;
+	am7xxx_device *devices_list;
 };
 
 typedef enum {
@@ -315,55 +321,245 @@ static int send_header(am7xxx_device *dev, struct am7xxx_header *h)
 	return ret;
 }
 
-am7xxx_device *am7xxx_init(void)
+static am7xxx_device *add_new_device(am7xxx_device **devices_list)
 {
-	unsigned int i;
+	am7xxx_device *new_device;
 
-	am7xxx_device *dev = malloc(sizeof(*dev));
-	if (dev == NULL) {
+	new_device = malloc(sizeof(*new_device));
+	if (new_device == NULL) {
 		perror("malloc");
-		goto out;
+		return NULL;
 	}
-	memset(dev, 0, sizeof(*dev));
+	memset(new_device, 0, sizeof(*new_device));
 
-	libusb_init(NULL);
-	libusb_set_debug(NULL, 3);
-
-	for (i = 0; i < ARRAY_SIZE(supported_devices); i++) {
-		dev->usb_device = libusb_open_device_with_vid_pid(NULL,
-						      supported_devices[i].vendor_id,
-						      supported_devices[i].product_id);
-		if (dev->usb_device) {
-			printf("%s: device found: %s\n", __func__, supported_devices[i].name);
-			break;
-		}
+	if (*devices_list == NULL) {
+		*devices_list = new_device;
+	} else {
+		am7xxx_device *prev = *devices_list;
+		while (prev->next)
+			prev = prev->next;
+		prev->next = new_device;
 	}
-	if (dev->usb_device == NULL) {
-		errno = ENODEV;
-		perror("libusb_open_device_with_vid_pid");
-		goto out_libusb_exit;
-	}
-
-	libusb_set_configuration(dev->usb_device, 1);
-	libusb_claim_interface(dev->usb_device, 0);
-
-	return dev;
-
-out_libusb_exit:
-	libusb_exit(NULL);
-	free(dev);
-out:
-	return NULL;
+	return new_device;
 }
 
-void am7xxx_shutdown(am7xxx_device *dev)
+static am7xxx_device *find_device(am7xxx_device *devices_list,
+				  unsigned int device_index)
 {
-	if (dev) {
-		libusb_close(dev->usb_device);
-		libusb_exit(NULL);
-		free(dev);
-		dev = NULL;
+	unsigned int i = 0;
+	am7xxx_device *current = devices_list;
+
+	while (current && i++ < device_index)
+		current = current->next;
+
+	return current;
+}
+
+typedef enum {
+	SCAN_OP_BUILD_DEVLIST,
+	SCAN_OP_OPEN_DEVICE,
+} scan_op;
+
+/**
+ * This is where the central logic of multi-device support is.
+ *
+ * When 'op' == SCAN_OP_BUILD_DEVLIST the parameters 'open_device_index' and
+ * 'dev' are ignored; the function returns 0 on success and a negative value
+ * on error.
+ *
+ * When 'op' == SCAN_OP_OPEN_DEVICE the function opens the supported USB
+ * device with index 'open_device_index' and returns the correspondent
+ * am7xxx_device in the 'dev' parameter; the function returns 0 on success,
+ * 1 if the device was already open and a negative value on error.
+ * 
+ * NOTES:
+ * if scan_devices() fails when called with 'op' == SCAN_OP_BUILD_DEVLIST,
+ * the caller might want to call am7xxx_shutdown() in order to remove
+ * devices possibly added before the failure.
+ */
+static int scan_devices(am7xxx_context *ctx, scan_op op,
+			unsigned int open_device_index, am7xxx_device **dev)
+{
+	int num_devices;
+	libusb_device** list;
+	unsigned int current_index;
+	int i;
+	int ret;
+
+	if (ctx == NULL) {
+		fprintf(stderr, "%s: context must not be NULL!\n", __func__);
+		return -EINVAL;
 	}
+	if (op == SCAN_OP_BUILD_DEVLIST && ctx->devices_list != NULL) {
+		fprintf(stderr, "%s: device scan done already? Abort!\n", __func__);
+		return -EINVAL;
+	}
+
+	num_devices = libusb_get_device_list(ctx->usb_context, &list);
+	if (num_devices < 0) {
+		ret = -ENODEV;
+		goto out;
+	}
+
+	current_index = 0;
+	for (i = 0; i < num_devices; i++) {
+		struct libusb_device_descriptor desc;
+		unsigned int j;
+
+		ret = libusb_get_device_descriptor(list[i], &desc);
+		if (ret < 0)
+			continue;
+
+		for (j = 0; j < ARRAY_SIZE(supported_devices); j++) {
+			if (desc.idVendor == supported_devices[j].vendor_id
+			    && desc.idProduct == supported_devices[j].product_id) {
+
+				if (op == SCAN_OP_BUILD_DEVLIST) {
+					am7xxx_device *new_device;
+					/* debug */
+					printf("am7xxx device found, index: %d, name: %s\n",
+					       current_index,
+					       supported_devices[j].name);
+					new_device = add_new_device(&(ctx->devices_list));
+					if (new_device == NULL) {
+						/* XXX, the caller may want
+						 * to call am7xxx_shutdown() if
+						 * we fail here, as we may have
+						 * added some devices already
+						 */
+						ret = -ENODEV;
+						goto out;
+					}
+				} else if (op == SCAN_OP_OPEN_DEVICE &&
+					   current_index == open_device_index) {
+
+					*dev = find_device(ctx->devices_list, open_device_index);
+					if (*dev == NULL) {
+						ret = -ENODEV;
+						goto out;
+					}
+
+					/* the usb device has already been opened */
+					if ((*dev)->usb_device) {
+						ret = 1;
+						goto out;
+					}
+
+					ret = libusb_open(list[i], &((*dev)->usb_device));
+					if (ret < 0)
+						goto out;
+
+					libusb_set_configuration((*dev)->usb_device, 1);
+					libusb_claim_interface((*dev)->usb_device, 0);
+					goto out;
+				}
+				current_index++;
+			}
+		}
+	}
+
+	/* if we made it up to here we didn't find any device to open */
+	if (op == SCAN_OP_OPEN_DEVICE) {
+		ret = -ENODEV;
+		goto out;
+	}
+
+out:
+	libusb_free_device_list(list, 1);
+	return ret;
+}
+
+int am7xxx_init(am7xxx_context **ctx)
+{
+	int ret = 0;
+
+	*ctx = malloc(sizeof(**ctx));
+	if (*ctx == NULL) {
+		perror("malloc");
+		ret = -ENOMEM;
+		goto out;
+	}
+	memset(*ctx, 0, sizeof(**ctx));
+
+	ret = libusb_init(&((*ctx)->usb_context));
+	if (ret < 0)
+		goto out_free_context;
+
+	libusb_set_debug((*ctx)->usb_context, 3);
+
+	ret = scan_devices(*ctx, SCAN_OP_BUILD_DEVLIST , 0, NULL);
+	if (ret < 0) {
+		fprintf(stderr, "%s: scan_devices failed\n", __func__);
+		am7xxx_shutdown(*ctx);
+		goto out;
+	}
+
+	return 0;
+
+out_free_context:
+	free(*ctx);
+	*ctx = NULL;
+out:
+	return ret;
+}
+
+void am7xxx_shutdown(am7xxx_context *ctx)
+{
+	am7xxx_device *current;
+
+	if (ctx == NULL) {
+		fprintf(stderr, "%s: context must not be NULL!\n", __func__);
+		return;
+	}
+
+	current = ctx->devices_list;
+	while (current) {
+		am7xxx_device *next = current->next;
+		am7xxx_close_device(current);
+		free(current);
+		current = next;
+	}
+
+	libusb_exit(ctx->usb_context);
+	free(ctx);
+	ctx = NULL;
+}
+
+int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
+		       unsigned int device_index)
+{
+	int ret;
+
+	if (ctx == NULL) {
+		fprintf(stderr, "%s: context must not be NULL!\n", __func__);
+		return -EINVAL;
+	}
+
+	ret = scan_devices(ctx, SCAN_OP_OPEN_DEVICE, device_index, dev);
+	if (ret < 0) {
+		errno = ENODEV;
+	} else if (ret > 0) {
+		/* warning */
+		fprintf(stderr, "%s: device %d already open\n", __func__, device_index);
+		errno = EBUSY;
+		ret = -EBUSY;
+	}
+
+	return ret;
+}
+
+int am7xxx_close_device(am7xxx_device *dev)
+{
+	if (dev == NULL) {
+		fprintf(stderr, "%s: dev must not be NULL!\n", __func__);
+		return -EINVAL;
+	}
+	if (dev->usb_device) {
+		libusb_release_interface(dev->usb_device, 0);
+		libusb_close(dev->usb_device);
+		dev->usb_device = NULL;
+	}
+	return 0;
 }
 
 int am7xxx_get_device_info(am7xxx_device *dev,

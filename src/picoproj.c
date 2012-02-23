@@ -50,6 +50,7 @@ int main(int argc, char *argv[])
 	char filename[FILENAME_MAX] = {0};
 	int image_fd;
 	struct stat st;
+	am7xxx_context *ctx;
 	am7xxx_device *dev;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
@@ -130,11 +131,33 @@ int main(int argc, char *argv[])
 		goto out_close_image_fd;
 	}
 
-	dev = am7xxx_init();
-	if (dev == NULL) {
+	ret = am7xxx_init(&ctx);
+	if (ret < 0) {
 		perror("am7xxx_init");
 		exit_code = EXIT_FAILURE;
 		goto out_munmap;
+	}
+
+	ret = am7xxx_open_device(ctx, &dev, 0);
+	if (ret < 0) {
+		perror("am7xxx_open_device");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+
+	ret = am7xxx_close_device(dev);
+	if (ret < 0) {
+		perror("am7xxx_close_device");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	ret = am7xxx_open_device(ctx, &dev, 0);
+	if (ret < 0) {
+		perror("am7xxx_open_device");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
 	}
 
 	ret = am7xxx_get_device_info(dev, &native_width, &native_height, &unknown0, &unknown1);
@@ -164,7 +187,7 @@ int main(int argc, char *argv[])
 	exit_code = EXIT_SUCCESS;
 
 cleanup:
-	am7xxx_shutdown(dev);
+	am7xxx_shutdown(ctx);
 
 out_munmap:
 	ret = munmap(image, size);
