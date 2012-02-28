@@ -55,6 +55,7 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 struct _am7xxx_device {
 	libusb_device_handle *usb_device;
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
+	am7xxx_context *ctx;
 	am7xxx_device *next;
 };
 
@@ -339,6 +340,8 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 		return NULL;
 	}
 	memset(new_device, 0, sizeof(*new_device));
+
+	new_device->ctx = ctx;
 
 	if (*devices_list == NULL) {
 		*devices_list = new_device;
