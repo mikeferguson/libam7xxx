@@ -464,6 +464,8 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 		goto out;
 	}
 
+	/* everything went fine when building the device list */
+	ret = 0;
 out:
 	libusb_free_device_list(list, 1);
 	return ret;
