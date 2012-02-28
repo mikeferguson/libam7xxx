@@ -321,9 +321,17 @@ static int send_header(am7xxx_device *dev, struct am7xxx_header *h)
 	return ret;
 }
 
-static am7xxx_device *add_new_device(am7xxx_device **devices_list)
+static am7xxx_device *add_new_device(am7xxx_context *ctx)
 {
+	am7xxx_device **devices_list;
 	am7xxx_device *new_device;
+
+	if (ctx == NULL) {
+		fprintf(stderr, "%s: context must not be NULL!\n", __func__);
+		return NULL;
+	}
+
+	devices_list = &(ctx->devices_list);
 
 	new_device = malloc(sizeof(*new_device));
 	if (new_device == NULL) {
@@ -343,12 +351,18 @@ static am7xxx_device *add_new_device(am7xxx_device **devices_list)
 	return new_device;
 }
 
-static am7xxx_device *find_device(am7xxx_device *devices_list,
+static am7xxx_device *find_device(am7xxx_context *ctx,
 				  unsigned int device_index)
 {
 	unsigned int i = 0;
-	am7xxx_device *current = devices_list;
+	am7xxx_device *current;
 
+	if (ctx == NULL) {
+		fprintf(stderr, "%s: context must not be NULL!\n", __func__);
+		return NULL;
+	}
+
+	current = ctx->devices_list;
 	while (current && i++ < device_index)
 		current = current->next;
 
@@ -420,7 +434,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 					printf("am7xxx device found, index: %d, name: %s\n",
 					       current_index,
 					       supported_devices[j].name);
-					new_device = add_new_device(&(ctx->devices_list));
+					new_device = add_new_device(ctx);
 					if (new_device == NULL) {
 						/* XXX, the caller may want
 						 * to call am7xxx_shutdown() if
@@ -433,7 +447,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 				} else if (op == SCAN_OP_OPEN_DEVICE &&
 					   current_index == open_device_index) {
 
-					*dev = find_device(ctx->devices_list, open_device_index);
+					*dev = find_device(ctx, open_device_index);
 					if (*dev == NULL) {
 						ret = -ENODEV;
 						goto out;
