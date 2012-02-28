@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <errno.h>
 #include <libusb.h>
 
@@ -26,6 +27,27 @@
 #include "serialize.h"
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+
+/* If we're not using GNU C, elide __attribute__
+ * taken from: http://unixwiz.net/techtips/gnu-c-attributes.html)
+ */
+#ifndef __GNUC__
+#  define  __attribute__(x)  /*NOTHING*/
+#endif
+
+static void log_message(am7xxx_context *ctx,
+			int level,
+			const char *function,
+			int line,
+			const char *fmt,
+			...) __attribute__ ((format (printf, 5, 6)));
+
+#define fatal(...)        log_message(NULL, AM7XXX_LOG_FATAL,   __func__, __LINE__, __VA_ARGS__)
+#define error(ctx, ...)   log_message(ctx,  AM7XXX_LOG_ERROR,   __func__, __LINE__, __VA_ARGS__)
+#define warning(ctx, ...) log_message(ctx,  AM7XXX_LOG_WARNING, __func__, 0,        __VA_ARGS__)
+#define info(ctx, ...)    log_message(ctx,  AM7XXX_LOG_INFO,    __func__, 0,        __VA_ARGS__)
+#define debug(ctx, ...)   log_message(ctx,  AM7XXX_LOG_DEBUG,   __func__, 0,        __VA_ARGS__)
+#define trace(ctx, ...)   log_message(ctx,  AM7XXX_LOG_TRACE,   NULL,     0,        __VA_ARGS__)
 
 struct am7xxx_usb_device_descriptor {
 	const char *name;
@@ -61,6 +83,7 @@ struct _am7xxx_device {
 
 struct _am7xxx_context {
 	libusb_context *usb_context;
+	int log_level;
 	am7xxx_device *devices_list;
 };
 
@@ -322,6 +345,35 @@ static int send_header(am7xxx_device *dev, struct am7xxx_header *h)
 	return ret;
 }
 
+/* When level == AM7XXX_LOG_FATAL do not check the log_level from the context
+ * and print the message unconditionally, this makes it possible to print
+ * fatal messages even early on initialization, before the context has been
+ * set up */
+static void log_message(am7xxx_context *ctx,
+			int level,
+			const char *function,
+			int line,
+			const char *fmt,
+			...)
+{
+	va_list ap;
+
+	if (level == AM7XXX_LOG_FATAL || (ctx && level <= ctx->log_level)) {
+		if (function) {
+			fprintf(stderr, "%s", function);
+			if (line)
+				fprintf(stderr, "[%d]", line);
+			fprintf(stderr, ": ");
+		}
+
+		va_start(ap, fmt);
+		vfprintf(stderr, fmt, ap);
+		va_end(ap);
+	}
+
+	return;
+}
+
 static am7xxx_device *add_new_device(am7xxx_context *ctx)
 {
 	am7xxx_device **devices_list;
@@ -500,6 +552,9 @@ int am7xxx_init(am7xxx_context **ctx)
 	}
 	memset(*ctx, 0, sizeof(**ctx));
 
+	/* Set the highest log level during initialization */
+	(*ctx)->log_level = AM7XXX_LOG_TRACE;
+
 	ret = libusb_init(&((*ctx)->usb_context));
 	if (ret < 0)
 		goto out_free_context;
@@ -513,6 +568,8 @@ int am7xxx_init(am7xxx_context **ctx)
 		goto out;
 	}
 
+	/* Set a quieter log level as default for normal operation */
+	(*ctx)->log_level = AM7XXX_LOG_ERROR;
 	return 0;
 
 out_free_context:
@@ -542,6 +599,11 @@ void am7xxx_shutdown(am7xxx_context *ctx)
 	libusb_exit(ctx->usb_context);
 	free(ctx);
 	ctx = NULL;
+}
+
+void am7xxx_set_log_level(am7xxx_context *ctx, am7xxx_log_level log_level)
+{
+	ctx->log_level = log_level;
 }
 
 int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,

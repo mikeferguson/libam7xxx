@@ -31,6 +31,15 @@ struct _am7xxx_device;
 typedef struct _am7xxx_device am7xxx_device;
 
 typedef enum {
+	AM7XXX_LOG_FATAL   = 0,
+	AM7XXX_LOG_ERROR   = 1,
+	AM7XXX_LOG_WARNING = 2,
+	AM7XXX_LOG_INFO    = 3,
+	AM7XXX_LOG_DEBUG   = 4,
+	AM7XXX_LOG_TRACE   = 5,
+} am7xxx_log_level;
+
+typedef enum {
 	AM7XXX_IMAGE_FORMAT_JPEG = 1,
 	AM7XXX_IMAGE_FORMAT_NV12 = 2,
 } am7xxx_image_format;
@@ -46,6 +55,8 @@ typedef enum {
 int am7xxx_init(am7xxx_context **ctx);
 
 void am7xxx_shutdown(am7xxx_context *ctx);
+
+void am7xxx_set_log_level(am7xxx_context *ctx, am7xxx_log_level log_level);
 
 int am7xxx_open_device(am7xxx_context *ctx,
 		       am7xxx_device **dev,
