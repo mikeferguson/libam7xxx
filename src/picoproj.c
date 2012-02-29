@@ -36,6 +36,7 @@ static void usage(char *name)
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
 	printf("\t\t\t\t\t1 - JPEG\n");
 	printf("\t\t\t\t\t2 - YUV - NV12\n");
+	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
 	printf("\t-W <image width>\tthe width of the image to upload\n");
 	printf("\t-H <image height>\tthe height of the image to upload\n");
 	printf("\t-h \t\t\tthis help message\n");
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 	struct stat st;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
+	int log_level = AM7XXX_LOG_INFO;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
@@ -62,7 +64,7 @@ int main(int argc, char *argv[])
 	unsigned int unknown0;
 	unsigned int unknown1;
 
-	while ((opt = getopt(argc, argv, "f:F:W:H:h")) != -1) {
+	while ((opt = getopt(argc, argv, "f:F:l:W:H:h")) != -1) {
 		switch (opt) {
 		case 'f':
 			strncpy(filename, optarg, FILENAME_MAX);
@@ -79,6 +81,13 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Unsupported format\n");
 				exit(EXIT_FAILURE);
+			}
+			break;
+		case 'l':
+			log_level = atoi(optarg);
+			if (log_level < AM7XXX_LOG_FATAL || log_level > AM7XXX_LOG_TRACE) {
+				fprintf(stderr, "Unsupported log level, falling back to AM7XXX_LOG_ERROR\n");
+				log_level = AM7XXX_LOG_ERROR;
 			}
 			break;
 		case 'W':
@@ -137,6 +146,8 @@ int main(int argc, char *argv[])
 		exit_code = EXIT_FAILURE;
 		goto out_munmap;
 	}
+
+	am7xxx_set_log_level(ctx, log_level);
 
 	ret = am7xxx_open_device(ctx, &dev, 0);
 	if (ret < 0) {
