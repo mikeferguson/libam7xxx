@@ -445,7 +445,7 @@ typedef enum {
  * device with index 'open_device_index' and returns the correspondent
  * am7xxx_device in the 'dev' parameter; the function returns 0 on success,
  * 1 if the device was already open and a negative value on error.
- * 
+ *
  * NOTES:
  * if scan_devices() fails when called with 'op' == SCAN_OP_BUILD_DEVLIST,
  * the caller might want to call am7xxx_shutdown() in order to remove

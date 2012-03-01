@@ -32,7 +32,7 @@ install(FILES "am7xxx.h"
 
 if(UNIX AND NOT APPLE)
   # Produce a pkg-config file for linking against the shared lib
-  configure_file ("libam7xxx.pc.in" "libam7xxx.pc" @ONLY)
+  configure_file("libam7xxx.pc.in" "libam7xxx.pc" @ONLY)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libam7xxx.pc"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 endif()
