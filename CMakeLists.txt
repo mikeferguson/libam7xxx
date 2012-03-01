@@ -68,7 +68,8 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Wunreachable-code
     -Wunsafe-loop-optimizations
     -Wwrite-strings
-    )
+    -fstack-protector
+    --param=ssp-buffer-size=4)
 endif()
 
 set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG=1 -Werror")
