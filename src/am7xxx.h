@@ -30,6 +30,11 @@ typedef struct _am7xxx_context am7xxx_context;
 struct _am7xxx_device;
 typedef struct _am7xxx_device am7xxx_device;
 
+typedef struct {
+	unsigned int native_width;
+	unsigned int native_height;
+} am7xxx_device_info;
+
 typedef enum {
 	AM7XXX_LOG_FATAL   = 0,
 	AM7XXX_LOG_ERROR   = 1,
@@ -65,10 +70,7 @@ int am7xxx_open_device(am7xxx_context *ctx,
 int am7xxx_close_device(am7xxx_device *dev);
 
 int am7xxx_get_device_info(am7xxx_device *dev,
-			   unsigned int *native_width,
-			   unsigned int *native_height,
-			   unsigned int *unknown0,
-			   unsigned int *unknown1);
+			   am7xxx_device_info *device_info);
 
 int am7xxx_send_image(am7xxx_device *dev,
 		      am7xxx_image_format format,

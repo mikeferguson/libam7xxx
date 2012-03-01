@@ -652,10 +652,7 @@ int am7xxx_close_device(am7xxx_device *dev)
 }
 
 int am7xxx_get_device_info(am7xxx_device *dev,
-			   unsigned int *native_width,
-			   unsigned int *native_height,
-			   unsigned int *unknown0,
-			   unsigned int *unknown1)
+			   am7xxx_device_info *device_info)
 {
 	int ret;
 	struct am7xxx_header h = {
@@ -682,10 +679,13 @@ int am7xxx_get_device_info(am7xxx_device *dev,
 	if (ret < 0)
 		return ret;
 
-	*native_width = h.header_data.devinfo.native_width;
-	*native_height = h.header_data.devinfo.native_height;
-	*unknown0 = h.header_data.devinfo.unknown0;
-	*unknown1 = h.header_data.devinfo.unknown1;
+	device_info->native_width = h.header_data.devinfo.native_width;
+	device_info->native_height = h.header_data.devinfo.native_height;
+#if 0
+	/* No reason to expose these in the public API until we know what they mean */
+	device_info->unknown0 = h.header_data.devinfo.unknown0;
+	device_info->unknown1 = h.header_data.devinfo.unknown1;
+#endif
 
 	return 0;
 }

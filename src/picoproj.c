@@ -59,10 +59,7 @@ int main(int argc, char *argv[])
 	int height = 480;
 	unsigned char *image;
 	unsigned int size;
-	unsigned int native_width;
-	unsigned int native_height;
-	unsigned int unknown0;
-	unsigned int unknown1;
+	am7xxx_device_info device_info;
 
 	while ((opt = getopt(argc, argv, "f:F:l:W:H:h")) != -1) {
 		switch (opt) {
@@ -171,15 +168,14 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-	ret = am7xxx_get_device_info(dev, &native_width, &native_height, &unknown0, &unknown1);
+	ret = am7xxx_get_device_info(dev, &device_info);
 	if (ret < 0) {
 		perror("am7xxx_get_info");
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
-	printf("Native resolution: %dx%d\n", native_width, native_height);
-	printf("Unknown0: %d\n", unknown0);
-	printf("Unknown1: %d\n", unknown1);
+	printf("Native resolution: %dx%d\n",
+	       device_info.native_width, device_info.native_height);
 
 	ret = am7xxx_set_power_mode(dev, AM7XXX_POWER_LOW);
 	if (ret < 0) {
