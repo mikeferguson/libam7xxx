@@ -77,7 +77,7 @@ int am7xxx_send_image(am7xxx_device *dev,
 		      unsigned int width,
 		      unsigned int height,
 		      unsigned char *image,
-		      unsigned int size);
+		      unsigned int image_size);
 
 /*
  * NOTE: if we set the mode to AM7XXX_POWER_OFF we can't turn the

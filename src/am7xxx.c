@@ -695,7 +695,7 @@ int am7xxx_send_image(am7xxx_device *dev,
 		      unsigned int width,
 		      unsigned int height,
 		      uint8_t *image,
-		      unsigned int size)
+		      unsigned int image_size)
 {
 	int ret;
 	struct am7xxx_header h = {
@@ -709,7 +709,7 @@ int am7xxx_send_image(am7xxx_device *dev,
 				.format     = format,
 				.width      = width,
 				.height     = height,
-				.image_size = size,
+				.image_size = image_size,
 			},
 		},
 	};
@@ -718,12 +718,12 @@ int am7xxx_send_image(am7xxx_device *dev,
 	if (ret < 0)
 		return ret;
 
-	if (image == NULL || size == 0) {
-		warning(dev->ctx, "Not sending any data, check the 'data' or 'size' parameters\n");
+	if (image == NULL || image_size == 0) {
+		warning(dev->ctx, "Not sending any data, check the 'image' or 'image_size' parameters\n");
 		return 0;
 	}
 
-	return send_data(dev, image, size);
+	return send_data(dev, image, image_size);
 }
 
 int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
