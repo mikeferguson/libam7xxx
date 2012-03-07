@@ -1,0 +1,40 @@
+/**
+@mainpage  libam7xxx
+
+@author Antonio Ospite <ospite@studenti.unina.it>
+@copyright GNU General Public License version 2.
+
+Website: http://git.ao2.it/libam7xxx.git
+
+@section libam7xxxIntro Introduction
+
+libam7xxx is an Open Source library to communicate via USB with projectors and
+Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+
+libam7xxx makes it possible to use these devices as USB displays on
+non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+a few, and on non-PC platforms like for instance mobile phones, tablets or
+game consoles.
+
+@section libam7xxxSupportedDevices Supported Devices
+
+- Acer C110
+- Philips/SagemCom PicoPix 1020
+
+@section libam7xxxDesignOverview Design Overview
+
+libam7xxx provides access to devices via two structs:
+
+- A context, which manages aspects of thread safety when using
+  multiple devices on multiple threads.
+- A device, which talks to the hardware and manages transfers and configuration.
+
+Either or both of these structs are passed to the functions in order
+to interact with the hardware. The USB access is handled by
+libusb-1.0, which should work in a mostly non-blocking fashion across
+all platforms (see function documentation for specifics).
+
+The API and the project structure has been inspired by
+<a href="http://openkinect.org">libfreenect</a>.
+
+*/

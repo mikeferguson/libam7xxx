@@ -102,3 +102,4 @@ endif(GIT_FOUND)
 
 # Add library project
 add_subdirectory(src)
+add_subdirectory(doc)
