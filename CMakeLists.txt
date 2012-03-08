@@ -80,4 +80,5 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
 # Add library project
 add_subdirectory(src)
+add_subdirectory(examples)
 add_subdirectory(doc)
