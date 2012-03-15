@@ -209,9 +209,9 @@ int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
  *
  * @param[in] dev A pointer to the structure representing the device to get info of
  * @param[in] format The format the image is in (see @link am7xxx_image_format @endlink enum)
- * @param[in] width  The width of the image
+ * @param[in] width The width of the image
  * @param[in] height The height of the image
- * @param[in] image  A buffer holding data in the format specified by the format parameter
+ * @param[in] image A buffer holding data in the format specified by the format parameter
  * @param[in] image_size The size in bytes of the image buffer
  *
  * @return 0 on success, a negative value on error
