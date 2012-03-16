@@ -244,6 +244,7 @@ static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 	(void)ctx;
 	(void)h;
 }
+
 static void trace_dump_buffer(am7xxx_context *ctx, const char *message,
 			      uint8_t *buffer, unsigned int len)
 {
