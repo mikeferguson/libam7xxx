@@ -179,6 +179,28 @@ int am7xxx_get_device_info(am7xxx_device *dev,
 			   am7xxx_device_info *device_info);
 
 /**
+ * Calculate the dimensions of an image to be shown on an am7xxx device.
+ *
+ * Before sending images bigger than the device native dimensions the user
+ * needs to rescale them, this utility function does the calculation in a way
+ * that the original image aspect ratio is preserved.
+ * 
+ * @param[in] dev A pointer to the structure representing the device to get info of
+ * @param[in] upscale Whether to calculate scaled dimensions for images smaller than the native dimesions
+ * @param[in] original_width The width of the original image
+ * @param[in] original_height The height of the original image
+ * @param[out] scaled_width The width the rescaled image should have
+ * @param[out] scaled_height The height the rescaled image should have
+ *
+ * @return 0 on success, a negative value on error
+ */
+int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
+					unsigned int upscale,
+					unsigned int original_width,
+					unsigned int original_height,
+					unsigned int *scaled_width,
+					unsigned int *scaled_height);
+/**
  * Send an image for display on a am7xxx device.
  *
  * This is the function that actually makes the device display something.
@@ -187,9 +209,9 @@ int am7xxx_get_device_info(am7xxx_device *dev,
  *
  * @param[in] dev A pointer to the structure representing the device to get info of
  * @param[in] format The format the image is in (see @link am7xxx_image_format @endlink enum)
- * @param[in] width  The width of the image
+ * @param[in] width The width of the image
  * @param[in] height The height of the image
- * @param[in] image  A buffer holding data in the format specified by the format parameter
+ * @param[in] image A buffer holding data in the format specified by the format parameter
  * @param[in] image_size The size in bytes of the image buffer
  *
  * @return 0 on success, a negative value on error

@@ -691,6 +691,68 @@ int am7xxx_get_device_info(am7xxx_device *dev,
 	return 0;
 }
 
+int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
+					unsigned int upscale,
+					unsigned int original_width,
+					unsigned int original_height,
+					unsigned int *scaled_width,
+					unsigned int *scaled_height)
+{
+
+	am7xxx_device_info device_info;
+	float width_ratio;
+	float height_ratio;
+	int ret;
+
+	ret = am7xxx_get_device_info(dev, &device_info);
+	if (ret < 0) {
+		error(dev->ctx, "cannot get device info\n");
+		return ret;
+	}
+
+	/*
+	 * Check if we need to rescale; if the input image fits the native
+	 * dimensions there is no need to, unless we want to upscale.
+	 */
+	if (!upscale &&
+	    original_width <= device_info.native_width &&
+	    original_height <= device_info.native_height ) {
+		debug(dev->ctx, "CASE 0, no rescaling, the original image fits already\n");
+		*scaled_width = original_width;
+		*scaled_height = original_height;
+		return 0;
+	}
+
+	/* Input dimensions relative to the device native dimensions */
+	width_ratio =  (float)original_width / device_info.native_width;
+	height_ratio = (float)original_height / device_info.native_height;
+
+	if (width_ratio > height_ratio) {
+		/*
+		 * The input is proportionally "wider" than the device viewport
+		 * so it's height needs to be adjusted
+		 */
+		debug(dev->ctx, "CASE 1, original image wider, adjust the scaled height\n");
+		*scaled_width = device_info.native_width;
+		*scaled_height = (unsigned int)(original_height / width_ratio);
+	} else if (width_ratio < height_ratio) {
+		/*
+		 * The input is proportionally "taller" than the device viewport
+		 * so its width needs to be adjusted
+		 */
+		debug(dev->ctx, "CASE 2 original image taller, adjust the scaled width\n");
+		*scaled_width = (unsigned int)(original_width / height_ratio);
+		*scaled_height = device_info.native_height;
+	} else {
+		debug(dev->ctx, "CASE 3, just rescale, same aspect ratio already\n");
+		*scaled_width = device_info.native_width;
+		*scaled_height = device_info.native_height;
+	}
+	debug(dev->ctx, "scaled dimensions: %dx%d\n", *scaled_width, *scaled_height);
+
+	return 0;
+}
+
 int am7xxx_send_image(am7xxx_device *dev,
 		      am7xxx_image_format format,
 		      unsigned int width,

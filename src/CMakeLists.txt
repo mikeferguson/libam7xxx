@@ -1,5 +1,4 @@
 add_definitions("-D_BSD_SOURCE") # for htole32()
-add_definitions("-D_POSIX_C_SOURCE=2") # for getopt()
 
 # Find packages needed to build library
 find_package(libusb-1.0 REQUIRED)
@@ -36,9 +35,3 @@ if(UNIX AND NOT APPLE)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libam7xxx.pc"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 endif()
-
-# Build the test app
-add_executable(picoproj picoproj.c)
-target_link_libraries(picoproj am7xxx)
-install(TARGETS picoproj
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")

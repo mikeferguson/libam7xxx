@@ -16,6 +16,8 @@ set(PROJECT_APIVER
 set(CMAKE_MODULE_PATH 
   ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 
+include (MaintenanceTools)
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 set(DOC_OUTPUT_PATH ${CMAKE_BINARY_DIR}/doc)
@@ -76,30 +78,7 @@ set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG=1 -Werror")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
-# Use git for some maintainance tasks
-find_package(Git)
-if(GIT_FOUND)
-  set(ARCHIVE_PREFIX ${CMAKE_PROJECT_NAME}-${PROJECT_VER})
-  find_program(DATE_EXECUTABLE date DOC "date command line program")
-  if (DATE_EXECUTABLE)
-    message(STATUS "Found date: " ${DATE_EXECUTABLE})
-    message(STATUS "Generator is: " ${CMAKE_GENERATOR})
-
-    # XXX: using $(shell CMD) works only with Unix Makefile
-    if (CMAKE_GENERATOR STREQUAL "Unix Makefiles")
-      message(STATUS " - \"git archive\" will use the date too!")
-      set(ARCHIVE_PREFIX ${ARCHIVE_PREFIX}-$\(shell ${DATE_EXECUTABLE} +%Y%m%d%H%M\))
-    endif()
-  endif()
-  add_custom_target(archive
-    COMMAND ${GIT_EXECUTABLE} archive -o \"${ARCHIVE_PREFIX}.tar.gz\" --prefix=\"${ARCHIVE_PREFIX}/\" HEAD
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-  add_custom_target(changelog
-    COMMAND ${GIT_EXECUTABLE} log --pretty=\"format:%ai  %aN  <%aE>%n%n%x09* %s%d%n\" > ChangeLog
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-endif(GIT_FOUND)
-
 # Add library project
 add_subdirectory(src)
+add_subdirectory(examples)
 add_subdirectory(doc)
