@@ -28,7 +28,7 @@ endif()
 add_executable(am7xxx-play am7xxx-play.c)
 
 target_link_libraries(am7xxx-play am7xxx
-  ${FFMPEG_LIBAVDEVICE_LIBRARIES}
+  ${FFMPEG_LIBRARIES}
   ${FFMPEG_LIBSWSCALE_LIBRARIES}
   ${LIBXCB_LIBRARIES})
 install(TARGETS am7xxx-play
