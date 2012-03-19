@@ -564,6 +564,7 @@ static void usage(char *name)
 	printf("\t\t\t\t\t1 - JPEG\n");
 	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-q \t\t\tquality of jpeg sent to the device, between 1 and 100\n");
+	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
 	printf("\t-h \t\t\tthis help message\n");
 	printf("\n\nEXAMPLES OF USE:\n");
 	printf("\t%s -f x11grab -i :0.0 -o video_size=800x480\n", name);
@@ -585,11 +586,12 @@ int main(int argc, char *argv[])
 	unsigned int rescale_method = SWS_BICUBIC;
 	unsigned int upscale = 0;
 	unsigned int quality = 95;
+	int log_level = AM7XXX_LOG_INFO;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 
-	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:h")) != -1) {
+	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:l:h")) != -1) {
 		switch (opt) {
 		case 'f':
 			input_format_string = strdup(optarg);
@@ -662,6 +664,13 @@ int main(int argc, char *argv[])
 				goto out;;
 			}
 			break;
+		case 'l':
+			log_level = atoi(optarg);
+			if (log_level < AM7XXX_LOG_FATAL || log_level > AM7XXX_LOG_TRACE) {
+				fprintf(stderr, "Unsupported log level, falling back to AM7XXX_LOG_ERROR\n");
+				log_level = AM7XXX_LOG_ERROR;
+			}
+			break;
 		case 'h':
 			usage(argv[0]);
 			ret = 0;
@@ -712,6 +721,8 @@ int main(int argc, char *argv[])
 		perror("am7xxx_init");
 		goto out;
 	}
+
+	am7xxx_set_log_level(ctx, log_level);
 
 	ret = am7xxx_open_device(ctx, &dev, 0);
 	if (ret < 0) {
