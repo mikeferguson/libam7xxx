@@ -34,7 +34,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
 
   # let CFLAGS env override this
   if(CMAKE_C_FLAGS STREQUAL "")
-    set(CMAKE_C_FLAGS "-std=c99 -pedantic -Wall -Wextra -O2")
+    set(CMAKE_C_FLAGS "-std=c99 -pedantic -Wall -Wextra")
   endif()
 
   # Don't make pedantic checks errors,
@@ -74,7 +74,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
     --param=ssp-buffer-size=4)
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG=1 -Werror")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb -DDEBUG=1 -Werror")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 
