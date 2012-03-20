@@ -564,6 +564,8 @@ static void usage(char *name)
 	printf("\t\t\t\t\t1 - JPEG\n");
 	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-q \t\t\tquality of jpeg sent to the device, between 1 and 100\n");
+	printf("\t-p <power level>\tpower level of device, between %x (off) and %x (maximum)\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n\t\t\t\t\t the slave connector to be plugged in.\n");
 	printf("\t-h \t\t\tthis help message\n");
 	printf("\n\nEXAMPLES OF USE:\n");
 	printf("\t%s -f x11grab -i :0.0 -o video_size=800x480\n", name);
@@ -585,11 +587,12 @@ int main(int argc, char *argv[])
 	unsigned int rescale_method = SWS_BICUBIC;
 	unsigned int upscale = 0;
 	unsigned int quality = 95;
+	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 
-	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:h")) != -1) {
+	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:hp:")) != -1) {
 		switch (opt) {
 		case 'f':
 			input_format_string = strdup(optarg);
@@ -667,6 +670,22 @@ int main(int argc, char *argv[])
 			ret = 0;
 			goto out;
 			break;
+		case 'p':
+			power_mode = atoi(optarg);
+			switch(power_mode) {
+			case AM7XXX_POWER_OFF:
+			case AM7XXX_POWER_LOW:
+			case AM7XXX_POWER_MIDDLE:
+			case AM7XXX_POWER_HIGH:
+			case AM7XXX_POWER_TURBO:
+				fprintf(stdout, "Power mode: %x\n", power_mode);
+				break;
+			default:
+				fprintf(stderr, "Invalid power mode value, must be between %x and %x\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+				ret = -EINVAL;
+				goto out;
+			}
+			break;
 		default: /* '?' */
 			usage(argv[0]);
 			ret = -EINVAL;
@@ -719,7 +738,7 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-	ret = am7xxx_set_power_mode(dev, AM7XXX_POWER_LOW);
+	ret = am7xxx_set_power_mode(dev, power_mode);
 	if (ret < 0) {
 		perror("am7xxx_set_power_mode");
 		goto cleanup;
