@@ -291,6 +291,7 @@ static int am7xxx_play(const char *input_format_string,
 	picture_raw = avcodec_alloc_frame();
 	if (picture_raw == NULL) {
 		fprintf(stderr, "cannot allocate the raw picture frame!");
+		ret = -ENOMEM;
 		goto cleanup_output;
 	}
 
@@ -298,6 +299,7 @@ static int am7xxx_play(const char *input_format_string,
 	picture_scaled = avcodec_alloc_frame();
 	if (picture_scaled == NULL) {
 		fprintf(stderr, "cannot allocate the scaled picture!\n");
+		ret = -ENOMEM;
 		goto cleanup_picture_raw;
 	}
 
@@ -308,6 +310,7 @@ static int am7xxx_play(const char *input_format_string,
 	out_buf = av_malloc(out_buf_size * sizeof(uint8_t));
 	if (out_buf == NULL) {
 		fprintf(stderr, "cannot allocate output data buffer!\n");
+		ret = -ENOMEM;
 		goto cleanup_picture_scaled;
 	}
 
@@ -329,6 +332,7 @@ static int am7xxx_play(const char *input_format_string,
 					    NULL, NULL, NULL);
 	if (sw_scale_ctx == NULL) {
 		fprintf(stderr, "cannot set up the rescaling context!\n");
+		ret = -EINVAL;
 		goto cleanup_out_buf;
 	}
 
