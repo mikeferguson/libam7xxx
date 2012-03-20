@@ -620,7 +620,7 @@ int main(int argc, char *argv[])
 			break;
 		case 's':
 			rescale_method = atoi(optarg);
-			switch(format) {
+			switch(rescale_method) {
 			case SWS_FAST_BILINEAR:
 			case SWS_BILINEAR:
 			case SWS_BICUBIC:
