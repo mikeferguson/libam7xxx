@@ -69,7 +69,7 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 };
 
 /* The header size on the wire is known to be always 24 bytes, regardless of
- * the memory configuration enforced by different architechtures or compilers
+ * the memory configuration enforced by different architectures or compilers
  * for struct am7xxx_header
  */
 #define AM7XXX_HEADER_WIRE_SIZE 24
