@@ -557,7 +557,7 @@ static void usage(char *name)
 	printf("\t-o <options>\t\ta comma separated list of input format options\n");
 	printf("\t\t\t\tEXAMPLE:\n");
 	printf("\t\t\t\t\t-o draw_mouse=1,framerate=100,video_size=800x480\n");
-	printf("\t-s <input path>\t\tthe rescaling method (see swscale.h)\n");
+	printf("\t-s <scaling method>\tthe rescaling method (see swscale.h)\n");
 	printf("\t-u \t\t\tupscale the image if smaller than the display dimensions\n");
 	printf("\t-F <format>\t\tthe image format to use (default is JPEG)\n");
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
