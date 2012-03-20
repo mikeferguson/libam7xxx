@@ -99,9 +99,9 @@ typedef enum {
 typedef enum {
 	AM7XXX_POWER_OFF    = 0, /**< Display is powered off, no image shown. */
 	AM7XXX_POWER_LOW    = 1, /**< Low power consumption but also low brightness. */
-	AM7XXX_POWER_MIDDLE = 2, /**< Middle level of brightness. */
+	AM7XXX_POWER_MIDDLE = 2, /**< Middle level of brightness. This and upper modes need both the Master and Slave USB connectors plugged. */
 	AM7XXX_POWER_HIGH   = 3, /**< More brightness, but more power consumption. */
-	AM7XXX_POWER_TURBO  = 4, /**< Max brightness and power consumprion. This may need both the Master and Slave USB connectors plugged. */
+	AM7XXX_POWER_TURBO  = 4, /**< Max brightness and power consumption. */
 } am7xxx_power_mode;
 
 /**
