@@ -636,7 +636,7 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Unsupported rescale method\n");
 				ret = -EINVAL;
-				goto out;;
+				goto out;
 			}
 			break;
 		case 'u':
@@ -654,7 +654,7 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Unsupported format\n");
 				ret = -EINVAL;
-				goto out;;
+				goto out;
 			}
 			break;
 		case 'q':
@@ -662,7 +662,7 @@ int main(int argc, char *argv[])
 			if (quality < 1 || quality > 100) {
 				fprintf(stderr, "Invalid quality value, must be between 1 and 100\n");
 				ret = -EINVAL;
-				goto out;;
+				goto out;
 			}
 			break;
 		case 'h':
