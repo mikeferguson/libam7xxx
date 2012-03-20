@@ -186,7 +186,7 @@ int am7xxx_get_device_info(am7xxx_device *dev,
  * that the original image aspect ratio is preserved.
  * 
  * @param[in] dev A pointer to the structure representing the device to get info of
- * @param[in] upscale Whether to calculate scaled dimensions for images smaller than the native dimesions
+ * @param[in] upscale Whether to calculate scaled dimensions for images smaller than the native dimensions
  * @param[in] original_width The width of the original image
  * @param[in] original_height The height of the original image
  * @param[out] scaled_width The width the rescaled image should have
