@@ -730,7 +730,7 @@ int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
 	if (width_ratio > height_ratio) {
 		/*
 		 * The input is proportionally "wider" than the device viewport
-		 * so it's height needs to be adjusted
+		 * so its height needs to be adjusted
 		 */
 		debug(dev->ctx, "CASE 1, original image wider, adjust the scaled height\n");
 		*scaled_width = device_info.native_width;
