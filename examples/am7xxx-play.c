@@ -563,7 +563,7 @@ static void usage(char *name)
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
 	printf("\t\t\t\t\t1 - JPEG\n");
 	printf("\t\t\t\t\t2 - NV12\n");
-	printf("\t-q \t\t\tquality of jpeg sent to the device, between 1 and 100\n");
+	printf("\t-q <quality>\t\tquality of jpeg sent to the device, between 1 and 100\n");
 	printf("\t-p <power level>\tpower level of device, between %x (off) and %x (maximum)\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
 	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n\t\t\t\t\t the slave connector to be plugged in.\n");
 	printf("\t-h \t\t\tthis help message\n");
