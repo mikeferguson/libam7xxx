@@ -99,9 +99,9 @@ typedef enum {
 typedef enum {
 	AM7XXX_POWER_OFF    = 0, /**< Display is powered off, no image shown. */
 	AM7XXX_POWER_LOW    = 1, /**< Low power consumption but also low brightness. */
-	AM7XXX_POWER_MIDDLE = 2, /**< Middle level of brightness. */
+	AM7XXX_POWER_MIDDLE = 2, /**< Middle level of brightness. This and upper modes need both the Master and Slave USB connectors plugged. */
 	AM7XXX_POWER_HIGH   = 3, /**< More brightness, but more power consumption. */
-	AM7XXX_POWER_TURBO  = 4, /**< Max brightness and power consumprion. This may need both the Master and Slave USB connectors plugged. */
+	AM7XXX_POWER_TURBO  = 4, /**< Max brightness and power consumption. */
 } am7xxx_power_mode;
 
 /**
@@ -186,7 +186,7 @@ int am7xxx_get_device_info(am7xxx_device *dev,
  * that the original image aspect ratio is preserved.
  * 
  * @param[in] dev A pointer to the structure representing the device to get info of
- * @param[in] upscale Whether to calculate scaled dimensions for images smaller than the native dimesions
+ * @param[in] upscale Whether to calculate scaled dimensions for images smaller than the native dimensions
  * @param[in] original_width The width of the original image
  * @param[in] original_height The height of the original image
  * @param[out] scaled_width The width the rescaled image should have
