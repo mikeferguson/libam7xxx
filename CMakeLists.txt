@@ -16,6 +16,8 @@ set(PROJECT_APIVER
 set(CMAKE_MODULE_PATH 
   ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/")
 
+OPTION(STRICT_COMPILATION_CHECKS "Enable stricter compilation checks" OFF)
+
 include (MaintenanceTools)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
@@ -36,13 +38,6 @@ if (CMAKE_COMPILER_IS_GNUCC)
   if(CMAKE_C_FLAGS STREQUAL "")
     set(CMAKE_C_FLAGS "-std=c99 -pedantic -Wall -Wextra")
   endif()
-
-  # Don't make pedantic checks errors,
-  # as vanilla libusb-1.0.8 can't live with that
-  #add_flags(CMAKE_C_FLAGS -pedantic-errors)
-
-  # GCC >= 4.6
-  #add_flags(CMAKE_C_FLAGS -Wunused-but-set-variable)
 
   add_flags(CMAKE_C_FLAGS
     -fno-common
@@ -72,9 +67,18 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Wwrite-strings
     -fstack-protector
     --param=ssp-buffer-size=4)
+
+  if (STRICT_COMPILATION_CHECKS)
+    add_flags(CMAKE_C_FLAGS
+      -Werror
+      # NOTE: Vanilla libusb-1.0.8 can't live with -pedantic-errors
+      -pedantic-errors
+      # NOTE: GCC >= 4.6 is needed for -Wunused-but-set-variable
+      -Wunused-but-set-variable)
+  endif()
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb -DDEBUG=1 -Werror")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb -DDEBUG=1")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 

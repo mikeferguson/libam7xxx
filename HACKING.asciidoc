@@ -11,7 +11,7 @@ The suggested way to hack on the project is:
 
   $ mkdir build
   $ cd build
-  $ cmake ../ -DCMAKE_BUILD_TYPE=debug
+  $ cmake ../ -DCMAKE_BUILD_TYPE=debug -DSTRICT_COMPILATION_CHECKS=ON
   $ make
 
 If you want to check the code with the ''sparse'' static analysis tool you
