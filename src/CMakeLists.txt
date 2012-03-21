@@ -22,8 +22,10 @@ endif()
 install(TARGETS am7xxx-static
    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 
-target_link_libraries(am7xxx ${LIBUSB_1_LIBRARIES})
-target_link_libraries(am7xxx-static ${LIBUSB_1_LIBRARIES})
+find_library(MATH_LIB m)
+
+target_link_libraries(am7xxx ${MATH_LIB} ${LIBUSB_1_LIBRARIES})
+target_link_libraries(am7xxx-static ${MATH_LIB} ${LIBUSB_1_LIBRARIES})
 
 # Install the header files
 install(FILES "am7xxx.h"

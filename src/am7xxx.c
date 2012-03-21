@@ -22,6 +22,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <libusb.h>
+#include <math.h>
 
 #include "am7xxx.h"
 #include "serialize.h"
@@ -734,14 +735,14 @@ int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
 		 */
 		debug(dev->ctx, "CASE 1, original image wider, adjust the scaled height\n");
 		*scaled_width = device_info.native_width;
-		*scaled_height = (unsigned int)(original_height / width_ratio);
+		*scaled_height = (unsigned int)lroundf(original_height / width_ratio);
 	} else if (width_ratio < height_ratio) {
 		/*
 		 * The input is proportionally "taller" than the device viewport
 		 * so its width needs to be adjusted
 		 */
 		debug(dev->ctx, "CASE 2 original image taller, adjust the scaled width\n");
-		*scaled_width = (unsigned int)(original_width / height_ratio);
+		*scaled_width = (unsigned int)lroundf(original_width / height_ratio);
 		*scaled_height = device_info.native_height;
 	} else {
 		debug(dev->ctx, "CASE 3, just rescale, same aspect ratio already\n");
