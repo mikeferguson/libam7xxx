@@ -84,7 +84,7 @@ static int video_input_init(struct video_input_ctx *input_ctx,
 	/* get information on the input stream (e.g. format, bitrate, framerate) */
 	ret = avformat_find_stream_info(input_format_ctx, NULL);
 	if (ret < 0) {
-		fprintf(stderr, "cannot get information on the stream");
+		fprintf(stderr, "cannot get information on the stream\n");
 		goto cleanup;
 	}
 
@@ -115,7 +115,7 @@ static int video_input_init(struct video_input_ctx *input_ctx,
 	/* find the decoder for the video stream */
 	input_codec = avcodec_find_decoder(input_codec_ctx->codec_id);
 	if (input_codec == NULL) {
-		fprintf(stderr, "input_codec is NULL!");
+		fprintf(stderr, "input_codec is NULL!\n");
 		ret = -ENOTSUP;
 		goto cleanup;
 	}
@@ -163,7 +163,7 @@ static int video_output_init(struct video_output_ctx *output_ctx,
 	int ret;
 
 	if (input_ctx == NULL) {
-		fprintf(stderr, "input_ctx must not be NULL!");
+		fprintf(stderr, "input_ctx must not be NULL!\n");
 		ret = -EINVAL;
 		goto out;
 	}
@@ -171,7 +171,7 @@ static int video_output_init(struct video_output_ctx *output_ctx,
 	/* create the encoder context */
 	output_codec_ctx = avcodec_alloc_context3(NULL);
 	if (output_codec_ctx == NULL) {
-		fprintf(stderr, "cannot allocate output codec context!");
+		fprintf(stderr, "cannot allocate output codec context!\n");
 		ret = -ENOMEM;
 		goto out;
 	}
@@ -290,7 +290,7 @@ static int am7xxx_play(const char *input_format_string,
 	/* allocate an input frame */
 	picture_raw = avcodec_alloc_frame();
 	if (picture_raw == NULL) {
-		fprintf(stderr, "cannot allocate the raw picture frame!");
+		fprintf(stderr, "cannot allocate the raw picture frame!\n");
 		ret = -ENOMEM;
 		goto cleanup_output;
 	}
