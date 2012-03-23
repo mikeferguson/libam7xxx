@@ -37,14 +37,16 @@ static void usage(char *name)
 	printf("usage: %s [OPTIONS]\n\n", name);
 	printf("OPTIONS:\n");
 	printf("\t-f <filename>\t\tthe image file to upload\n");
-	printf("\t-F <format>\t\tthe image format to use (default is JPEG).\n");
+	printf("\t-F <format>\t\tthe image format to use (default is JPEG)\n");
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
 	printf("\t\t\t\t\t1 - JPEG\n");
-	printf("\t\t\t\t\t2 - YUV - NV12\n");
+	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
 	printf("\t-W <image width>\tthe width of the image to upload\n");
 	printf("\t-H <image height>\tthe height of the image to upload\n");
 	printf("\t-h \t\t\tthis help message\n");
+	printf("\n\nEXAMPLE OF USE:\n");
+	printf("\t%s -f file.jpg -F 1 -l 5 -W 800 -H 480\n", name);
 }
 
 int main(int argc, char *argv[])
