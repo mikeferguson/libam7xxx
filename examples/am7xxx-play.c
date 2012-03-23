@@ -17,6 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @example examples/am7xxx-play.c
+ * am7xxx-play uses libavdevice, libavformat, libavcodec and libswscale to
+ * decode the input, encode it to jpeg and display it with libam7xxx.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

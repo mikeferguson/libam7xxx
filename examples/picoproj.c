@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @example examples/picoproj.c
+ * A minimal example to show how to use libam7xxx to show a static image.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
