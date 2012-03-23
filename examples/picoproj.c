@@ -18,7 +18,7 @@
 
 /**
  * @example examples/picoproj.c
- * A minimal example to show how to use libam7xxx to show a static image.
+ * A minimal example to show how to use libam7xxx to display a static image.
  */
 
 #include <stdio.h>
