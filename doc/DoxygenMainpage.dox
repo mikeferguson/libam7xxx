@@ -16,6 +16,8 @@ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
 a few, and on non-PC platforms like for instance mobile phones, tablets or
 game consoles.
 
+Check @link am7xxx.h @endlink for the public API documentation.
+
 @section libam7xxxSupportedDevices Supported Devices
 
 - Acer C110
