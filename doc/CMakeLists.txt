@@ -13,3 +13,5 @@ if(DOXYGEN_FOUND)
     DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/${CMAKE_PROJECT_NAME}")
 
 endif(DOXYGEN_FOUND)
+
+add_subdirectory(man)

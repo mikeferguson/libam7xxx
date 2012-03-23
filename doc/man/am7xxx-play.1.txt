@@ -1,0 +1,100 @@
+AM7XXX-PLAY(1)
+==============
+:doctype: manpage
+
+
+NAME
+----
+am7xxx-play - play stuff on an am7xxx device (e.g. Acer C110, PicoPix 1020)
+
+
+SYNOPSIS
+--------
+*am7xxx-play* ['OPTIONS']
+
+
+DESCRIPTION
+-----------
+am7xxx-play(1) uses libavdevice, libavformat, libavcodec and libswscale to
+decode the input, encode it to jpeg and display it with libam7xxx.
+
+
+OPTIONS
+-------
+*-f* '<input format>'::
+    the input device format
+
+*-i* '<input path>'::
+    the input path
+
+*-o* '<options>'::
+    a comma separated list of input format options
++
+EXAMPLE:
++
+  -o draw_mouse=1,framerate=100,video_size=800x480
+
+*-s* '<scaling method>'::
+    the rescaling method (see swscale.h)
+
+*-u*::
+    upscale the image if smaller than the display dimensions
+
+*-F* '<format>'::
+    the image format to use (default is JPEG)
++
+.SUPPORTED FORMATS:
+* 1 - JPEG
+* 2 - NV12
+
+*-q* '<quality>'::
+    quality of jpeg sent to the device, between 1 and 100
+
+*-l* '<log level>'::
+    the verbosity level of libam7xxx output (0-5)
+
+*-p* '<power level>'::
+    power level of device, between 0 (off) and 4 (maximum) +
+    WARNING: Level 2 and greater require the master AND
+             the slave connector to be plugged in.
+
+*-h*::
+    this help message
+
+
+EXAMPLES OF USE
+---------------
+
+   am7xxx-play -f x11grab -i :0.0 -o video_size=800x480
+   am7xxx-play -f fbdev -i /dev/fb0
+   am7xxx-play -f video4linux2 -i /dev/video0 -o video_size=320x240,frame_rate=100 -u -q 90
+   am7xxx-play -i http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_640x360.m4v
+
+
+EXIT STATUS
+-----------
+*0*::
+    Success
+
+*!0*::
+    Failure (libam7xxx error; libav error)
+
+
+AUTHORS
+-------
+Antonio Ospite and Reto Schneider
+
+
+RESOURCES
+---------
+Main web site: <http://git.ao2.it/libam7xxx.git>
+
+
+COPYING
+-------
+Copyright \(C) 2012  Antonio Ospite <ospite@studenti.unina.it>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
