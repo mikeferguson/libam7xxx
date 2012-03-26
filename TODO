@@ -1,3 +1,2 @@
-- Document the API with Doxygen.
 - Generate language bindings in order to use libam7xxx from other languages.
 - Handle signals in picoproj and do the proper cleanup
