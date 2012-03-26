@@ -16,6 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * @example examples/picoproj.c
+ * A minimal example to show how to use libam7xxx to display a static image.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,13 +37,16 @@ static void usage(char *name)
 	printf("usage: %s [OPTIONS]\n\n", name);
 	printf("OPTIONS:\n");
 	printf("\t-f <filename>\t\tthe image file to upload\n");
-	printf("\t-F <format>\t\tthe image format to use (default is JPEG).\n");
+	printf("\t-F <format>\t\tthe image format to use (default is JPEG)\n");
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
 	printf("\t\t\t\t\t1 - JPEG\n");
-	printf("\t\t\t\t\t2 - YUV - NV12\n");
+	printf("\t\t\t\t\t2 - NV12\n");
+	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
 	printf("\t-W <image width>\tthe width of the image to upload\n");
 	printf("\t-H <image height>\tthe height of the image to upload\n");
 	printf("\t-h \t\t\tthis help message\n");
+	printf("\n\nEXAMPLE OF USE:\n");
+	printf("\t%s -f file.jpg -F 1 -l 5 -W 800 -H 480\n", name);
 }
 
 int main(int argc, char *argv[])
@@ -50,18 +58,17 @@ int main(int argc, char *argv[])
 	char filename[FILENAME_MAX] = {0};
 	int image_fd;
 	struct stat st;
-	am7xxx_device dev;
+	am7xxx_context *ctx;
+	am7xxx_device *dev;
+	int log_level = AM7XXX_LOG_INFO;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
 	unsigned char *image;
 	unsigned int size;
-	unsigned int native_width;
-	unsigned int native_height;
-	unsigned int unknown0;
-	unsigned int unknown1;
+	am7xxx_device_info device_info;
 
-	while ((opt = getopt(argc, argv, "f:F:W:H:h")) != -1) {
+	while ((opt = getopt(argc, argv, "f:F:l:W:H:h")) != -1) {
 		switch (opt) {
 		case 'f':
 			strncpy(filename, optarg, FILENAME_MAX);
@@ -78,6 +85,13 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Unsupported format\n");
 				exit(EXIT_FAILURE);
+			}
+			break;
+		case 'l':
+			log_level = atoi(optarg);
+			if (log_level < AM7XXX_LOG_FATAL || log_level > AM7XXX_LOG_TRACE) {
+				fprintf(stderr, "Unsupported log level, falling back to AM7XXX_LOG_ERROR\n");
+				log_level = AM7XXX_LOG_ERROR;
 			}
 			break;
 		case 'W':
@@ -130,22 +144,45 @@ int main(int argc, char *argv[])
 		goto out_close_image_fd;
 	}
 
-	dev = am7xxx_init();
-	if (dev == NULL) {
+	ret = am7xxx_init(&ctx);
+	if (ret < 0) {
 		perror("am7xxx_init");
 		exit_code = EXIT_FAILURE;
 		goto out_munmap;
 	}
 
-	ret = am7xxx_get_device_info(dev, &native_width, &native_height, &unknown0, &unknown1);
+	am7xxx_set_log_level(ctx, log_level);
+
+	ret = am7xxx_open_device(ctx, &dev, 0);
+	if (ret < 0) {
+		perror("am7xxx_open_device");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+
+	ret = am7xxx_close_device(dev);
+	if (ret < 0) {
+		perror("am7xxx_close_device");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	ret = am7xxx_open_device(ctx, &dev, 0);
+	if (ret < 0) {
+		perror("am7xxx_open_device");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
+
+	ret = am7xxx_get_device_info(dev, &device_info);
 	if (ret < 0) {
 		perror("am7xxx_get_info");
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
-	printf("Native resolution: %dx%d\n", native_width, native_height);
-	printf("Unknown0: %d\n", unknown0);
-	printf("Unknown1: %d\n", unknown1);
+	printf("Native resolution: %dx%d\n",
+	       device_info.native_width, device_info.native_height);
 
 	ret = am7xxx_set_power_mode(dev, AM7XXX_POWER_LOW);
 	if (ret < 0) {
@@ -164,7 +201,7 @@ int main(int argc, char *argv[])
 	exit_code = EXIT_SUCCESS;
 
 cleanup:
-	am7xxx_shutdown(dev);
+	am7xxx_shutdown(ctx);
 
 out_munmap:
 	ret = munmap(image, size);

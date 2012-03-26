@@ -1,0 +1,80 @@
+PICOPROJ(1)
+===========
+:doctype: manpage
+
+
+NAME
+----
+picoproj - test program for libam7xxx
+
+
+SYNOPSIS
+--------
+*picoproj* ['OPTIONS']
+
+
+DESCRIPTION
+-----------
+picoproj(1) is a minimal example to show how to use libam7xxx to display a static image.
+
+
+OPTIONS
+-------
+
+*-f* '<filename>'::
+    the image file to upload
+
+
+*-F* '<format>'::
+    the image format to use (default is JPEG)
++
+.SUPPORTED FORMATS:
+* 1 - JPEG
+* 2 - NV12
+
+*-l* '<log level>'::
+    the verbosity level of libam7xxx output (0-5)
+
+*-W* '<image width>'::
+    the width of the image to upload
+
+*-H* '<image height>'::
+    the height of the image to upload
+
+*-h*::
+    this help message
+
+
+EXAMPLE OF USE
+--------------
+
+picoproj -f file.jpg -F 1 -l 5 -W 800 -H 480
+
+
+EXIT STATUS
+-----------
+*0*::
+    Success
+
+*!0*::
+    Failure (libam7xxx error)
+
+
+AUTHORS
+-------
+Antonio Ospite and Reto Schneider
+
+
+RESOURCES
+---------
+Main web site: <http://git.ao2.it/libam7xxx.git>
+
+
+COPYING
+-------
+Copyright \(C) 2012  Antonio Ospite <ospite@studenti.unina.it>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.

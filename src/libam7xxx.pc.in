@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: @PROJECT_NAME@
 Description: @PROJECT_DESCRIPTION@
-Requires: libusb-1.0
+Requires.private: libusb-1.0
 Version: @PROJECT_APIVER@
 Libs: -L${libdir} -lam7xxx
 Cflags: -I${includedir}

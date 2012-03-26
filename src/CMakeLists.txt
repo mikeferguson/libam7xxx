@@ -1,5 +1,4 @@
 add_definitions("-D_BSD_SOURCE") # for htole32()
-add_definitions("-D_POSIX_C_SOURCE=2") # for getopt()
 
 # Find packages needed to build library
 find_package(libusb-1.0 REQUIRED)
@@ -23,8 +22,10 @@ endif()
 install(TARGETS am7xxx-static
    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 
-target_link_libraries(am7xxx ${LIBUSB_1_LIBRARIES})
-target_link_libraries(am7xxx-static ${LIBUSB_1_LIBRARIES})
+find_library(MATH_LIB m)
+
+target_link_libraries(am7xxx ${MATH_LIB} ${LIBUSB_1_LIBRARIES})
+target_link_libraries(am7xxx-static ${MATH_LIB} ${LIBUSB_1_LIBRARIES})
 
 # Install the header files
 install(FILES "am7xxx.h"
@@ -32,13 +33,7 @@ install(FILES "am7xxx.h"
 
 if(UNIX AND NOT APPLE)
   # Produce a pkg-config file for linking against the shared lib
-  configure_file ("libam7xxx.pc.in" "libam7xxx.pc" @ONLY)
+  configure_file("libam7xxx.pc.in" "libam7xxx.pc" @ONLY)
   install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libam7xxx.pc"
     DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
 endif()
-
-# Build the test app
-add_executable(picoproj picoproj.c)
-target_link_libraries(picoproj am7xxx)
-install(TARGETS picoproj
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
