@@ -49,7 +49,7 @@ Examples of devices based on AM7XXX are:
   - Acer Series C pico projectors (C20, C110, C112):
       * http://www.acer.it/ac/it/IT/content/models/projector-c
       * http://support.acer.com/product/default.aspx?modelId=3888
-    
+
   - Philips/SagemCom PicoPix projectors (PPX 1020, PPX 1230, PPX 1430, PPX
     1630):
       * http://www.philips.co.uk/c/pocket-projector/179840/cat/

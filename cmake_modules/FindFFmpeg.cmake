@@ -17,7 +17,7 @@
 #and search the path which contain the libname/header.h (usefull for new version)
 
 #Then we need to include ${FFMPEG_libname_INCLUDE_DIRS} (in old version case, use by ffmpeg header and osg plugin code)
-#                                                       (in new version case, use by ffmpeg header) 
+#                                                       (in new version case, use by ffmpeg header)
 #and ${FFMPEG_libname_INCLUDE_DIRS/libname}             (in new version case, use by osg plugin code)
 
 

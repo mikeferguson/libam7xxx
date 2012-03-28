@@ -37,7 +37,7 @@ extern "C" {
 struct _am7xxx_context;
 typedef struct _am7xxx_context am7xxx_context;
 
-/** 
+/**
  * @typedef am7xxx_device
  *
  * An opaque data type representing an am7xxx device.
@@ -88,7 +88,7 @@ typedef enum {
  * An am7xxx device can operate in several power modes. A certain power mode
  * may have effect on the display brightness or on the device power
  * consumption.
- *		
+ *
  * @note Most am7xxx devices come with a Y-shaped USB cable with a Master and
  * a Slave connector, higher power modes may require that both connectors are
  * plugged in to the host system for the device to work properly.
@@ -184,7 +184,7 @@ int am7xxx_get_device_info(am7xxx_device *dev,
  * Before sending images bigger than the device native dimensions the user
  * needs to rescale them, this utility function does the calculation in a way
  * that the original image aspect ratio is preserved.
- * 
+ *
  * @param[in] dev A pointer to the structure representing the device to get info of
  * @param[in] upscale Whether to calculate scaled dimensions for images smaller than the native dimensions
  * @param[in] original_width The width of the original image
