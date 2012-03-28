@@ -1,0 +1,419 @@
+2012-03-28 10:55:14 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Release version 0.1.1 (HEAD, master)
+
+2012-03-28 10:43:04 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: use ${DOC_OUTPUT_PATH} in the targets once we have it defined
+
+2012-03-28 10:31:22 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: keep the -h option as the last one in am7xxx-play
+
+2012-03-28 10:27:12 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: add power level setting to picoproj
+
+2012-03-28 10:11:54 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* TODO: remove the entry about signals and picoproj
+
+2012-03-28 10:09:08 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* cosmetics: remove some trailing spaces
+
+2012-03-28 10:02:03 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: control shared library symbols visibility
+
+2012-03-28 09:11:51 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: make sure docs have been generated when installing
+
+2012-03-26 13:50:05 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Increase project number to 0.1.0 (v0.1.0, origin/master)
+
+2012-03-26 13:49:31 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge branch 'unstable'
+
+2012-03-26 13:27:43 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* TODO: remove the entry about documenting the API with Doxygen (origin/unstable, unstable)
+
+2012-03-24 00:25:57 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: add generation of man pages from asciidoc sources
+
+2012-03-24 00:01:25 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: add a link to the public API on the main page
+
+2012-03-24 00:26:59 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: rephrase picoproj example description
+
+2012-03-23 23:32:59 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: make picoproj usage look more like am7xxx-play one
+
+2012-03-23 22:01:45 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: add examples to the Doxygen documentation
+
+2012-03-23 17:03:36 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* sm7xxx-play: add missing newline on some error messages
+
+2012-03-21 14:47:20 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: round scaled_height and scaled_width
+
+2012-03-21 12:06:16 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* cmake: make stricter compilation checks conditional
+
+2012-03-21 11:45:36 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge remote-tracking branch 'origin/rettichschnidi' into unstable
+
+2012-03-20 22:59:03 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: set proper return codes in am7xxx-play
+
+2012-03-19 22:13:04 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: add a -l option to am7xxx-play
+
+2012-03-20 23:39:05 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Fix typo: dimesions -> dimensions (origin/rettichschnidi)
+
+2012-03-20 23:36:20 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* All modes above LOW need both connectors to be plugged in.
+
+2012-03-20 23:33:50 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Fix typo: architechtures -> architectures
+
+2012-03-20 23:32:46 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Remove douled semicolons
+
+2012-03-20 21:16:14 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Check the user submitted value for the rescaling method.
+
+2012-03-20 21:15:29 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Fix the wording of the help message for the rescaling method.
+
+2012-03-20 21:06:30 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Update the help message to make it clear that the quality argument needs a parameter.
+
+2012-03-20 20:53:38 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Let the user set the power mode via the switch '-p <power mode>'
+
+2012-03-20 19:55:27 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Merge remote-tracking branch 'origin/unstable' into rettichschnidi
+
+2012-03-19 22:07:16 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* cmake: disable optimizations in debug builds
+
+2012-03-18 23:45:48 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Link to all ffmpeg libraries, not just to avdevice.
+
+2012-03-17 10:17:19 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: fix a typo, s/it's/its/
+
+2012-03-16 20:46:29 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Merge branch 'unstable' into rettichschnidi
+
+2012-03-16 20:36:05 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Purely cosmetic change: add missing newline
+
+2012-03-09 19:47:54 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Use commas to separate different pico projector names.
+
+2012-03-15 15:30:28 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: add a am7xxx-play example program
+
+2012-03-15 14:11:28 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: cosmetics, remove some useless double spaces
+
+2012-03-15 14:05:25 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: add  am7xxx_calc_scaled_image_dimensions()
+
+2012-03-08 14:35:36 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* contrib: add PicoPix 1020 USB IDs to 55-am7xxx.rules
+
+2012-03-08 14:22:20 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: move it to an example/ directory
+
+2012-03-07 23:32:29 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* cmake: split out the maintenance targets to a new cmake module
+
+2012-03-07 23:12:30 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: add an install target
+
+2012-03-07 17:48:49 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx, doc: add Doxygen documentation for the public API
+
+2012-03-06 17:28:57 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: rename the 'size' argument of am7xxx_send_image() to 'image_size'
+
+2012-03-01 23:47:00 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* cosmetics: remove some unneeded white spaces
+
+2012-03-01 23:05:50 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* CmakeLists.txt: add some hardening options to CMAKE_C_FLAGS
+
+2012-03-01 21:52:06 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: introduce a new am7xxx_device_info type
+
+2012-02-29 23:54:22 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* HACKING.asciidoc: mention how to use valgrind
+
+2012-02-29 23:31:14 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: add an option to set the log level
+
+2012-02-29 23:29:12 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: use the logging infrastructure
+
+2012-02-28 23:51:37 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: add a simple logging infrastructure
+
+2012-02-28 22:37:06 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: track the context in am7xxx_device
+
+2012-02-28 21:57:45 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: pass the context to add_new_device() and find_device()
+
+2012-02-28 21:44:34 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: silent a warning enabled by 'sparse' about an uninitialized variable
+
+2012-02-29 23:33:13 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* TODO: remove the entry about multi-device support
+
+2012-02-23 18:05:48 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: add multi-device support
+
+2012-02-23 16:23:41 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* TODO: handle signals in picoproj and do the proper cleanup
+
+2012-02-22 13:14:24 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: support other devices which talk the same protocol
+
+2012-02-21 14:48:06 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* cmake: fix libusb search
+
+2012-02-21 13:19:28 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: change am7xx_device definition, better buffer handling
+
+2012-02-23 15:26:44 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: initialize the 'transferred' variable before USB transfers
+
+2012-02-21 19:55:24 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: Acer C120 is not based on AM7XXX
+
+2012-02-20 21:31:36 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: rephrase the part about USB IDs
+
+2012-02-20 17:51:11 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: fix a typo s/trasfers/transfers/
+
+2012-02-20 17:50:06 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: mention Thomas Baquet's project and fix some style
+
+2012-02-20 13:44:23 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* contrib: add some udev rules to let normal users access the devices
+
+2012-02-20 13:28:29 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: highlight USB IDs by using an unformatted style
+
+2012-01-25 15:50:41 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Don't use fixed size integer types in the public header
+
+2012-01-25 15:44:24 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Make struct am7xxx_header and related types private
+
+2012-01-25 15:26:44 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Implement am7xxx_get_device_info()
+
+2012-01-25 12:24:53 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add info about transfer direction in debug messages, add newline
+
+2012-01-24 17:15:50 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: make the -f option mandatory
+
+2012-01-24 16:43:23 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Implement am7xxx_set_power_mode()
+
+2012-01-24 16:03:33 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Indent header_data fields when dumping headers
+
+2012-01-24 15:45:00 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Document in_80chars() and remove reference_image_header[]
+
+2012-01-24 15:39:24 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Dump the data only in DEBUG builds
+
+2012-01-24 14:55:54 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add a HACKING.asciidoc file
+
+2012-01-24 13:38:35 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Serialize struct am7xxx_header properly before sending it on the wire
+
+2012-01-24 10:41:47 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: exit with success when the -h option is used
+
+2012-01-24 10:27:25 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Document usb_modeswitch command to change the device mode
+
+2012-01-23 17:13:15 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Renamed AM7XXX_IMAGE_FORMAT_YUV_NV12 to AM7XXX_IMAGE_FORMAT_NV12.
+
+2012-01-21 16:22:04 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Added support for imageformat YUV - NV12
+
+2012-01-21 16:15:50 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* Stop build process if a warning shows up
+
+2012-01-16 00:03:42 +0100 Reto Schneider <github@reto-schneider.ch>
+
+	* corrected some spelling mistakes
+
+2012-01-15 22:58:15 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Relicense under GPLv2+
+
+2012-01-15 21:12:14 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add a TODO file
+
+2012-01-15 21:11:58 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add a README.asciidoc
+
+2012-01-15 01:40:19 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Fix Copyright year
+
+2012-01-15 01:39:15 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add GPL-3 license text
+
+2012-01-13 13:43:59 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Rename the header_len field to header_data_len
+
+2012-01-13 13:37:32 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Make including am7xxx.h in C++ code safe
+
+2012-01-13 03:20:14 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Use Cmake and make libam7xxx a shared library
+
+2012-01-12 13:46:14 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Split am7xxx functions and definitions
+
+2012-01-07 03:16:17 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add backup and changelog rules to Makefile
+
+2012-01-07 02:53:08 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add initial support for USB output communication
+
+2012-01-07 01:46:38 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add support for sending an actual JPEG image
+
+2012-01-07 01:45:20 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Image size is always unsigned
+
+2012-01-07 01:44:01 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Wrap lines when dumping big buffers
+
+2012-01-07 00:03:55 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add some command line options
+
+2012-01-07 00:03:16 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Minor Makefile cleanup
+
+2012-01-06 22:51:02 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Rewrite to support different packet types
+
+2012-01-07 01:58:10 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Fix a typo
+
+2012-01-06 18:16:37 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Initial import
