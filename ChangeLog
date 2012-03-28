@@ -1,6 +1,14 @@
+2012-03-28 13:37:00 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Release version 0.1.2 (HEAD, master)
+
+2012-03-28 13:08:23 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: fix the "custom install targets" to handle DESTDIR
+
 2012-03-28 10:55:14 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
-	* Release version 0.1.1 (HEAD, master)
+	* Release version 0.1.1 (v0.1.1, origin/master)
 
 2012-03-28 10:43:04 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
@@ -32,7 +40,7 @@
 
 2012-03-26 13:50:05 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
-	* Increase project number to 0.1.0 (v0.1.0, origin/master)
+	* Increase project number to 0.1.0 (v0.1.0)
 
 2012-03-26 13:49:31 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
