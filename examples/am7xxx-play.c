@@ -604,7 +604,7 @@ int main(int argc, char *argv[])
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 
-	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:l:hp:")) != -1) {
+	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:l:p:h")) != -1) {
 		switch (opt) {
 		case 'f':
 			input_format_string = strdup(optarg);
@@ -684,11 +684,6 @@ int main(int argc, char *argv[])
 				log_level = AM7XXX_LOG_ERROR;
 			}
 			break;
-		case 'h':
-			usage(argv[0]);
-			ret = 0;
-			goto out;
-			break;
 		case 'p':
 			power_mode = atoi(optarg);
 			switch(power_mode) {
@@ -704,6 +699,11 @@ int main(int argc, char *argv[])
 				ret = -EINVAL;
 				goto out;
 			}
+			break;
+		case 'h':
+			usage(argv[0]);
+			ret = 0;
+			goto out;
 			break;
 		default: /* '?' */
 			usage(argv[0]);
