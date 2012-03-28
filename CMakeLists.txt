@@ -40,6 +40,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
   endif()
 
   add_flags(CMAKE_C_FLAGS
+    -fvisibility=hidden
     -fno-common
     -Wall
     -Wextra

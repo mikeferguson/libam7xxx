@@ -36,6 +36,20 @@
 #  define  __attribute__(x)  /*NOTHING*/
 #endif
 
+/* Control shared library symbols visibility */
+#if defined _WIN32 || defined __CYGWIN__
+	#define AM7XXX_PUBLIC __declspec(dllexport)
+	#define AM7XXX_LOCAL
+#else
+	#if __GNUC__ >= 4
+		#define AM7XXX_PUBLIC __attribute__ ((visibility ("default")))
+		#define AM7XXX_LOCAL  __attribute__ ((visibility ("hidden")))
+	#else
+		#define AM7XXX_PUBLIC
+		#define AM7XXX_LOCAL
+	#endif
+#endif
+
 static void log_message(am7xxx_context *ctx,
 			int level,
 			const char *function,
@@ -551,7 +565,9 @@ out:
 	return ret;
 }
 
-int am7xxx_init(am7xxx_context **ctx)
+/* Public API */
+
+AM7XXX_PUBLIC int am7xxx_init(am7xxx_context **ctx)
 {
 	int ret = 0;
 
@@ -590,7 +606,7 @@ out:
 	return ret;
 }
 
-void am7xxx_shutdown(am7xxx_context *ctx)
+AM7XXX_PUBLIC void am7xxx_shutdown(am7xxx_context *ctx)
 {
 	am7xxx_device *current;
 
@@ -612,12 +628,12 @@ void am7xxx_shutdown(am7xxx_context *ctx)
 	ctx = NULL;
 }
 
-void am7xxx_set_log_level(am7xxx_context *ctx, am7xxx_log_level log_level)
+AM7XXX_PUBLIC void am7xxx_set_log_level(am7xxx_context *ctx, am7xxx_log_level log_level)
 {
 	ctx->log_level = log_level;
 }
 
-int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
+AM7XXX_PUBLIC int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
 		       unsigned int device_index)
 {
 	int ret;
@@ -639,7 +655,7 @@ int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
 	return ret;
 }
 
-int am7xxx_close_device(am7xxx_device *dev)
+AM7XXX_PUBLIC int am7xxx_close_device(am7xxx_device *dev)
 {
 	if (dev == NULL) {
 		fatal("dev must not be NULL!\n");
@@ -653,7 +669,7 @@ int am7xxx_close_device(am7xxx_device *dev)
 	return 0;
 }
 
-int am7xxx_get_device_info(am7xxx_device *dev,
+AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 			   am7xxx_device_info *device_info)
 {
 	int ret;
@@ -692,7 +708,7 @@ int am7xxx_get_device_info(am7xxx_device *dev,
 	return 0;
 }
 
-int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
+AM7XXX_PUBLIC int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
 					unsigned int upscale,
 					unsigned int original_width,
 					unsigned int original_height,
@@ -754,7 +770,7 @@ int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
 	return 0;
 }
 
-int am7xxx_send_image(am7xxx_device *dev,
+AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 		      am7xxx_image_format format,
 		      unsigned int width,
 		      unsigned int height,
@@ -790,7 +806,7 @@ int am7xxx_send_image(am7xxx_device *dev,
 	return send_data(dev, image, image_size);
 }
 
-int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
+AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
 {
 	int ret;
 	struct am7xxx_header h = {
