@@ -1,0 +1,3 @@
+usr/include/am7xxx.h
+usr/lib/*.so
+usr/lib/pkgconfig/*

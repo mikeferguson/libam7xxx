@@ -1,0 +1,4 @@
+# These are derived from how doxygen works, we are masking them so to have
+# less noise when running lintian
+libam7xxx-doc: duplicate-files usr/share/doc/libam7xxx-doc/html/search/all_6e.js usr/share/doc/libam7xxx-doc/html/search/variables_6e.js
+libam7xxx-doc: embedded-javascript-library usr/share/doc/libam7xxx-doc/html/jquery.js

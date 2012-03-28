@@ -1,0 +1,10 @@
+libam7xxx.so.0.1 libam7xxx0.1 #MINVER#
+ am7xxx_calc_scaled_image_dimensions@Base 0.1.0
+ am7xxx_close_device@Base 0.1.0
+ am7xxx_get_device_info@Base 0.1.0
+ am7xxx_init@Base 0.1.0
+ am7xxx_open_device@Base 0.1.0
+ am7xxx_send_image@Base 0.1.0
+ am7xxx_set_log_level@Base 0.1.0
+ am7xxx_set_power_mode@Base 0.1.0
+ am7xxx_shutdown@Base 0.1.0

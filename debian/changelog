@@ -1,0 +1,5 @@
+libam7xxx (0.1.2-1) unstable; urgency=low
+
+  * Initial release (Closes: #666075)
+
+ -- Antonio Ospite <ospite@studenti.unina.it>  Wed, 28 Mar 2012 16:51:54 +0200

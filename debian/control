@@ -1,0 +1,108 @@
+Source: libam7xxx
+Section: libdevel
+Priority: extra
+Maintainer: Antonio Ospite <ospite@studenti.unina.it>
+Build-Depends: debhelper (>= 9), dpkg-dev (>= 1.16.1~), cmake, pkg-config,
+ libusb-1.0-0-dev, libxcb1-dev, libavdevice-dev, libavformat-dev, libavcodec-dev, libswscale-dev
+Build-Depends-Indep: doxygen, asciidoc (>> 8.0.0), xmlto, docbook-xsl (>> 1.72)
+Standards-Version: 3.9.3
+Homepage: http://git.ao2.it/libam7xxx.git
+Vcs-Git: git://git.ao2.it/libam7xxx.git
+Vcs-Browser: http://git.ao2.it/libam7xxx.git
+
+Package: libam7xxx0.1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: usb-modeswitch, usb-modeswitch-data (>= 20111023-1)
+Description: library for accessing am7xxx based devices
+ libam7xxx is an Open Source library to communicate via USB with projectors and
+ Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+ .
+ libam7xxx makes it possible to use these devices as USB displays on
+ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+ a few, and on non-PC platforms like for instance mobile phones, tablets or
+ game consoles.
+ .
+ Examples of supported devices are:
+   - Acer C110
+   - Philips/SagemCom PicoPix 1020
+ .
+ This package contains the shared library of libam7xxx.
+
+Package: libam7xxx-dev
+Architecture: any
+Depends: ${misc:Depends}, libam7xxx0.1 (= ${binary:Version})
+Description: library for accessing am7xxx based devices -- development files
+ libam7xxx is an Open Source library to communicate via USB with projectors and
+ Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+ .
+ libam7xxx makes it possible to use these devices as USB displays on
+ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+ a few, and on non-PC platforms like for instance mobile phones, tablets or
+ game consoles.
+ .
+ Examples of supported devices are:
+   - Acer C110
+   - Philips/SagemCom PicoPix 1020
+ .
+ This is the development package containing the libraries and header for
+ software development with libam7xxx.
+
+Package: libam7xxx-bin
+Section: utils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: library for accessing am7xxx devices -- utilities and samples
+ libam7xxx is an Open Source library to communicate via USB with projectors and
+ Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+ .
+ libam7xxx makes it possible to use these devices as USB displays on
+ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+ a few, and on non-PC platforms like for instance mobile phones, tablets or
+ game consoles.
+ .
+ Examples of supported devices are:
+   - Acer C110
+   - Philips/SagemCom PicoPix 1020
+ .
+ This package includes utilities and sample programs for libam7xxx.
+
+Package: libam7xxx-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Description: library for accessing am7xxx devices -- documentation
+ libam7xxx is an Open Source library to communicate via USB with projectors and
+ Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+ .
+ libam7xxx makes it possible to use these devices as USB displays on
+ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+ a few, and on non-PC platforms like for instance mobile phones, tablets or
+ game consoles.
+ .
+ Examples of supported devices are:
+   - Acer C110
+   - Philips/SagemCom PicoPix 1020
+ .
+ This package contains the documentation of the API of libam7xxx.
+
+Package: am7xxx
+Section: libs
+Architecture: any
+Depends: ${misc:Depends}, libam7xxx-bin, libam7xxx-dev, libam7xxx0.1,
+ libam7xxx-doc
+Description: library for accessing am7xxx devices -- metapackage
+ libam7xxx is an Open Source library to communicate via USB with projectors and
+ Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+ .
+ libam7xxx makes it possible to use these devices as USB displays on
+ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+ a few, and on non-PC platforms like for instance mobile phones, tablets or
+ game consoles.
+ .
+ Examples of supported devices are:
+   - Acer C110
+   - Philips/SagemCom PicoPix 1020
+ .
+ This is the metapackage to install all components of the project.

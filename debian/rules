@@ -1,0 +1,9 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+DEB_LDFLAGS_MAINT_APPEND=-Wl,-Bsymbolic-functions -Wl,--as-needed
+include /usr/share/dpkg/buildflags.mk
+export CFLAGS CPPFLAGS LDFLAGS
+
+%:
+	dh $@

@@ -1,0 +1,6 @@
+
+Permission to access am7xxx devices
+===================================
+
+The access to am7xxx devices is granted to any user belonging to the
+"plugdev" group.
