@@ -2,9 +2,9 @@
 find_package(Asciidoc)
 if(ASCIIDOC_FOUND)
   add_custom_target(manpages
-    ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/am7xxx-play.1.txt -D ${CMAKE_CURRENT_BINARY_DIR}
-    COMMAND ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/picoproj.1.txt -D ${CMAKE_CURRENT_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/am7xxx-play.1.txt -D ${DOC_OUTPUT_PATH}/man
+    COMMAND ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/picoproj.1.txt -D ${DOC_OUTPUT_PATH}/man
+    WORKING_DIRECTORY ${DOC_OUTPUT_PATH}/man
     COMMENT "Generating man pages with Asciidoc" VERBATIM
   )
 
