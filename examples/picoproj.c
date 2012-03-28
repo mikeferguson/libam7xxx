@@ -42,6 +42,8 @@ static void usage(char *name)
 	printf("\t\t\t\t\t1 - JPEG\n");
 	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
+	printf("\t-p <power level>\tpower level of device, between %x (off) and %x (maximum)\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n\t\t\t\t\t the slave connector to be plugged in.\n");
 	printf("\t-W <image width>\tthe width of the image to upload\n");
 	printf("\t-H <image height>\tthe height of the image to upload\n");
 	printf("\t-h \t\t\tthis help message\n");
@@ -61,6 +63,7 @@ int main(int argc, char *argv[])
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 	int log_level = AM7XXX_LOG_INFO;
+	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
@@ -68,7 +71,7 @@ int main(int argc, char *argv[])
 	unsigned int size;
 	am7xxx_device_info device_info;
 
-	while ((opt = getopt(argc, argv, "f:F:l:W:H:h")) != -1) {
+	while ((opt = getopt(argc, argv, "f:F:l:p:W:H:h")) != -1) {
 		switch (opt) {
 		case 'f':
 			strncpy(filename, optarg, FILENAME_MAX);
@@ -92,6 +95,21 @@ int main(int argc, char *argv[])
 			if (log_level < AM7XXX_LOG_FATAL || log_level > AM7XXX_LOG_TRACE) {
 				fprintf(stderr, "Unsupported log level, falling back to AM7XXX_LOG_ERROR\n");
 				log_level = AM7XXX_LOG_ERROR;
+			}
+			break;
+		case 'p':
+			power_mode = atoi(optarg);
+			switch(power_mode) {
+			case AM7XXX_POWER_OFF:
+			case AM7XXX_POWER_LOW:
+			case AM7XXX_POWER_MIDDLE:
+			case AM7XXX_POWER_HIGH:
+			case AM7XXX_POWER_TURBO:
+				fprintf(stdout, "Power mode: %x\n", power_mode);
+				break;
+			default:
+				fprintf(stderr, "Invalid power mode value, must be between %x and %x\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+				exit(EXIT_FAILURE);
 			}
 			break;
 		case 'W':
@@ -184,7 +202,7 @@ int main(int argc, char *argv[])
 	printf("Native resolution: %dx%d\n",
 	       device_info.native_width, device_info.native_height);
 
-	ret = am7xxx_set_power_mode(dev, AM7XXX_POWER_LOW);
+	ret = am7xxx_set_power_mode(dev, power_mode);
 	if (ret < 0) {
 		perror("am7xxx_set_power_mode");
 		exit_code = EXIT_FAILURE;
