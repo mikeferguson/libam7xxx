@@ -9,17 +9,16 @@ if(ASCIIDOC_FOUND)
   )
 
   add_custom_target(install-manpages
-    ${CMAKE_COMMAND} -E make_directory
-      "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${DOC_OUTPUT_PATH}/man/am7xxx-play.1
-      "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
-    COMMAND ${CMAKE_COMMAND} -E copy
-      ${DOC_OUTPUT_PATH}/man/picoproj.1
-      "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
-  )
+    COMMAND ${CMAKE_COMMAND} -DCOMPONENT=manpages -P ${CMAKE_BINARY_DIR}/cmake_install.cmake
+    COMMENT "Installing manpages")
   add_dependencies(install-manpages manpages)
 
-  install(CODE "execute_process(COMMAND ${CMAKE_BUILD_TOOL} install-manpages)")
+  install(CODE "execute_process(COMMAND ${CMAKE_BUILD_TOOL} manpages)")
+
+  install(FILES
+    ${DOC_OUTPUT_PATH}/man/am7xxx-play.1
+    ${DOC_OUTPUT_PATH}/man/picoproj.1
+    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
+    COMPONENT manpages)
 
 endif(ASCIIDOC_FOUND)
