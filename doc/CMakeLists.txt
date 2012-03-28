@@ -9,8 +9,14 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen" VERBATIM
   )
 
-  install(DIRECTORY ${DOC_OUTPUT_PATH}/html
-    DESTINATION "${CMAKE_INSTALL_PREFIX}/share/doc/${CMAKE_PROJECT_NAME}")
+  add_custom_target(install-doc
+    ${CMAKE_COMMAND} -E copy_directory
+    ${DOC_OUTPUT_PATH}/html
+    "${CMAKE_INSTALL_PREFIX}/share/doc/${CMAKE_PROJECT_NAME}/html"
+  )
+  add_dependencies(install-doc doc)
+
+  install(CODE "execute_process(COMMAND ${CMAKE_BUILD_TOOL} install-doc)")
 
 endif(DOXYGEN_FOUND)
 

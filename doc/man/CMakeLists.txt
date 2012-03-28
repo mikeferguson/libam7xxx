@@ -8,9 +8,18 @@ if(ASCIIDOC_FOUND)
     COMMENT "Generating man pages with Asciidoc" VERBATIM
   )
 
-install(FILES
-  ${DOC_OUTPUT_PATH}/man/am7xxx-play.1
-  ${DOC_OUTPUT_PATH}/man/picoproj.1
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man1/")
+  add_custom_target(install-manpages
+    ${CMAKE_COMMAND} -E make_directory
+      "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${DOC_OUTPUT_PATH}/man/am7xxx-play.1
+      "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${DOC_OUTPUT_PATH}/man/picoproj.1
+      "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
+  )
+  add_dependencies(install-manpages manpages)
+
+  install(CODE "execute_process(COMMAND ${CMAKE_BUILD_TOOL} install-manpages)")
 
 endif(ASCIIDOC_FOUND)
