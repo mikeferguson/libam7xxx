@@ -1,3 +1,4 @@
+include(CheckSymbolExists)
 add_definitions("-D_POSIX_C_SOURCE=2") # for getopt()
 add_definitions("-D_POSIX_SOURCE") # for sigaction
 add_definitions("-D_BSD_SOURCE") # for strdup
@@ -17,6 +18,15 @@ endif()
 option(BUILD_AM7XXX-PLAY "Build a more complete example: am7xxx-play" TRUE)
 if(BUILD_AM7XXX-PLAY)
   find_package(FFmpeg REQUIRED)
+  set(CMAKE_REQUIRED_LIBRARIES ${FFMPEG_LIBRARIES}) 
+  set(CMAKE_REQUIRED_INCLUDES ${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS}) 
+  check_symbol_exists(avformat_open_input
+    "${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS}/libavformat/avformat.h"
+    HAVE_AVFORMAT_OPEN_INPUT)
+  if(NOT HAVE_AVFORMAT_OPEN_INPUT)
+    message(FATAL_ERROR
+      "Function avformat_open_input missing. Please use a newer FFmpeg release.")
+  endif()
 
   include_directories(${FFMPEG_LIBAVDEVICE_INCLUDE_DIRS})
   include_directories(${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS})
