@@ -15,7 +15,9 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-picoproj(1) is a minimal example to show how to use libam7xxx to display a static image.
+picoproj(1) is a minimal example to show how to use libam7xxx to display
+a static image; it will not perform any image rescaling or conversion, images
+larger than the device native resolution can be wrongly displayed.
 
 
 OPTIONS

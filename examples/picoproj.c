@@ -209,6 +209,10 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
+	if ((unsigned int)width > device_info.native_width ||
+	    (unsigned int)height > device_info.native_height)
+		fprintf(stderr, "WARNING: image not fitting the native resolution, it may be displayed wrongly!\n");
+
 	ret = am7xxx_send_image(dev, format, width, height, image, size);
 	if (ret < 0) {
 		perror("am7xxx_send_image");
