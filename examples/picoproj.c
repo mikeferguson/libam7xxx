@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	}
 	size = st.st_size;
 
-	image = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, image_fd, 0);
+	image = mmap(NULL, st.st_size, PROT_READ, MAP_PRIVATE, image_fd, 0);
 	if (image == NULL) {
 		perror("mmap");
 		exit_code = EXIT_FAILURE;
