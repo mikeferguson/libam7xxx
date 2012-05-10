@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "f:F:l:p:W:H:h")) != -1) {
 		switch (opt) {
 		case 'f':
+			if (filename[0] != '\0')
+				fprintf(stderr, "Warning: image file already specified\n");
 			strncpy(filename, optarg, FILENAME_MAX);
 			break;
 		case 'F':
