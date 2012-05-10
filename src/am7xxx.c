@@ -294,7 +294,7 @@ static int send_data(am7xxx_device *dev, uint8_t *buffer, unsigned int len)
 
 	trace_dump_buffer(dev->ctx, "sending -->", buffer, len);
 
-	ret = libusb_bulk_transfer(dev->usb_device, 1, buffer, len, &transferred, 0);
+	ret = libusb_bulk_transfer(dev->usb_device, 0x1, buffer, len, &transferred, 0);
 	if (ret != 0 || (unsigned int)transferred != len) {
 		error(dev->ctx, "ret: %d\ttransferred: %d (expected %u)\n",
 		      ret, transferred, len);
