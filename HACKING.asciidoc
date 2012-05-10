@@ -22,6 +22,28 @@ can run:
   $ cmake -D CMAKE_C_COMPILER=cgcc ../
   $ make
 
+=== Cross Builds
+
+If you want to build for MS Windows:
+
+  $ sudo aptitude install mingw-w64
+  $ mkdir build
+  $ cd build
+  $ wget -nv http://sourceforge.net/projects/libusbx/files/releases/1.0.11/Windows/libusbx-1.0.11-win.7z
+  $ 7z -olibusbx-1.0.11-win x libusbx-1.0.11-win.7z
+  $ cmake  \
+          -D GNU_HOST=i686-w64-mingw32 \
+          -D CMAKE_TOOLCHAIN_FILE=../cmake_modules/mingw_cross_toolchain.cmake \
+          -D CMAKE_INSTALL_PREFIX=libam7xxx-win/ \
+          -D LIBUSB_1_INCLUDE_DIR=libusbx-1.0.11-win/include/libusbx-1.0 \
+          -D LIBUSB_1_LIBRARY=libusbx-1.0.11-win/MinGW32/dll/libusb-1.0.dll \
+          -D BUILD_AM7XXX-PLAY:BOOL=FALSE \
+          ../
+  $ make
+
+After that you will find libam7xxx.dll in lib/ and picoproj.exe in the bin/
+directory.
+
 === Valgrind
 
 You can run the test program under the http://valgrind.org/[valgrind]
