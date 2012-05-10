@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 
 	ret = am7xxx_get_device_info(dev, &device_info);
 	if (ret < 0) {
-		perror("am7xxx_get_info");
+		perror("am7xxx_get_device_info");
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
