@@ -542,7 +542,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 						goto out;
 					}
 
-					libusb_set_configuration((*dev)->usb_device, 1);
+					libusb_set_configuration((*dev)->usb_device, 2);
 					libusb_claim_interface((*dev)->usb_device, 0);
 					goto out;
 				}
