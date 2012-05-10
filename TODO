@@ -1,1 +1,3 @@
-- Generate language bindings in order to use libam7xxx from other languages.
+- Write a GStreamer sink element based on libam7xxx.
+- Generate language bindings in order to use libam7xxx from other languages
+  (this may not be necessary if the GStreamer sink works well enough).
