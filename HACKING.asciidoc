@@ -11,7 +11,7 @@ The suggested way to hack on the project is:
 
   $ mkdir build
   $ cd build
-  $ cmake ../ -DCMAKE_BUILD_TYPE=debug -DSTRICT_COMPILATION_CHECKS=ON
+  $ cmake -D CMAKE_BUILD_TYPE=debug -D STRICT_COMPILATION_CHECKS=ON ../
   $ make
 
 If you want to check the code with the ''sparse'' static analysis tool you
@@ -19,7 +19,7 @@ can run:
 
   $ mkdir build
   $ cd build
-  $ cmake ../ -DCMAKE_C_COMPILER=cgcc
+  $ cmake -D CMAKE_C_COMPILER=cgcc ../
   $ make
 
 === Valgrind
