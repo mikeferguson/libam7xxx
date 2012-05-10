@@ -17,7 +17,13 @@
  */
 
 #include <string.h>
+
+#ifdef __MINGW32__
+#define le32toh(x) (x)
+#define htole32(x) (x)
+#else
 #include <endian.h>
+#endif
 
 #include "serialize.h"
 
