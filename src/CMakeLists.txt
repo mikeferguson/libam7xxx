@@ -22,7 +22,12 @@ endif()
 install(TARGETS am7xxx-static
    DESTINATION "${CMAKE_INSTALL_PREFIX}/lib")
 
-find_library(MATH_LIB m)
+if(NOT WIN32)
+  find_library(MATH_LIB m)
+else()
+  # not needed on windows
+  set(MATH_LIB "")
+endif()
 
 target_link_libraries(am7xxx ${MATH_LIB} ${LIBUSB_1_LIBRARIES})
 target_link_libraries(am7xxx-static ${MATH_LIB} ${LIBUSB_1_LIBRARIES})

@@ -68,20 +68,26 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Wwrite-strings
     -fstack-protector
     --param=ssp-buffer-size=4)
-
-  if (STRICT_COMPILATION_CHECKS)
-    add_flags(CMAKE_C_FLAGS
-      -Werror
-      # NOTE: Vanilla libusb-1.0.8 can't live with -pedantic-errors
-      -pedantic-errors
-      # NOTE: GCC >= 4.6 is needed for -Wunused-but-set-variable
-      -Wunused-but-set-variable)
-  endif()
 endif()
 
 set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb -DDEBUG=1")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+
+if (CMAKE_COMPILER_IS_GNUCC)
+  if (STRICT_COMPILATION_CHECKS)
+    add_flags(STRICT_FLAGS
+      -Werror
+      # NOTE: Vanilla libusb-1.0.8 can't live with -pedantic-errors
+      -pedantic-errors
+      # NOTE: GCC >= 4.6 is needed for -Wunused-but-set-variable
+      -Wunused-but-set-variable)
+
+    add_flags(CMAKE_C_FLAGS_DEBUG ${STRICT_FLAGS})
+    add_flags(CMAKE_C_FLAGS_RELEASE ${STRICT_FLAGS})
+    add_flags(CMAKE_C_FLAGS_RELWITHDEBINFO ${STRICT_FLAGS})
+  endif()
+endif()
 
 # Add library project
 add_subdirectory(src)

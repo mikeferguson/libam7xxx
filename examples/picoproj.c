@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
 	int opt;
 
 	char filename[FILENAME_MAX] = {0};
-	int image_fd;
+	FILE *image_fp;
 	struct stat st;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
@@ -74,6 +73,8 @@ int main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "f:F:l:p:W:H:h")) != -1) {
 		switch (opt) {
 		case 'f':
+			if (filename[0] != '\0')
+				fprintf(stderr, "Warning: image file already specified\n");
 			strncpy(filename, optarg, FILENAME_MAX);
 			break;
 		case 'F':
@@ -142,31 +143,43 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	image_fd = open(filename, O_RDONLY);
-	if (image_fd < 0) {
-		perror("open");
+	image_fp = fopen(filename, "rb");
+	if (image_fp == NULL) {
+		perror("fopen");
 		exit_code = EXIT_FAILURE;
 		goto out;
 	}
-	if (fstat(image_fd, &st) < 0) {
+	if (fstat(fileno(image_fp), &st) < 0) {
 		perror("fstat");
 		exit_code = EXIT_FAILURE;
-		goto out_close_image_fd;
+		goto out_close_image_fp;
 	}
 	size = st.st_size;
 
-	image = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, image_fd, 0);
+	image = malloc(size * sizeof(unsigned char));
 	if (image == NULL) {
-		perror("mmap");
+		perror("malloc");
 		exit_code = EXIT_FAILURE;
-		goto out_close_image_fd;
+		goto out_close_image_fp;
+	}
+
+	ret = fread(image, size, 1, image_fp);
+	if (ret != 1) {
+		if (feof(image_fp))
+			fprintf(stderr, "Unexpected end of file.\n");
+		else if (ferror(image_fp))
+			perror("fread");
+		else
+			fprintf(stderr, "Unexpected error condition.\n");
+
+		goto out_free_image;
 	}
 
 	ret = am7xxx_init(&ctx);
 	if (ret < 0) {
 		perror("am7xxx_init");
 		exit_code = EXIT_FAILURE;
-		goto out_munmap;
+		goto out_free_image;
 	}
 
 	am7xxx_set_log_level(ctx, log_level);
@@ -195,7 +208,7 @@ int main(int argc, char *argv[])
 
 	ret = am7xxx_get_device_info(dev, &device_info);
 	if (ret < 0) {
-		perror("am7xxx_get_info");
+		perror("am7xxx_get_device_info");
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
@@ -225,15 +238,13 @@ int main(int argc, char *argv[])
 cleanup:
 	am7xxx_shutdown(ctx);
 
-out_munmap:
-	ret = munmap(image, size);
-	if (ret < 0)
-		perror("munmap");
+out_free_image:
+	free(image);
 
-out_close_image_fd:
-	ret = close(image_fd);
-	if (ret < 0)
-		perror("close");
+out_close_image_fp:
+	ret = fclose(image_fp);
+	if (ret == EOF)
+		perror("fclose");
 
 out:
 	exit(exit_code);
