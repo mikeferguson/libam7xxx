@@ -77,6 +77,11 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.product_id = 0xc101,
 	},
 	{
+		.name       = "Acer C112",
+		.vendor_id  = 0x1de1,
+		.product_id = 0x5501,
+	},
+	{
 		.name       = "Philips/Sagemcom PicoPix 1020",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
