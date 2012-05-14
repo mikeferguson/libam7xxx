@@ -62,6 +62,9 @@ Examples of devices based on AM7XXX are:
   - CEL-TEC MP-01:
       * http://www.kabelmanie.cz/miniprojektor-cel-tec-mp-01/
 
+  - Royaltek PJU-2100:
+      * http://www.royaltek.com/index.php/pju-2100-pico-projector
+
   - Other unbranded projectors:
       * http://www.dealextreme.com/p/portable-home-office-mini-usb-2-0-lcos-projector-16-9-45019
 
