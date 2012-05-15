@@ -5,6 +5,31 @@
 libam7xxx uses the linux kernel coding style:
 http://kernel.org/doc/Documentation/CodingStyle
 
+=== Getting and compiling libam7xxx
+
+libam7xxx depends on 'libusb-1.0' and optionally on 'libav' or 'ffmpeg' for
+its example programs, the build system used is 'cmake'.
+
+On a Debian based system, the dependencies can be installed with this command:
+
+  $ sudo aptitude install cmake \
+                          libusb-1.0-0-dev \
+                          libavformat-dev \
+                          libavcodec-dev \
+                          libavdevice-dev \
+                          libswscale-dev
+
+The library and the example programs can be compiled following these steps:
+
+  $ git clone git://git.ao2.it/libam7xxx.git
+  $ cd libam7xxx
+  $ mkdir build
+  $ cd build
+  $ cmake ../
+  $ make
+
+After that the example programs can be found in the +bin/+ subdirectory.
+
 === Debug builds
 
 The suggested way to hack on the project is:
