@@ -199,8 +199,10 @@ static int video_output_init(struct video_output_ctx *output_ctx,
 	output_codec_ctx->bit_rate   = (input_ctx->codec_ctx)->bit_rate;
 	output_codec_ctx->width      = new_output_width;
 	output_codec_ctx->height     = new_output_height;
-	output_codec_ctx->time_base.num  = (input_ctx->codec_ctx)->time_base.num;
-	output_codec_ctx->time_base.den  = (input_ctx->codec_ctx)->time_base.den;
+	output_codec_ctx->time_base.num  =
+		(input_ctx->format_ctx)->streams[input_ctx->video_stream_index]->time_base.num;
+	output_codec_ctx->time_base.den  =
+		(input_ctx->format_ctx)->streams[input_ctx->video_stream_index]->time_base.den;
 
 	/* When the raw format is requested we don't actually need to setup
 	 * and open a decoder
