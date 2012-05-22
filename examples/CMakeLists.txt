@@ -32,6 +32,13 @@ if(BUILD_AM7XXX-PLAY)
   include_directories(${FFMPEG_LIBAVFORMAT_INCLUDE_DIRS})
   include_directories(${FFMPEG_LIBSWSCALE_INCLUDE_DIRS})
 
+  set(CMAKE_REQUIRED_DEFINITIONS -D_POSIX_SOURCE)
+  check_symbol_exists(sigaction "signal.h" HAVE_SIGACTION)
+  if (HAVE_SIGACTION)
+    add_definitions("-DHAVE_SIGACTION")
+  endif()
+  set(CMAKE_REQUIRED_DEFINITIONS)
+
   # xcb is used to retrieve the full screen dimensions when using x11grab
   # as input format
   find_package(XCB)

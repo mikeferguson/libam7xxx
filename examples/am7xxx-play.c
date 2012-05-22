@@ -539,6 +539,7 @@ static void unset_run(int signo)
 	run = 0;
 }
 
+#ifdef HAVE_SIGACTION
 static int set_signal_handler(void (*signal_handler)(int))
 {
 	struct sigaction new_action;
@@ -566,6 +567,15 @@ static int set_signal_handler(void (*signal_handler)(int))
 out:
 	return ret;
 }
+#else
+static int set_signal_handler(void (*signal_handler)(int))
+{
+	(void)signal_handler;
+	fprintf(stderr, "set_signal_handler() not implemented, sigaction not available\n");
+	return 0;
+}
+#endif
+
 
 static void usage(char *name)
 {
