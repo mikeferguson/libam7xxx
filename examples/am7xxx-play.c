@@ -632,6 +632,7 @@ int main(int argc, char *argv[])
 			input_path = strdup(optarg);
 			break;
 		case 'o':
+#ifdef HAVE_STRTOK_R
 			/*
 			 * parse suboptions, the expected format is something
 			 * like:
@@ -648,6 +649,9 @@ int main(int argc, char *argv[])
 				av_dict_set(&options, subopt_name, subopt_value, 0);
 			}
 			free(subopts_saved);
+#else
+			fprintf(stderr, "Option '-o' not implemented\n");
+#endif
 			break;
 		case 's':
 			rescale_method = atoi(optarg);

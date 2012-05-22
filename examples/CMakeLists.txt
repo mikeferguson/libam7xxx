@@ -37,6 +37,11 @@ if(BUILD_AM7XXX-PLAY)
   if (HAVE_SIGACTION)
     add_definitions("-DHAVE_SIGACTION")
   endif()
+
+  check_symbol_exists(strtok_r "string.h" HAVE_STRTOK_R)
+  if (HAVE_STRTOK_R)
+    add_definitions("-DHAVE_STRTOK_R")
+  endif()
   set(CMAKE_REQUIRED_DEFINITIONS)
 
   # xcb is used to retrieve the full screen dimensions when using x11grab
