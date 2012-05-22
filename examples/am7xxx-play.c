@@ -35,6 +35,13 @@
 
 #include <am7xxx.h>
 
+/* On some systems ENOTSUP is not defined, fallback to its value on
+ * linux which is equal to EOPNOTSUPP which is 95
+ */
+#ifndef ENOTSUP
+#define ENOTSUP 95
+#endif
+
 static unsigned int run = 1;
 
 struct video_input_ctx {
