@@ -64,6 +64,9 @@ Examples of devices based on AM7XXX are:
 
   - Royaltek PJU-2100:
       * http://www.royaltek.com/index.php/pju-2100-pico-projector
+  
+  - Aiptek PocketCinema T25:
+      * http://www.aiptek.eu/index.php/en/products/pico-projectors/pocketcinema-t25
 
   - Other unbranded projectors:
       * http://www.dealextreme.com/p/portable-home-office-mini-usb-2-0-lcos-projector-16-9-45019
