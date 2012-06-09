@@ -82,6 +82,11 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.product_id = 0x5501,
 	},
 	{
+		.name       ="Aiptek PocketCinema T25",
+		.vendor_id  = 0x08ca,
+		.product_id = 0x2144,
+	},
+	{
 		.name       = "Philips/Sagemcom PicoPix 1020",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
