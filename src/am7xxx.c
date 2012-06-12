@@ -156,9 +156,13 @@ struct am7xxx_power_header {
  * 04 00 00 00 00 0c ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
  */
 
+/* Direction of the communication from the host point of view */
+#define AM7XXX_DIRECTION_OUT 0 /* host -> device */
+#define AM7XXX_DIRECTION_IN  1 /* host <- device */
+
 struct am7xxx_header {
 	uint32_t packet_type;
-	uint8_t unknown0;
+	uint8_t direction;
 	uint8_t header_data_len;
 	uint8_t unknown2;
 	uint8_t unknown3;
@@ -214,7 +218,7 @@ static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 
 	debug(ctx, "BEGIN\n");
 	debug(ctx, "packet_type:     0x%08x (%u)\n", h->packet_type, h->packet_type);
-	debug(ctx, "unknown0:        0x%02hhx (%hhu)\n", h->unknown0, h->unknown0);
+	debug(ctx, "direction:       0x%02hhx (%hhu)\n", h->direction, h->direction);
 	debug(ctx, "header_data_len: 0x%02hhx (%hhu)\n", h->header_data_len, h->header_data_len);
 	debug(ctx, "unknown2:        0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
 	debug(ctx, "unknown3:        0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
@@ -319,7 +323,7 @@ static void serialize_header(struct am7xxx_header *h, uint8_t *buffer)
 	uint8_t **buffer_iterator = &buffer;
 
 	put_le32(h->packet_type, buffer_iterator);
-	put_8(h->unknown0, buffer_iterator);
+	put_8(h->direction, buffer_iterator);
 	put_8(h->header_data_len, buffer_iterator);
 	put_8(h->unknown2, buffer_iterator);
 	put_8(h->unknown3, buffer_iterator);
@@ -334,7 +338,7 @@ static void unserialize_header(uint8_t *buffer, struct am7xxx_header *h)
 	uint8_t **buffer_iterator = &buffer;
 
 	h->packet_type = get_le32(buffer_iterator);
-	h->unknown0 = get_8(buffer_iterator);
+	h->direction = get_8(buffer_iterator);
 	h->header_data_len = get_8(buffer_iterator);
 	h->unknown2 = get_8(buffer_iterator);
 	h->unknown3 = get_8(buffer_iterator);
@@ -356,7 +360,13 @@ static int read_header(am7xxx_device *dev, struct am7xxx_header *h)
 
 	debug_dump_header(dev->ctx, h);
 
-	ret = 0;
+	if (h->direction == AM7XXX_DIRECTION_IN) {
+		ret = 0;
+	} else {
+		error(dev->ctx,
+		      "Received a packet with direction AM7XXX_DIRECTION_OUT, weird!\n");
+		ret = -EINVAL;
+	}
 
 out:
 	return ret;
@@ -685,7 +695,7 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 	int ret;
 	struct am7xxx_header h = {
 		.packet_type     = AM7XXX_PACKET_TYPE_DEVINFO,
-		.unknown0        = 0x00,
+		.direction       = AM7XXX_DIRECTION_OUT,
 		.header_data_len = 0x00,
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
@@ -790,7 +800,7 @@ AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 	int ret;
 	struct am7xxx_header h = {
 		.packet_type     = AM7XXX_PACKET_TYPE_IMAGE,
-		.unknown0        = 0x00,
+		.direction       = AM7XXX_DIRECTION_OUT,
 		.header_data_len = sizeof(struct am7xxx_image_header),
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
@@ -821,7 +831,7 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 	int ret;
 	struct am7xxx_header h = {
 		.packet_type     = AM7XXX_PACKET_TYPE_POWER,
-		.unknown0        = 0x00,
+		.direction       = AM7XXX_DIRECTION_OUT,
 		.header_data_len = sizeof(struct am7xxx_power_header),
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
