@@ -37,8 +37,8 @@ OPTIONS
 *-l* '<log level>'::
     the verbosity level of libam7xxx output (0-5)
 
-*-p* '<power level>'::
-    power level of device, between 0 (off) and 4 (maximum) +
+*-p* '<power mode>'::
+    the power mode of device, between 0 (off) and 4 (turbo) +
     WARNING: Level 2 and greater require the master AND
              the slave connector to be plugged in.
 
