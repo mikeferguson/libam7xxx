@@ -846,7 +846,7 @@ AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 	return send_data(dev, image, image_size);
 }
 
-AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
+AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode power)
 {
 	int ret;
 	struct am7xxx_header h = {
@@ -857,7 +857,7 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		.unknown3        = 0x10,
 	};
 
-	switch(mode) {
+	switch(power) {
 	case AM7XXX_POWER_OFF:
 		h.header_data.power.bit2 = 0;
 		h.header_data.power.bit1 = 0;
@@ -889,7 +889,7 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		break;
 
 	default:
-		error(dev->ctx, "Power mode not supported!\n");
+		error(dev->ctx, "Unsupported power mode.\n");
 		return -EINVAL;
 	};
 
