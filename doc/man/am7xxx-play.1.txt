@@ -58,6 +58,9 @@ EXAMPLE:
     WARNING: Level 2 and greater require the master AND
              the slave connector to be plugged in.
 
+*-z* '<zoom mode>'::
+    the display zoom mode, between 0 (original) and 3 (test)
+
 *-h*::
     this help message
 
