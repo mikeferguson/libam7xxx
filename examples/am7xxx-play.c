@@ -594,8 +594,10 @@ static void usage(char *name)
 	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-q <quality>\t\tquality of jpeg sent to the device, between 1 and 100\n");
 	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
-	printf("\t-p <power level>\tpower level of device, between %x (off) and %x (maximum)\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
-	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n\t\t\t\t\t the slave connector to be plugged in.\n");
+	printf("\t-p <power mode>\t\tthe power mode of device, between %d (off) and %d (turbo)\n",
+	       AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n");
+	printf("\t\t\t\t         the slave connector to be plugged in.\n");
 	printf("\t-z <zoom mode>\t\tthe display zoom mode, between %d (original) and %d (test)\n",
 	       AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
 	printf("\t-h \t\t\tthis help message\n");
@@ -718,10 +720,11 @@ int main(int argc, char *argv[])
 			case AM7XXX_POWER_MIDDLE:
 			case AM7XXX_POWER_HIGH:
 			case AM7XXX_POWER_TURBO:
-				fprintf(stdout, "Power mode: %x\n", power_mode);
+				fprintf(stdout, "Power mode: %d\n", power_mode);
 				break;
 			default:
-				fprintf(stderr, "Invalid power mode value, must be between %x and %x\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+				fprintf(stderr, "Invalid power mode value, must be between %d and %d\n",
+					AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
 				ret = -EINVAL;
 				goto out;
 			}
