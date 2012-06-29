@@ -1,0 +1,3 @@
+# Example rules to show how to run a program when the device is plugged in or out
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1de1", ATTRS{idProduct}=="c101", MODE="0660", GROUP="plugdev", RUN+="am7xxx-autodisplay.sh start"
+ACTION=="remove", SUBSYSTEM=="usb", ENV{ID_VENDOR_ID}=="1de1", ENV{ID_MODEL_ID}=="c101", RUN+="am7xxx-autodisplay.sh stop"
