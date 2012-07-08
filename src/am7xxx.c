@@ -848,6 +848,7 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		h.header_data.power.bit2 = 0;
 		h.header_data.power.bit1 = 0;
 		h.header_data.power.bit0 = 1;
+		break;
 
 	case AM7XXX_POWER_MIDDLE:
 		h.header_data.power.bit2 = 0;
