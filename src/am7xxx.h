@@ -105,6 +105,24 @@ typedef enum {
 } am7xxx_power_mode;
 
 /**
+ * The display zoom modes.
+ *
+ * An am7xxx device can display images using several zoom modes.
+ *
+ * @note Changing the zoom mode can change the aspect ratio of the displayed
+ * image.
+ *
+ * @note On the zoom test screen the version of the firmware running on the
+ * device is shown as well (e.g SPI_V21.0.0_2011.03.18).
+ */
+typedef enum {
+	AM7XXX_ZOOM_ORIGINAL = 0, /**< Original Size, as retrieved via #am7xxx_device_info. */
+	AM7XXX_ZOOM_H        = 1, /**< Zoom 1: H Scale (changes aspect ratio). */
+	AM7XXX_ZOOM_H_V      = 2, /**< Zoom 2: H/V Scale (changes aspect ratio). */
+	AM7XXX_ZOOM_TEST     = 3, /**< Zoom test screen, the firmware version is shown as well. */
+} am7xxx_zoom_mode;
+
+/**
  * Initialize the library context and data structures, and scan for devices.
  *
  * @param[out] ctx A pointer to the context the library will be used in.
@@ -226,17 +244,38 @@ int am7xxx_send_image(am7xxx_device *dev,
 /**
  * Set the power mode of an am7xxx device.
  *
- * \note If we set the mode to AM7XXX_POWER_OFF we can't turn the
- * display on again by using only am7xxx_set_power_mode(). This needs to be
- * investigated, maybe some other command can reset the device.
+ * @note When setting the mode to AM7XXX_POWER_OFF the display can't be turned
+ * on again by using only am7xxx_set_power_mode(), am7xxx_set_zoom_mode() has
+ * to be called first, the current guess is that the latter performs some
+ * other resets beside setting the zoom mode.
  *
- * @param[in] dev A pointer to the structure representing the device to get info of
- * @param[in] mode The power mode to put the device in (see @link am7xxx_power_mode @endlink enum)
+ * @param[in] dev A pointer to the structure representing the device to set power mode to
+ * @param[in] power The power mode to put the device in (see #am7xxx_power_mode enum)
  *
  * @return 0 on success, a negative value on error
  *
  */
-int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode);
+int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode power);
+
+/**
+ * Set the zoom mode of an am7xxx device.
+ *
+ * @note When setting the mode to AM7XXX_ZOOM_TEST, the calling program might
+ * want to skip displaying actual images.
+ *
+ * @note It looks like that power mode and zoom mode are related somehow wrt.
+ * resetting the operational mode after AM7XXX_POWER_OFF, applications can
+ * restore the display properly using this combination:
+ *  - Off: power mode 0, zoom mode 3
+ *  - On: power mode != 0, zoom mode != 3
+ *
+ * @param[in] dev A pointer to the structure representing the device to set zoom mode to
+ * @param[in] zoom The zoom mode to put the device in (see #am7xxx_zoom_mode enum)
+ *
+ * @return 0 on success, a negative value on error
+ *
+ */
+int am7xxx_set_zoom_mode(am7xxx_device *dev, am7xxx_zoom_mode zoom);
 
 #ifdef __cplusplus
 }

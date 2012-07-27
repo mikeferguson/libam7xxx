@@ -116,7 +116,7 @@ typedef enum {
 	AM7XXX_PACKET_TYPE_DEVINFO = 0x01,
 	AM7XXX_PACKET_TYPE_IMAGE   = 0x02,
 	AM7XXX_PACKET_TYPE_POWER   = 0x04,
-	AM7XXX_PACKET_TYPE_UNKNOWN = 0x05,
+	AM7XXX_PACKET_TYPE_ZOOM    = 0x05,
 } am7xxx_packet_type;
 
 struct am7xxx_generic_header {
@@ -146,6 +146,11 @@ struct am7xxx_power_header {
 	uint32_t bit0;
 };
 
+struct am7xxx_zoom_header {
+	uint32_t bit1;
+	uint32_t bit0;
+};
+
 /*
  * Examples of packet headers:
  *
@@ -171,6 +176,7 @@ struct am7xxx_header {
 		struct am7xxx_devinfo_header devinfo;
 		struct am7xxx_image_header image;
 		struct am7xxx_power_header power;
+		struct am7xxx_zoom_header zoom;
 	} header_data;
 };
 
@@ -211,6 +217,16 @@ static void debug_dump_power_header(am7xxx_context *ctx, struct am7xxx_power_hea
 	debug(ctx, "\tbit0: 0x%08x (%u)\n", p->bit0, p->bit0);
 }
 
+static void debug_dump_zoom_header(am7xxx_context *ctx, struct am7xxx_zoom_header *z)
+{
+	if (ctx == NULL || z == NULL)
+		return;
+
+	debug(ctx, "Zoom header:\n");
+	debug(ctx, "\tbit1: 0x%08x (%u)\n", z->bit1, z->bit1);
+	debug(ctx, "\tbit0: 0x%08x (%u)\n", z->bit0, z->bit0);
+}
+
 static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 {
 	if (ctx == NULL || h == NULL)
@@ -234,6 +250,10 @@ static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 
 	case AM7XXX_PACKET_TYPE_POWER:
 		debug_dump_power_header(ctx, &(h->header_data.power));
+		break;
+
+	case AM7XXX_PACKET_TYPE_ZOOM:
+		debug_dump_zoom_header(ctx, &(h->header_data.zoom));
 		break;
 
 	default:
@@ -826,7 +846,7 @@ AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 	return send_data(dev, image, image_size);
 }
 
-AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
+AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode power)
 {
 	int ret;
 	struct am7xxx_header h = {
@@ -837,7 +857,7 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		.unknown3        = 0x10,
 	};
 
-	switch(mode) {
+	switch(power) {
 	case AM7XXX_POWER_OFF:
 		h.header_data.power.bit2 = 0;
 		h.header_data.power.bit1 = 0;
@@ -869,7 +889,51 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		break;
 
 	default:
-		error(dev->ctx, "Power mode not supported!\n");
+		error(dev->ctx, "Unsupported power mode.\n");
+		return -EINVAL;
+	};
+
+	ret = send_header(dev, &h);
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+
+AM7XXX_PUBLIC int am7xxx_set_zoom_mode(am7xxx_device *dev, am7xxx_zoom_mode zoom)
+{
+	int ret;
+	struct am7xxx_header h = {
+		.packet_type     = AM7XXX_PACKET_TYPE_ZOOM,
+		.direction       = AM7XXX_DIRECTION_OUT,
+		.header_data_len = sizeof(struct am7xxx_zoom_header),
+		.unknown2        = 0x3e,
+		.unknown3        = 0x10,
+	};
+
+	switch(zoom) {
+	case AM7XXX_ZOOM_ORIGINAL:
+		h.header_data.zoom.bit1 = 0;
+		h.header_data.zoom.bit0 = 0;
+		break;
+
+	case AM7XXX_ZOOM_H:
+		h.header_data.zoom.bit1 = 0;
+		h.header_data.zoom.bit0 = 1;
+		break;
+
+	case AM7XXX_ZOOM_H_V:
+		h.header_data.zoom.bit1 = 1;
+		h.header_data.zoom.bit0 = 0;
+		break;
+
+	case AM7XXX_ZOOM_TEST:
+		h.header_data.zoom.bit1 = 1;
+		h.header_data.zoom.bit0 = 1;
+		break;
+
+	default:
+		error(dev->ctx, "Unsupported zoom mode.\n");
 		return -EINVAL;
 	};
 
