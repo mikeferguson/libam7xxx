@@ -35,6 +35,7 @@ static void usage(char *name)
 {
 	printf("usage: %s [OPTIONS]\n\n", name);
 	printf("OPTIONS:\n");
+	printf("\t-d <index>\t\tthe device index (default is 0)\n");
 	printf("\t-f <filename>\t\tthe image file to upload\n");
 	printf("\t-F <format>\t\tthe image format to use (default is JPEG)\n");
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
@@ -66,6 +67,7 @@ int main(int argc, char *argv[])
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 	int log_level = AM7XXX_LOG_INFO;
+	int device_index = 0;
 	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
 	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
@@ -75,8 +77,15 @@ int main(int argc, char *argv[])
 	unsigned int size;
 	am7xxx_device_info device_info;
 
-	while ((opt = getopt(argc, argv, "f:F:l:p:z:W:H:h")) != -1) {
+	while ((opt = getopt(argc, argv, "d:f:F:l:p:z:W:H:h")) != -1) {
 		switch (opt) {
+		case 'd':
+			device_index = atoi(optarg);
+			if (device_index < 0) {
+				fprintf(stderr, "Unsupported device index\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
 		case 'f':
 			if (filename[0] != '\0')
 				fprintf(stderr, "Warning: image file already specified\n");
@@ -220,7 +229,7 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-	ret = am7xxx_open_device(ctx, &dev, 0);
+	ret = am7xxx_open_device(ctx, &dev, device_index);
 	if (ret < 0) {
 		perror("am7xxx_open_device");
 		exit_code = EXIT_FAILURE;

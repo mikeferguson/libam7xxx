@@ -21,6 +21,10 @@ decode the input, encode it to jpeg and display it with libam7xxx.
 
 OPTIONS
 -------
+
+*-d* '<index>'::
+    the device index (default is 0)
+
 *-f* '<input format>'::
     the input device format
 

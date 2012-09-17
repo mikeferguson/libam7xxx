@@ -581,6 +581,7 @@ static void usage(char *name)
 {
 	printf("usage: %s [OPTIONS]\n\n", name);
 	printf("OPTIONS:\n");
+	printf("\t-d <index>\t\tthe device index (default is 0)\n");
 	printf("\t-f <input format>\tthe input device format\n");
 	printf("\t-i <input path>\t\tthe input path\n");
 	printf("\t-o <options>\t\ta comma separated list of input format options\n");
@@ -622,14 +623,23 @@ int main(int argc, char *argv[])
 	unsigned int upscale = 0;
 	unsigned int quality = 95;
 	int log_level = AM7XXX_LOG_INFO;
+	int device_index = 0;
 	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
 	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 
-	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:l:p:z:h")) != -1) {
+	while ((opt = getopt(argc, argv, "d:f:i:o:s:uF:q:l:p:z:h")) != -1) {
 		switch (opt) {
+		case 'd':
+			device_index = atoi(optarg);
+			if (device_index < 0) {
+				fprintf(stderr, "Unsupported device index\n");
+				ret = -EINVAL;
+				goto out;
+			}
+			break;
 		case 'f':
 			input_format_string = strdup(optarg);
 			break;
@@ -797,7 +807,7 @@ int main(int argc, char *argv[])
 
 	am7xxx_set_log_level(ctx, log_level);
 
-	ret = am7xxx_open_device(ctx, &dev, 0);
+	ret = am7xxx_open_device(ctx, &dev, device_index);
 	if (ret < 0) {
 		perror("am7xxx_open_device");
 		goto cleanup;

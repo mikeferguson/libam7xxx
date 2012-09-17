@@ -23,6 +23,9 @@ larger than the device native resolution can be wrongly displayed.
 OPTIONS
 -------
 
+*-d* '<index>'::
+    the device index (default is 0)
+
 *-f* '<filename>'::
     the image file to upload
 
