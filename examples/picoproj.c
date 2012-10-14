@@ -260,8 +260,10 @@ int main(int argc, char *argv[])
 	}
 
 	/* When setting AM7XXX_ZOOM_TEST don't display the actual image */
-	if (zoom == AM7XXX_ZOOM_TEST)
+	if (zoom == AM7XXX_ZOOM_TEST) {
+		printf("AM7XXX_ZOOM_TEST requested, not sending actual image.\n");
 		goto cleanup;
+	}
 
 
 	if ((unsigned int)width > device_info.native_width ||
