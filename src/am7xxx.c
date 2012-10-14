@@ -91,6 +91,11 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
 	},
+	{
+		.name       = "Philips/Sagemcom PicoPix 2055",
+		.vendor_id  = 0x21e7,
+		.product_id = 0x0016,
+	},
 };
 
 /* The header size on the wire is known to be always 24 bytes, regardless of

@@ -24,6 +24,7 @@ Check @link am7xxx.h @endlink for the public API documentation.
 - Acer C112
 - Aiptek PocketCinema T25
 - Philips/SagemCom PicoPix 1020
+- Philips/SagemCom PicoPix 2055
 
 @section libam7xxxDesignOverview Design Overview
 

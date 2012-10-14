@@ -55,7 +55,7 @@ Examples of devices based on AM7XXX are:
       * http://support.acer.com/product/default.aspx?modelId=3888
 
   - Philips/SagemCom PicoPix projectors (PPX 1020, PPX 1230, PPX 1430, PPX
-    1630):
+    1630, PPX 2055):
       * http://www.philips.co.uk/c/pocket-projector/179840/cat/
       * http://www.sagemcom.com/EN/products/image-sound/pico-video-projectors.html
 
