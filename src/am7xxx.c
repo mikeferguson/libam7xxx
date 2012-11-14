@@ -453,8 +453,6 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 		return NULL;
 	}
 
-	devices_list = &(ctx->devices_list);
-
 	new_device = malloc(sizeof(*new_device));
 	if (new_device == NULL) {
 		fatal("cannot allocate a new device (%s)\n", strerror(errno));
@@ -463,6 +461,8 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 	memset(new_device, 0, sizeof(*new_device));
 
 	new_device->ctx = ctx;
+
+	devices_list = &(ctx->devices_list);
 
 	if (*devices_list == NULL) {
 		*devices_list = new_device;
