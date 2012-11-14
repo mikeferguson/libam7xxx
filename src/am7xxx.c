@@ -239,7 +239,10 @@ static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 
 	debug(ctx, "BEGIN\n");
 	debug(ctx, "packet_type:     0x%08x (%u)\n", h->packet_type, h->packet_type);
-	debug(ctx, "direction:       0x%02hhx (%hhu)\n", h->direction, h->direction);
+	debug(ctx, "direction:       0x%02hhx (%hhu) (%s)\n", h->direction, h->direction,
+	      h->direction == AM7XXX_DIRECTION_IN ? "IN" :
+	      h->direction == AM7XXX_DIRECTION_OUT ? "OUT" :
+	      "UNKNOWN");
 	debug(ctx, "header_data_len: 0x%02hhx (%hhu)\n", h->header_data_len, h->header_data_len);
 	debug(ctx, "unknown2:        0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
 	debug(ctx, "unknown3:        0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
