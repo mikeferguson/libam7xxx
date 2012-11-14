@@ -109,6 +109,7 @@ struct _am7xxx_device {
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
 	am7xxx_device_info *device_info;
 	am7xxx_context *ctx;
+	const struct am7xxx_usb_device_descriptor *desc;
 	am7xxx_device *next;
 };
 
@@ -451,7 +452,8 @@ static void log_message(am7xxx_context *ctx,
 	return;
 }
 
-static am7xxx_device *add_new_device(am7xxx_context *ctx)
+static am7xxx_device *add_new_device(am7xxx_context *ctx,
+				     const struct am7xxx_usb_device_descriptor *desc)
 {
 	am7xxx_device **devices_list;
 	am7xxx_device *new_device;
@@ -469,6 +471,7 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 	memset(new_device, 0, sizeof(*new_device));
 
 	new_device->ctx = ctx;
+	new_device->desc = desc;
 
 	devices_list = &(ctx->devices_list);
 
@@ -565,7 +568,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 					info(ctx, "am7xxx device found, index: %d, name: %s\n",
 					     current_index,
 					     supported_devices[j].name);
-					new_device = add_new_device(ctx);
+					new_device = add_new_device(ctx, &supported_devices[j]);
 					if (new_device == NULL) {
 						/* XXX, the caller may want
 						 * to call am7xxx_shutdown() if
