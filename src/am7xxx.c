@@ -390,7 +390,8 @@ static int read_header(am7xxx_device *dev, struct am7xxx_header *h)
 		ret = 0;
 	} else {
 		error(dev->ctx,
-		      "Received a packet with direction AM7XXX_DIRECTION_OUT, weird!\n");
+		      "Expected an AM7XXX_DIRECTION_IN packet, got one with direction = %d. Weird!\n",
+		      h->direction);
 		ret = -EINVAL;
 	}
 
