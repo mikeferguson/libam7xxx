@@ -386,8 +386,6 @@ static int read_header(am7xxx_device *dev, struct am7xxx_header *h)
 
 	unserialize_header(dev->buffer, h);
 
-	debug_dump_header(dev->ctx, h);
-
 	if (h->direction == AM7XXX_DIRECTION_IN) {
 		ret = 0;
 	} else {
@@ -395,6 +393,8 @@ static int read_header(am7xxx_device *dev, struct am7xxx_header *h)
 		      "Received a packet with direction AM7XXX_DIRECTION_OUT, weird!\n");
 		ret = -EINVAL;
 	}
+
+	debug_dump_header(dev->ctx, h);
 
 out:
 	return ret;
@@ -406,7 +406,13 @@ static int send_header(am7xxx_device *dev, struct am7xxx_header *h)
 
 	debug_dump_header(dev->ctx, h);
 
+	/* For symmetry with read_header() we should check here for
+	 * h->direction == AM7XXX_DIRECTION_OUT but we just ensure that in all
+	 * the callers and save some cycles here.
+	 */
+
 	serialize_header(h, dev->buffer);
+
 	ret = send_data(dev, dev->buffer, AM7XXX_HEADER_WIRE_SIZE);
 	if (ret < 0)
 		error(dev->ctx, "failed to send data\n");
