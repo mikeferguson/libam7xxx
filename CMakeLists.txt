@@ -48,7 +48,6 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Winit-self
     -Winline
     -Wpacked
-    -Wp,-D_FORTIFY_SOURCE=2
     -Wpointer-arith
     -Wlarger-than-65500
     -Wmissing-declarations
@@ -68,13 +67,13 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Wwrite-strings
     -fstack-protector
     --param=ssp-buffer-size=4)
-endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb -DDEBUG=1")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+  add_flags(DEBUG_FLAGS
+    -ggdb)
 
-if (CMAKE_COMPILER_IS_GNUCC)
+  add_flags(RELEASE_FLAGS
+    -Wp,-D_FORTIFY_SOURCE=2)
+
   if (STRICT_COMPILATION_CHECKS)
     add_flags(STRICT_FLAGS
       -Werror
@@ -83,11 +82,12 @@ if (CMAKE_COMPILER_IS_GNUCC)
       # NOTE: GCC >= 4.6 is needed for -Wunused-but-set-variable
       -Wunused-but-set-variable)
 
-    add_flags(CMAKE_C_FLAGS_DEBUG ${STRICT_FLAGS})
-    add_flags(CMAKE_C_FLAGS_RELEASE ${STRICT_FLAGS})
-    add_flags(CMAKE_C_FLAGS_RELWITHDEBINFO ${STRICT_FLAGS})
   endif()
 endif()
+
+set(CMAKE_C_FLAGS_DEBUG "-O0 ${DEBUG_FLAGS} ${STRICT_FLAGS}")
+set(CMAKE_C_FLAGS_RELEASE "-O2 ${RELEASE_FLAGS} ${STRICT_FLAGS}")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 ${RELEASE_FLAGS} ${DEBUG_FLAGS} ${STRICT_FLAGS}")
 
 # Add library project
 add_subdirectory(src)
