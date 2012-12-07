@@ -107,6 +107,7 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 struct _am7xxx_device {
 	libusb_device_handle *usb_device;
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
+	am7xxx_device_info *device_info;
 	am7xxx_context *ctx;
 	am7xxx_device *next;
 };
@@ -674,6 +675,7 @@ AM7XXX_PUBLIC void am7xxx_shutdown(am7xxx_context *ctx)
 	while (current) {
 		am7xxx_device *next = current->next;
 		am7xxx_close_device(current);
+		free(current->device_info);
 		free(current);
 		current = next;
 	}
@@ -744,6 +746,11 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 		},
 	};
 
+	if (dev->device_info) {
+		memcpy(device_info, dev->device_info, sizeof(*device_info));
+		return 0;
+	}
+
 	ret = send_header(dev, &h);
 	if (ret < 0)
 		return ret;
@@ -759,12 +766,20 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 		return -ENOTSUP;
 	}
 
-	device_info->native_width = h.header_data.devinfo.native_width;
-	device_info->native_height = h.header_data.devinfo.native_height;
+	dev->device_info = malloc(sizeof(*dev->device_info));
+	if (dev->device_info == NULL) {
+		error(dev->ctx, "cannot allocate a device info (%s)\n",
+		       strerror(errno));
+		return -ENOMEM;
+	}
+	memset(dev->device_info, 0, sizeof(*dev->device_info));
+
+	dev->device_info->native_width = h.header_data.devinfo.native_width;
+	dev->device_info->native_height = h.header_data.devinfo.native_height;
 #if 0
 	/* No reason to expose these in the public API until we know what they mean */
-	device_info->unknown0 = h.header_data.devinfo.unknown0;
-	device_info->unknown1 = h.header_data.devinfo.unknown1;
+	dev->device_info->unknown0 = h.header_data.devinfo.unknown0;
+	dev->device_info->unknown1 = h.header_data.devinfo.unknown1;
 #endif
 
 	return 0;
