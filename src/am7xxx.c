@@ -752,6 +752,13 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 	if (ret < 0)
 		return ret;
 
+	if (h.packet_type != AM7XXX_PACKET_TYPE_DEVINFO) {
+		error(dev->ctx, "expected packet type: %d, got %d instead!\n",
+		      AM7XXX_PACKET_TYPE_DEVINFO, h.packet_type);
+		errno = ENOTSUP;
+		return -ENOTSUP;
+	}
+
 	device_info->native_width = h.header_data.devinfo.native_width;
 	device_info->native_height = h.header_data.devinfo.native_height;
 #if 0
