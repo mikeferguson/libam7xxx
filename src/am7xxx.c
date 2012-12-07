@@ -703,12 +703,28 @@ AM7XXX_PUBLIC int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
 	ret = scan_devices(ctx, SCAN_OP_OPEN_DEVICE, device_index, dev);
 	if (ret < 0) {
 		errno = ENODEV;
+		goto out;
 	} else if (ret > 0) {
 		warning(ctx, "device %d already open\n", device_index);
 		errno = EBUSY;
 		ret = -EBUSY;
+		goto out;
 	}
 
+	/* Philips/Sagemcom PicoPix projectors require that the DEVINFO packet
+	 * is the first one to be sent to the device in order for it to
+	 * successfully return the correct device information.
+	 *
+	 * So, if there is not a cached version of it (from a previous open),
+	 * we ask for device info at open time,
+	 */
+	if ((*dev)->device_info == NULL) {
+		ret = am7xxx_get_device_info(*dev, NULL);
+		if (ret < 0)
+			error(ctx, "cannot get device info\n");
+	}
+
+out:
 	return ret;
 }
 
