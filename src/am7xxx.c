@@ -107,6 +107,7 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 struct _am7xxx_device {
 	libusb_device_handle *usb_device;
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
+	am7xxx_device_info *device_info;
 	am7xxx_context *ctx;
 	am7xxx_device *next;
 };
@@ -674,6 +675,7 @@ AM7XXX_PUBLIC void am7xxx_shutdown(am7xxx_context *ctx)
 	while (current) {
 		am7xxx_device *next = current->next;
 		am7xxx_close_device(current);
+		free(current->device_info);
 		free(current);
 		current = next;
 	}
@@ -701,12 +703,28 @@ AM7XXX_PUBLIC int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
 	ret = scan_devices(ctx, SCAN_OP_OPEN_DEVICE, device_index, dev);
 	if (ret < 0) {
 		errno = ENODEV;
+		goto out;
 	} else if (ret > 0) {
 		warning(ctx, "device %d already open\n", device_index);
 		errno = EBUSY;
 		ret = -EBUSY;
+		goto out;
 	}
 
+	/* Philips/Sagemcom PicoPix projectors require that the DEVINFO packet
+	 * is the first one to be sent to the device in order for it to
+	 * successfully return the correct device information.
+	 *
+	 * So, if there is not a cached version of it (from a previous open),
+	 * we ask for device info at open time,
+	 */
+	if ((*dev)->device_info == NULL) {
+		ret = am7xxx_get_device_info(*dev, NULL);
+		if (ret < 0)
+			error(ctx, "cannot get device info\n");
+	}
+
+out:
 	return ret;
 }
 
@@ -744,6 +762,11 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 		},
 	};
 
+	if (dev->device_info) {
+		memcpy(device_info, dev->device_info, sizeof(*device_info));
+		return 0;
+	}
+
 	ret = send_header(dev, &h);
 	if (ret < 0)
 		return ret;
@@ -752,12 +775,27 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 	if (ret < 0)
 		return ret;
 
-	device_info->native_width = h.header_data.devinfo.native_width;
-	device_info->native_height = h.header_data.devinfo.native_height;
+	if (h.packet_type != AM7XXX_PACKET_TYPE_DEVINFO) {
+		error(dev->ctx, "expected packet type: %d, got %d instead!\n",
+		      AM7XXX_PACKET_TYPE_DEVINFO, h.packet_type);
+		errno = ENOTSUP;
+		return -ENOTSUP;
+	}
+
+	dev->device_info = malloc(sizeof(*dev->device_info));
+	if (dev->device_info == NULL) {
+		error(dev->ctx, "cannot allocate a device info (%s)\n",
+		       strerror(errno));
+		return -ENOMEM;
+	}
+	memset(dev->device_info, 0, sizeof(*dev->device_info));
+
+	dev->device_info->native_width = h.header_data.devinfo.native_width;
+	dev->device_info->native_height = h.header_data.devinfo.native_height;
 #if 0
 	/* No reason to expose these in the public API until we know what they mean */
-	device_info->unknown0 = h.header_data.devinfo.unknown0;
-	device_info->unknown1 = h.header_data.devinfo.unknown1;
+	dev->device_info->unknown0 = h.header_data.devinfo.unknown0;
+	dev->device_info->unknown1 = h.header_data.devinfo.unknown1;
 #endif
 
 	return 0;
