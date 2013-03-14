@@ -286,7 +286,7 @@ static int am7xxx_play(const char *input_format_string,
 	uint8_t *out_buf;
 	int out_picture_size;
 	struct SwsContext *sw_scale_ctx;
-	AVPacket packet;
+	AVPacket in_packet;
 	int got_picture;
 	int ret = 0;
 
@@ -353,7 +353,7 @@ static int am7xxx_play(const char *input_format_string,
 
 	while (run) {
 		/* read packet */
-		ret = av_read_frame(input_ctx.format_ctx, &packet);
+		ret = av_read_frame(input_ctx.format_ctx, &in_packet);
 		if (ret < 0) {
 			if (ret == (int)AVERROR_EOF || input_ctx.format_ctx->pb->eof_reached)
 				ret = 0;
@@ -363,7 +363,7 @@ static int am7xxx_play(const char *input_format_string,
 			goto end_while;
 		}
 
-		if (packet.stream_index != input_ctx.video_stream_index) {
+		if (in_packet.stream_index != input_ctx.video_stream_index) {
 			/* that is more or less a "continue", but there is
 			 * still the packet to free */
 			goto end_while;
@@ -371,7 +371,7 @@ static int am7xxx_play(const char *input_format_string,
 
 		/* decode */
 		got_picture = 0;
-		ret = avcodec_decode_video2(input_ctx.codec_ctx, picture_raw, &got_picture, &packet);
+		ret = avcodec_decode_video2(input_ctx.codec_ctx, picture_raw, &got_picture, &in_packet);
 		if (ret < 0) {
 			fprintf(stderr, "cannot decode video\n");
 			run = 0;
@@ -431,7 +431,7 @@ static int am7xxx_play(const char *input_format_string,
 			}
 		}
 end_while:
-		av_free_packet(&packet);
+		av_free_packet(&in_packet);
 	}
 
 	sws_freeContext(sw_scale_ctx);
