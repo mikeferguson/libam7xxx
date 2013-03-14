@@ -1,3 +1,14 @@
+libam7xxx (0.1.3-1) UNRELEASED; urgency=low
+
+  * New upstream release
+  * debian: update libam7xxx0.1.symbols
+  * debian: add patch to add a missing man page
+  * fixup for manpage
+  * debian/control: update the list of supported devices
+  * debian: add a package for debug symbols
+
+ -- Antonio Ospite <ospite@studenti.unina.it>  Thu, 14 Mar 2013 22:08:01 +0100
+
 libam7xxx (0.1.2-1) unstable; urgency=low
 
   * Initial release (Closes: #666075)
