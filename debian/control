@@ -33,6 +33,28 @@ Description: library for accessing am7xxx based devices
  .
  This package contains the shared library of libam7xxx.
 
+Package: libam7xxx0.1-dbg
+Section: debug
+Architecture: any
+Depends: ${misc:Depends}, libam7xxx0.1 (= ${binary:Version})
+Description: debugging symbols for libam7xxx
+ libam7xxx is an Open Source library to communicate via USB with projectors and
+ Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
+ .
+ libam7xxx makes it possible to use these devices as USB displays on
+ non-Windows Operating Systems like GNU/Linux or Android/Linux just to name
+ a few, and on non-PC platforms like for instance mobile phones, tablets or
+ game consoles.
+ .
+ Examples of supported devices are:
+   - Acer C110
+   - Acer C112
+   - Aiptek PocketCinema T25
+   - Philips/SagemCom PicoPix 1020
+   - Philips/SagemCom PicoPix 2055
+ .
+ This package contains the debugging symbols for libam7xxx.
+
 Package: libam7xxx-dev
 Architecture: any
 Depends: ${misc:Depends}, libam7xxx0.1 (= ${binary:Version})

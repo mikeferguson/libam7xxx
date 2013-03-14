@@ -7,3 +7,7 @@ export CFLAGS CPPFLAGS LDFLAGS
 
 %:
 	dh $@
+
+.PHONY: override_dh_strip
+override_dh_strip:
+	dh_strip --dbg-package=libam7xxx0.1-dbg
