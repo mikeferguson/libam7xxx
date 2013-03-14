@@ -15,11 +15,16 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-picoproj(1) is a minimal example to show how to use libam7xxx to display a static image.
+picoproj(1) is a minimal example to show how to use libam7xxx to display
+a static image; it will not perform any image rescaling or conversion, images
+larger than the device native resolution can be wrongly displayed.
 
 
 OPTIONS
 -------
+
+*-d* '<index>'::
+    the device index (default is 0)
 
 *-f* '<filename>'::
     the image file to upload
@@ -35,10 +40,13 @@ OPTIONS
 *-l* '<log level>'::
     the verbosity level of libam7xxx output (0-5)
 
-*-p* '<power level>'::
-    power level of device, between 0 (off) and 4 (maximum) +
+*-p* '<power mode>'::
+    the power mode of device, between 0 (off) and 4 (turbo) +
     WARNING: Level 2 and greater require the master AND
              the slave connector to be plugged in.
+
+*-z* '<zoom mode>'::
+    the display zoom mode, between 0 (original) and 3 (test)
 
 *-W* '<image width>'::
     the width of the image to upload

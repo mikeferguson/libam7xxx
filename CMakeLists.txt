@@ -6,7 +6,7 @@ set(PROJECT_DESCRIPTION
 
 set(PROJECT_VER_MAJOR 0)
 set(PROJECT_VER_MINOR 1)
-set(PROJECT_VER_PATCH 2)
+set(PROJECT_VER_PATCH 3)
 set(PROJECT_VER_EXTRA "")
 set(PROJECT_VER
   "${PROJECT_VER_MAJOR}.${PROJECT_VER_MINOR}.${PROJECT_VER_PATCH}${PROJECT_VER_EXTRA}")
@@ -48,7 +48,6 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Winit-self
     -Winline
     -Wpacked
-    -Wp,-D_FORTIFY_SOURCE=2
     -Wpointer-arith
     -Wlarger-than-65500
     -Wmissing-declarations
@@ -69,19 +68,26 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -fstack-protector
     --param=ssp-buffer-size=4)
 
+  add_flags(DEBUG_FLAGS
+    -ggdb)
+
+  add_flags(RELEASE_FLAGS
+    -Wp,-D_FORTIFY_SOURCE=2)
+
   if (STRICT_COMPILATION_CHECKS)
-    add_flags(CMAKE_C_FLAGS
+    add_flags(STRICT_FLAGS
       -Werror
       # NOTE: Vanilla libusb-1.0.8 can't live with -pedantic-errors
       -pedantic-errors
       # NOTE: GCC >= 4.6 is needed for -Wunused-but-set-variable
       -Wunused-but-set-variable)
+
   endif()
 endif()
 
-set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb -DDEBUG=1")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_C_FLAGS_DEBUG "-O0 ${DEBUG_FLAGS} ${STRICT_FLAGS}")
+set(CMAKE_C_FLAGS_RELEASE "-O2 ${RELEASE_FLAGS} ${STRICT_FLAGS}")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 ${RELEASE_FLAGS} ${DEBUG_FLAGS} ${STRICT_FLAGS}")
 
 # Add library project
 add_subdirectory(src)

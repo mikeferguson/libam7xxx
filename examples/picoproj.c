@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -36,14 +35,19 @@ static void usage(char *name)
 {
 	printf("usage: %s [OPTIONS]\n\n", name);
 	printf("OPTIONS:\n");
+	printf("\t-d <index>\t\tthe device index (default is 0)\n");
 	printf("\t-f <filename>\t\tthe image file to upload\n");
 	printf("\t-F <format>\t\tthe image format to use (default is JPEG)\n");
 	printf("\t\t\t\tSUPPORTED FORMATS:\n");
 	printf("\t\t\t\t\t1 - JPEG\n");
 	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
-	printf("\t-p <power level>\tpower level of device, between %x (off) and %x (maximum)\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
-	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n\t\t\t\t\t the slave connector to be plugged in.\n");
+	printf("\t-p <power mode>\t\tthe power mode of device, between %d (off) and %d (turbo)\n",
+	       AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n");
+	printf("\t\t\t\t         the slave connector to be plugged in.\n");
+	printf("\t-z <zoom mode>\t\tthe display zoom mode, between %d (original) and %d (test)\n",
+	       AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
 	printf("\t-W <image width>\tthe width of the image to upload\n");
 	printf("\t-H <image height>\tthe height of the image to upload\n");
 	printf("\t-h \t\t\tthis help message\n");
@@ -58,12 +62,14 @@ int main(int argc, char *argv[])
 	int opt;
 
 	char filename[FILENAME_MAX] = {0};
-	int image_fd;
+	FILE *image_fp;
 	struct stat st;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 	int log_level = AM7XXX_LOG_INFO;
+	int device_index = 0;
 	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
+	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
@@ -71,9 +77,18 @@ int main(int argc, char *argv[])
 	unsigned int size;
 	am7xxx_device_info device_info;
 
-	while ((opt = getopt(argc, argv, "f:F:l:p:W:H:h")) != -1) {
+	while ((opt = getopt(argc, argv, "d:f:F:l:p:z:W:H:h")) != -1) {
 		switch (opt) {
+		case 'd':
+			device_index = atoi(optarg);
+			if (device_index < 0) {
+				fprintf(stderr, "Unsupported device index\n");
+				exit(EXIT_FAILURE);
+			}
+			break;
 		case 'f':
+			if (filename[0] != '\0')
+				fprintf(stderr, "Warning: image file already specified\n");
 			strncpy(filename, optarg, FILENAME_MAX);
 			break;
 		case 'F':
@@ -105,10 +120,26 @@ int main(int argc, char *argv[])
 			case AM7XXX_POWER_MIDDLE:
 			case AM7XXX_POWER_HIGH:
 			case AM7XXX_POWER_TURBO:
-				fprintf(stdout, "Power mode: %x\n", power_mode);
+				fprintf(stdout, "Power mode: %d\n", power_mode);
 				break;
 			default:
-				fprintf(stderr, "Invalid power mode value, must be between %x and %x\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+				fprintf(stderr, "Invalid power mode value, must be between %d and %d\n",
+					AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+				exit(EXIT_FAILURE);
+			}
+			break;
+		case 'z':
+			zoom = atoi(optarg);
+			switch(zoom) {
+			case AM7XXX_ZOOM_ORIGINAL:
+			case AM7XXX_ZOOM_H:
+			case AM7XXX_ZOOM_H_V:
+			case AM7XXX_ZOOM_TEST:
+				fprintf(stdout, "Zoom: %d\n", zoom);
+				break;
+			default:
+				fprintf(stderr, "Invalid zoom mode value, must be between %d and %d\n",
+					AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
 				exit(EXIT_FAILURE);
 			}
 			break;
@@ -142,31 +173,43 @@ int main(int argc, char *argv[])
 		goto out;
 	}
 
-	image_fd = open(filename, O_RDONLY);
-	if (image_fd < 0) {
-		perror("open");
+	image_fp = fopen(filename, "rb");
+	if (image_fp == NULL) {
+		perror("fopen");
 		exit_code = EXIT_FAILURE;
 		goto out;
 	}
-	if (fstat(image_fd, &st) < 0) {
+	if (fstat(fileno(image_fp), &st) < 0) {
 		perror("fstat");
 		exit_code = EXIT_FAILURE;
-		goto out_close_image_fd;
+		goto out_close_image_fp;
 	}
 	size = st.st_size;
 
-	image = mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, image_fd, 0);
+	image = malloc(size * sizeof(unsigned char));
 	if (image == NULL) {
-		perror("mmap");
+		perror("malloc");
 		exit_code = EXIT_FAILURE;
-		goto out_close_image_fd;
+		goto out_close_image_fp;
+	}
+
+	ret = fread(image, size, 1, image_fp);
+	if (ret != 1) {
+		if (feof(image_fp))
+			fprintf(stderr, "Unexpected end of file.\n");
+		else if (ferror(image_fp))
+			perror("fread");
+		else
+			fprintf(stderr, "Unexpected error condition.\n");
+
+		goto out_free_image;
 	}
 
 	ret = am7xxx_init(&ctx);
 	if (ret < 0) {
 		perror("am7xxx_init");
 		exit_code = EXIT_FAILURE;
-		goto out_munmap;
+		goto out_free_image;
 	}
 
 	am7xxx_set_log_level(ctx, log_level);
@@ -186,7 +229,7 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-	ret = am7xxx_open_device(ctx, &dev, 0);
+	ret = am7xxx_open_device(ctx, &dev, device_index);
 	if (ret < 0) {
 		perror("am7xxx_open_device");
 		exit_code = EXIT_FAILURE;
@@ -195,12 +238,19 @@ int main(int argc, char *argv[])
 
 	ret = am7xxx_get_device_info(dev, &device_info);
 	if (ret < 0) {
-		perror("am7xxx_get_info");
+		perror("am7xxx_get_device_info");
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 	printf("Native resolution: %dx%d\n",
 	       device_info.native_width, device_info.native_height);
+
+	ret = am7xxx_set_zoom_mode(dev, zoom);
+	if (ret < 0) {
+		perror("am7xxx_set_zoom_mode");
+		exit_code = EXIT_FAILURE;
+		goto cleanup;
+	}
 
 	ret = am7xxx_set_power_mode(dev, power_mode);
 	if (ret < 0) {
@@ -208,6 +258,17 @@ int main(int argc, char *argv[])
 		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
+
+	/* When setting AM7XXX_ZOOM_TEST don't display the actual image */
+	if (zoom == AM7XXX_ZOOM_TEST) {
+		printf("AM7XXX_ZOOM_TEST requested, not sending actual image.\n");
+		goto cleanup;
+	}
+
+
+	if ((unsigned int)width > device_info.native_width ||
+	    (unsigned int)height > device_info.native_height)
+		fprintf(stderr, "WARNING: image not fitting the native resolution, it may be displayed wrongly!\n");
 
 	ret = am7xxx_send_image(dev, format, width, height, image, size);
 	if (ret < 0) {
@@ -221,15 +282,13 @@ int main(int argc, char *argv[])
 cleanup:
 	am7xxx_shutdown(ctx);
 
-out_munmap:
-	ret = munmap(image, size);
-	if (ret < 0)
-		perror("munmap");
+out_free_image:
+	free(image);
 
-out_close_image_fd:
-	ret = close(image_fd);
-	if (ret < 0)
-		perror("close");
+out_close_image_fp:
+	ret = fclose(image_fp);
+	if (ret == EOF)
+		perror("fclose");
 
 out:
 	exit(exit_code);

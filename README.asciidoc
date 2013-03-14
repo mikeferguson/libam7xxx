@@ -44,6 +44,10 @@ manually with the command:
    --default-product 0x1101 \
    --message-content 55534243087052890000000000000cff020000000000000000000000000000
 
+Alternatively, on systems where libusb works but 'usb_mode_switch' is not
+easily available, the switch can be performed using the 'am7xxx_mode_switch'
+example program from libam7xxx.
+
 Examples of devices based on AM7XXX are:
 
   - Acer Series C pico projectors (C20, C110, C112):
@@ -51,12 +55,18 @@ Examples of devices based on AM7XXX are:
       * http://support.acer.com/product/default.aspx?modelId=3888
 
   - Philips/SagemCom PicoPix projectors (PPX 1020, PPX 1230, PPX 1430, PPX
-    1630):
+    1630, PPX 2055):
       * http://www.philips.co.uk/c/pocket-projector/179840/cat/
       * http://www.sagemcom.com/EN/products/image-sound/pico-video-projectors.html
 
   - CEL-TEC MP-01:
       * http://www.kabelmanie.cz/miniprojektor-cel-tec-mp-01/
+
+  - Royaltek PJU-2100:
+      * http://www.royaltek.com/index.php/pju-2100-pico-projector
+  
+  - Aiptek PocketCinema T25:
+      * http://www.aiptek.eu/index.php/en/products/pico-projectors/pocketcinema-t25
 
   - Other unbranded projectors:
       * http://www.dealextreme.com/p/portable-home-office-mini-usb-2-0-lcos-projector-16-9-45019
@@ -69,3 +79,36 @@ Examples of devices based on AM7XXX are:
 Maybe other devices reported as supporting "Display over USB (DoUSB)" like
 Acer K330 or some Optoma projectors could be used with this library, but
 this needs still needs to be verified.
+
+== Testing libam7xxx on MS Windows
+
+All the needed files need to be in the same location:
+  
+  - 'libusb-1.0.dll' from http://sourceforge.net/projects/libusbx/files/releases/1.0.11/Windows/libusbx-1.0.11-win.7z
+
+  - 'libssp-0.dll' from MinGW;
+
+  - 'am7xxx_mode_switch.exe', 'libam7xxx.dll' and 'picoproj.exe' which can all
+    be built by following the instructions in the HACKING.asciidoc document
+    from libam7xxx.
+
+  - 'am7xxx-play.exe' and the '.dll' files from the 'usr/bin/' dir in libav-win32:
+    http://win32.libav.org/win32/libav-win32-20120521.7z
+
+In order to use the device on MS Windows the WinUSB drivers must be installed
+for both the mass storage device and the display device:
+
+  - Download http://sourceforge.net/projects/libwdi/files/zadig/[Zadig], it is
+    a tool to install and replace USB devices filter drivers on MS Windows.
+
+  - From Zadig, select the USB Mass Storage Device relative to the projector
+    and replace the +USBSTOR+ driver with the +WinUSB+ one; keep in mind that
+    from now on the virtual CD-ROM can't be accessed anymore until the
+    +USBSTOR+ Driver is restored.
+
+  - Run 'am7xxx_mode_switch.exe'
+
+  - When the new (display) device shows up, run Zadig and install the +WinUSB+
+    driver for it too.
+
+Now it is possible to run 'picoproj.exe' or 'am7xxx-play.exe' on Windows.

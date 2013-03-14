@@ -1,4 +1,10 @@
 # Acer C110
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1de1", ATTRS{idProduct}=="c101", MODE="0660", GROUP="plugdev"
+# Acer C112
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1de1", ATTRS{idProduct}=="5501", MODE="0660", GROUP="plugdev"
+# Aiptek PocketCinema T25
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="08ca", ATTRS{idProduct}=="2144", MODE="0660", GROUP="plugdev"
 # Philips/Sagemcom PicoPix 1020
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="21e7", ATTRS{idProduct}=="000e", MODE="0660", GROUP="plugdev"
+# Philips/Sagemcom PicoPix 2055
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="21e7", ATTRS{idProduct}=="0016", MODE="0660", GROUP="plugdev"

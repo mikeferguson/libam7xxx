@@ -35,6 +35,13 @@
 
 #include <am7xxx.h>
 
+/* On some systems ENOTSUP is not defined, fallback to its value on
+ * linux which is equal to EOPNOTSUPP which is 95
+ */
+#ifndef ENOTSUP
+#define ENOTSUP 95
+#endif
+
 static unsigned int run = 1;
 
 struct video_input_ctx {
@@ -199,8 +206,10 @@ static int video_output_init(struct video_output_ctx *output_ctx,
 	output_codec_ctx->bit_rate   = (input_ctx->codec_ctx)->bit_rate;
 	output_codec_ctx->width      = new_output_width;
 	output_codec_ctx->height     = new_output_height;
-	output_codec_ctx->time_base.num  = (input_ctx->codec_ctx)->time_base.num;
-	output_codec_ctx->time_base.den  = (input_ctx->codec_ctx)->time_base.den;
+	output_codec_ctx->time_base.num  =
+		(input_ctx->format_ctx)->streams[input_ctx->video_stream_index]->time_base.num;
+	output_codec_ctx->time_base.den  =
+		(input_ctx->format_ctx)->streams[input_ctx->video_stream_index]->time_base.den;
 
 	/* When the raw format is requested we don't actually need to setup
 	 * and open a decoder
@@ -276,9 +285,12 @@ static int am7xxx_play(const char *input_format_string,
 	int out_buf_size;
 	uint8_t *out_buf;
 	int out_picture_size;
+	uint8_t *out_picture;
 	struct SwsContext *sw_scale_ctx;
-	AVPacket packet;
+	AVPacket in_packet;
+	AVPacket out_packet;
 	int got_picture;
+	int got_packet;
 	int ret = 0;
 
 	ret = video_input_init(&input_ctx, input_format_string, input_path, input_options);
@@ -344,7 +356,7 @@ static int am7xxx_play(const char *input_format_string,
 
 	while (run) {
 		/* read packet */
-		ret = av_read_frame(input_ctx.format_ctx, &packet);
+		ret = av_read_frame(input_ctx.format_ctx, &in_packet);
 		if (ret < 0) {
 			if (ret == (int)AVERROR_EOF || input_ctx.format_ctx->pb->eof_reached)
 				ret = 0;
@@ -354,7 +366,7 @@ static int am7xxx_play(const char *input_format_string,
 			goto end_while;
 		}
 
-		if (packet.stream_index != input_ctx.video_stream_index) {
+		if (in_packet.stream_index != input_ctx.video_stream_index) {
 			/* that is more or less a "continue", but there is
 			 * still the packet to free */
 			goto end_while;
@@ -362,7 +374,7 @@ static int am7xxx_play(const char *input_format_string,
 
 		/* decode */
 		got_picture = 0;
-		ret = avcodec_decode_video2(input_ctx.codec_ctx, picture_raw, &got_picture, &packet);
+		ret = avcodec_decode_video2(input_ctx.codec_ctx, picture_raw, &got_picture, &in_packet);
 		if (ret < 0) {
 			fprintf(stderr, "cannot decode video\n");
 			run = 0;
@@ -381,20 +393,26 @@ static int am7xxx_play(const char *input_format_string,
 				  picture_scaled->linesize);
 
 			if (output_ctx.raw_output) {
+				out_picture = out_buf;
 				out_picture_size = out_buf_size;
 			} else {
 				picture_scaled->quality = (output_ctx.codec_ctx)->global_quality;
-				/* TODO: switch to avcodec_encode_video2() eventually */
-				out_picture_size = avcodec_encode_video(output_ctx.codec_ctx,
-									out_buf,
-									out_buf_size,
-									picture_scaled);
-				if (out_picture_size < 0) {
+				av_init_packet(&out_packet);
+				out_packet.data = NULL;
+				out_packet.size = 0;
+				got_packet = 0;
+				ret = avcodec_encode_video2(output_ctx.codec_ctx,
+							    &out_packet,
+							    picture_scaled,
+							    &got_packet);
+				if (ret < 0 || !got_packet) {
 					fprintf(stderr, "cannot encode video\n");
-					ret = out_picture_size;
 					run = 0;
 					goto end_while;
 				}
+
+				out_picture = out_packet.data;
+				out_picture_size = out_packet.size;
 			}
 
 #ifdef DEBUG
@@ -405,7 +423,7 @@ static int am7xxx_play(const char *input_format_string,
 			else
 				snprintf(filename, NAME_MAX, "out.raw");
 			file = fopen(filename, "wb");
-			fwrite(out_buf, 1, out_picture_size, file);
+			fwrite(out_picture, 1, out_picture_size, file);
 			fclose(file);
 #endif
 
@@ -413,7 +431,7 @@ static int am7xxx_play(const char *input_format_string,
 						image_format,
 						(output_ctx.codec_ctx)->width,
 						(output_ctx.codec_ctx)->height,
-						out_buf,
+						out_picture,
 						out_picture_size);
 			if (ret < 0) {
 				perror("am7xxx_send_image");
@@ -422,7 +440,9 @@ static int am7xxx_play(const char *input_format_string,
 			}
 		}
 end_while:
-		av_free_packet(&packet);
+		if (!output_ctx.raw_output)
+			av_free_packet(&out_packet);
+		av_free_packet(&in_packet);
 	}
 
 	sws_freeContext(sw_scale_ctx);
@@ -530,6 +550,7 @@ static void unset_run(int signo)
 	run = 0;
 }
 
+#ifdef HAVE_SIGACTION
 static int set_signal_handler(void (*signal_handler)(int))
 {
 	struct sigaction new_action;
@@ -557,11 +578,21 @@ static int set_signal_handler(void (*signal_handler)(int))
 out:
 	return ret;
 }
+#else
+static int set_signal_handler(void (*signal_handler)(int))
+{
+	(void)signal_handler;
+	fprintf(stderr, "set_signal_handler() not implemented, sigaction not available\n");
+	return 0;
+}
+#endif
+
 
 static void usage(char *name)
 {
 	printf("usage: %s [OPTIONS]\n\n", name);
 	printf("OPTIONS:\n");
+	printf("\t-d <index>\t\tthe device index (default is 0)\n");
 	printf("\t-f <input format>\tthe input device format\n");
 	printf("\t-i <input path>\t\tthe input path\n");
 	printf("\t-o <options>\t\ta comma separated list of input format options\n");
@@ -575,8 +606,12 @@ static void usage(char *name)
 	printf("\t\t\t\t\t2 - NV12\n");
 	printf("\t-q <quality>\t\tquality of jpeg sent to the device, between 1 and 100\n");
 	printf("\t-l <log level>\t\tthe verbosity level of libam7xxx output (0-5)\n");
-	printf("\t-p <power level>\tpower level of device, between %x (off) and %x (maximum)\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
-	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n\t\t\t\t\t the slave connector to be plugged in.\n");
+	printf("\t-p <power mode>\t\tthe power mode of device, between %d (off) and %d (turbo)\n",
+	       AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+	printf("\t\t\t\tWARNING: Level 2 and greater require the master AND\n");
+	printf("\t\t\t\t         the slave connector to be plugged in.\n");
+	printf("\t-z <zoom mode>\t\tthe display zoom mode, between %d (original) and %d (test)\n",
+	       AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
 	printf("\t-h \t\t\tthis help message\n");
 	printf("\n\nEXAMPLES OF USE:\n");
 	printf("\t%s -f x11grab -i :0.0 -o video_size=800x480\n", name);
@@ -599,13 +634,23 @@ int main(int argc, char *argv[])
 	unsigned int upscale = 0;
 	unsigned int quality = 95;
 	int log_level = AM7XXX_LOG_INFO;
+	int device_index = 0;
 	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
+	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
 
-	while ((opt = getopt(argc, argv, "f:i:o:s:uF:q:l:p:h")) != -1) {
+	while ((opt = getopt(argc, argv, "d:f:i:o:s:uF:q:l:p:z:h")) != -1) {
 		switch (opt) {
+		case 'd':
+			device_index = atoi(optarg);
+			if (device_index < 0) {
+				fprintf(stderr, "Unsupported device index\n");
+				ret = -EINVAL;
+				goto out;
+			}
+			break;
 		case 'f':
 			input_format_string = strdup(optarg);
 			break;
@@ -613,6 +658,7 @@ int main(int argc, char *argv[])
 			input_path = strdup(optarg);
 			break;
 		case 'o':
+#ifdef HAVE_STRTOK_R
 			/*
 			 * parse suboptions, the expected format is something
 			 * like:
@@ -629,6 +675,9 @@ int main(int argc, char *argv[])
 				av_dict_set(&options, subopt_name, subopt_value, 0);
 			}
 			free(subopts_saved);
+#else
+			fprintf(stderr, "Option '-o' not implemented\n");
+#endif
 			break;
 		case 's':
 			rescale_method = atoi(optarg);
@@ -692,19 +741,34 @@ int main(int argc, char *argv[])
 			case AM7XXX_POWER_MIDDLE:
 			case AM7XXX_POWER_HIGH:
 			case AM7XXX_POWER_TURBO:
-				fprintf(stdout, "Power mode: %x\n", power_mode);
+				fprintf(stdout, "Power mode: %d\n", power_mode);
 				break;
 			default:
-				fprintf(stderr, "Invalid power mode value, must be between %x and %x\n", AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
+				fprintf(stderr, "Invalid power mode value, must be between %d and %d\n",
+					AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
 				ret = -EINVAL;
 				goto out;
+			}
+			break;
+		case 'z':
+			zoom = atoi(optarg);
+			switch(zoom) {
+			case AM7XXX_ZOOM_ORIGINAL:
+			case AM7XXX_ZOOM_H:
+			case AM7XXX_ZOOM_H_V:
+			case AM7XXX_ZOOM_TEST:
+				fprintf(stdout, "Zoom: %d\n", zoom);
+				break;
+			default:
+				fprintf(stderr, "Invalid zoom mode value, must be between %d and %d\n",
+					AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
+				exit(EXIT_FAILURE);
 			}
 			break;
 		case 'h':
 			usage(argv[0]);
 			ret = 0;
 			goto out;
-			break;
 		default: /* '?' */
 			usage(argv[0]);
 			ret = -EINVAL;
@@ -753,9 +817,15 @@ int main(int argc, char *argv[])
 
 	am7xxx_set_log_level(ctx, log_level);
 
-	ret = am7xxx_open_device(ctx, &dev, 0);
+	ret = am7xxx_open_device(ctx, &dev, device_index);
 	if (ret < 0) {
 		perror("am7xxx_open_device");
+		goto cleanup;
+	}
+
+	ret = am7xxx_set_zoom_mode(dev, zoom);
+	if (ret < 0) {
+		perror("am7xxx_set_zoom_mode");
 		goto cleanup;
 	}
 
@@ -764,6 +834,10 @@ int main(int argc, char *argv[])
 		perror("am7xxx_set_power_mode");
 		goto cleanup;
 	}
+
+	/* When setting AM7XXX_ZOOM_TEST don't display the actual image */
+	if (zoom == AM7XXX_ZOOM_TEST)
+		goto cleanup;
 
 	ret = am7xxx_play(input_format_string,
 			  &options,

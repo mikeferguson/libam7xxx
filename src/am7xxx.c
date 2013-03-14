@@ -77,9 +77,24 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.product_id = 0xc101,
 	},
 	{
+		.name       = "Acer C112",
+		.vendor_id  = 0x1de1,
+		.product_id = 0x5501,
+	},
+	{
+		.name       ="Aiptek PocketCinema T25",
+		.vendor_id  = 0x08ca,
+		.product_id = 0x2144,
+	},
+	{
 		.name       = "Philips/Sagemcom PicoPix 1020",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
+	},
+	{
+		.name       = "Philips/Sagemcom PicoPix 2055",
+		.vendor_id  = 0x21e7,
+		.product_id = 0x0016,
 	},
 };
 
@@ -92,6 +107,7 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 struct _am7xxx_device {
 	libusb_device_handle *usb_device;
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
+	am7xxx_device_info *device_info;
 	am7xxx_context *ctx;
 	am7xxx_device *next;
 };
@@ -106,7 +122,7 @@ typedef enum {
 	AM7XXX_PACKET_TYPE_DEVINFO = 0x01,
 	AM7XXX_PACKET_TYPE_IMAGE   = 0x02,
 	AM7XXX_PACKET_TYPE_POWER   = 0x04,
-	AM7XXX_PACKET_TYPE_UNKNOWN = 0x05,
+	AM7XXX_PACKET_TYPE_ZOOM    = 0x05,
 } am7xxx_packet_type;
 
 struct am7xxx_generic_header {
@@ -136,6 +152,11 @@ struct am7xxx_power_header {
 	uint32_t bit0;
 };
 
+struct am7xxx_zoom_header {
+	uint32_t bit1;
+	uint32_t bit0;
+};
+
 /*
  * Examples of packet headers:
  *
@@ -146,9 +167,13 @@ struct am7xxx_power_header {
  * 04 00 00 00 00 0c ff ff 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
  */
 
+/* Direction of the communication from the host point of view */
+#define AM7XXX_DIRECTION_OUT 0 /* host -> device */
+#define AM7XXX_DIRECTION_IN  1 /* host <- device */
+
 struct am7xxx_header {
 	uint32_t packet_type;
-	uint8_t unknown0;
+	uint8_t direction;
 	uint8_t header_data_len;
 	uint8_t unknown2;
 	uint8_t unknown3;
@@ -157,6 +182,7 @@ struct am7xxx_header {
 		struct am7xxx_devinfo_header devinfo;
 		struct am7xxx_image_header image;
 		struct am7xxx_power_header power;
+		struct am7xxx_zoom_header zoom;
 	} header_data;
 };
 
@@ -197,6 +223,16 @@ static void debug_dump_power_header(am7xxx_context *ctx, struct am7xxx_power_hea
 	debug(ctx, "\tbit0: 0x%08x (%u)\n", p->bit0, p->bit0);
 }
 
+static void debug_dump_zoom_header(am7xxx_context *ctx, struct am7xxx_zoom_header *z)
+{
+	if (ctx == NULL || z == NULL)
+		return;
+
+	debug(ctx, "Zoom header:\n");
+	debug(ctx, "\tbit1: 0x%08x (%u)\n", z->bit1, z->bit1);
+	debug(ctx, "\tbit0: 0x%08x (%u)\n", z->bit0, z->bit0);
+}
+
 static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 {
 	if (ctx == NULL || h == NULL)
@@ -204,7 +240,10 @@ static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 
 	debug(ctx, "BEGIN\n");
 	debug(ctx, "packet_type:     0x%08x (%u)\n", h->packet_type, h->packet_type);
-	debug(ctx, "unknown0:        0x%02hhx (%hhu)\n", h->unknown0, h->unknown0);
+	debug(ctx, "direction:       0x%02hhx (%hhu) (%s)\n", h->direction, h->direction,
+	      h->direction == AM7XXX_DIRECTION_IN ? "IN" :
+	      h->direction == AM7XXX_DIRECTION_OUT ? "OUT" :
+	      "UNKNOWN");
 	debug(ctx, "header_data_len: 0x%02hhx (%hhu)\n", h->header_data_len, h->header_data_len);
 	debug(ctx, "unknown2:        0x%02hhx (%hhu)\n", h->unknown2, h->unknown2);
 	debug(ctx, "unknown3:        0x%02hhx (%hhu)\n", h->unknown3, h->unknown3);
@@ -220,6 +259,10 @@ static void debug_dump_header(am7xxx_context *ctx, struct am7xxx_header *h)
 
 	case AM7XXX_PACKET_TYPE_POWER:
 		debug_dump_power_header(ctx, &(h->header_data.power));
+		break;
+
+	case AM7XXX_PACKET_TYPE_ZOOM:
+		debug_dump_zoom_header(ctx, &(h->header_data.zoom));
 		break;
 
 	default:
@@ -294,7 +337,7 @@ static int send_data(am7xxx_device *dev, uint8_t *buffer, unsigned int len)
 
 	trace_dump_buffer(dev->ctx, "sending -->", buffer, len);
 
-	ret = libusb_bulk_transfer(dev->usb_device, 1, buffer, len, &transferred, 0);
+	ret = libusb_bulk_transfer(dev->usb_device, 0x1, buffer, len, &transferred, 0);
 	if (ret != 0 || (unsigned int)transferred != len) {
 		error(dev->ctx, "ret: %d\ttransferred: %d (expected %u)\n",
 		      ret, transferred, len);
@@ -309,7 +352,7 @@ static void serialize_header(struct am7xxx_header *h, uint8_t *buffer)
 	uint8_t **buffer_iterator = &buffer;
 
 	put_le32(h->packet_type, buffer_iterator);
-	put_8(h->unknown0, buffer_iterator);
+	put_8(h->direction, buffer_iterator);
 	put_8(h->header_data_len, buffer_iterator);
 	put_8(h->unknown2, buffer_iterator);
 	put_8(h->unknown3, buffer_iterator);
@@ -324,7 +367,7 @@ static void unserialize_header(uint8_t *buffer, struct am7xxx_header *h)
 	uint8_t **buffer_iterator = &buffer;
 
 	h->packet_type = get_le32(buffer_iterator);
-	h->unknown0 = get_8(buffer_iterator);
+	h->direction = get_8(buffer_iterator);
 	h->header_data_len = get_8(buffer_iterator);
 	h->unknown2 = get_8(buffer_iterator);
 	h->unknown3 = get_8(buffer_iterator);
@@ -344,9 +387,16 @@ static int read_header(am7xxx_device *dev, struct am7xxx_header *h)
 
 	unserialize_header(dev->buffer, h);
 
-	debug_dump_header(dev->ctx, h);
+	if (h->direction == AM7XXX_DIRECTION_IN) {
+		ret = 0;
+	} else {
+		error(dev->ctx,
+		      "Expected an AM7XXX_DIRECTION_IN packet, got one with direction = %d. Weird!\n",
+		      h->direction);
+		ret = -EINVAL;
+	}
 
-	ret = 0;
+	debug_dump_header(dev->ctx, h);
 
 out:
 	return ret;
@@ -358,7 +408,13 @@ static int send_header(am7xxx_device *dev, struct am7xxx_header *h)
 
 	debug_dump_header(dev->ctx, h);
 
+	/* For symmetry with read_header() we should check here for
+	 * h->direction == AM7XXX_DIRECTION_OUT but we just ensure that in all
+	 * the callers and save some cycles here.
+	 */
+
 	serialize_header(h, dev->buffer);
+
 	ret = send_data(dev, dev->buffer, AM7XXX_HEADER_WIRE_SIZE);
 	if (ret < 0)
 		error(dev->ctx, "failed to send data\n");
@@ -405,8 +461,6 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 		return NULL;
 	}
 
-	devices_list = &(ctx->devices_list);
-
 	new_device = malloc(sizeof(*new_device));
 	if (new_device == NULL) {
 		fatal("cannot allocate a new device (%s)\n", strerror(errno));
@@ -415,6 +469,8 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 	memset(new_device, 0, sizeof(*new_device));
 
 	new_device->ctx = ctx;
+
+	devices_list = &(ctx->devices_list);
 
 	if (*devices_list == NULL) {
 		*devices_list = new_device;
@@ -501,8 +557,8 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 			continue;
 
 		for (j = 0; j < ARRAY_SIZE(supported_devices); j++) {
-			if (desc.idVendor == supported_devices[j].vendor_id
-			    && desc.idProduct == supported_devices[j].product_id) {
+			if (desc.idVendor == supported_devices[j].vendor_id &&
+			    desc.idProduct == supported_devices[j].product_id) {
 
 				if (op == SCAN_OP_BUILD_DEVLIST) {
 					am7xxx_device *new_device;
@@ -542,7 +598,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 						goto out;
 					}
 
-					libusb_set_configuration((*dev)->usb_device, 1);
+					libusb_set_configuration((*dev)->usb_device, 2);
 					libusb_claim_interface((*dev)->usb_device, 0);
 					goto out;
 				}
@@ -619,6 +675,7 @@ AM7XXX_PUBLIC void am7xxx_shutdown(am7xxx_context *ctx)
 	while (current) {
 		am7xxx_device *next = current->next;
 		am7xxx_close_device(current);
+		free(current->device_info);
 		free(current);
 		current = next;
 	}
@@ -646,12 +703,28 @@ AM7XXX_PUBLIC int am7xxx_open_device(am7xxx_context *ctx, am7xxx_device **dev,
 	ret = scan_devices(ctx, SCAN_OP_OPEN_DEVICE, device_index, dev);
 	if (ret < 0) {
 		errno = ENODEV;
+		goto out;
 	} else if (ret > 0) {
 		warning(ctx, "device %d already open\n", device_index);
 		errno = EBUSY;
 		ret = -EBUSY;
+		goto out;
 	}
 
+	/* Philips/Sagemcom PicoPix projectors require that the DEVINFO packet
+	 * is the first one to be sent to the device in order for it to
+	 * successfully return the correct device information.
+	 *
+	 * So, if there is not a cached version of it (from a previous open),
+	 * we ask for device info at open time,
+	 */
+	if ((*dev)->device_info == NULL) {
+		ret = am7xxx_get_device_info(*dev, NULL);
+		if (ret < 0)
+			error(ctx, "cannot get device info\n");
+	}
+
+out:
 	return ret;
 }
 
@@ -675,7 +748,7 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 	int ret;
 	struct am7xxx_header h = {
 		.packet_type     = AM7XXX_PACKET_TYPE_DEVINFO,
-		.unknown0        = 0x00,
+		.direction       = AM7XXX_DIRECTION_OUT,
 		.header_data_len = 0x00,
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
@@ -689,6 +762,11 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 		},
 	};
 
+	if (dev->device_info) {
+		memcpy(device_info, dev->device_info, sizeof(*device_info));
+		return 0;
+	}
+
 	ret = send_header(dev, &h);
 	if (ret < 0)
 		return ret;
@@ -697,12 +775,27 @@ AM7XXX_PUBLIC int am7xxx_get_device_info(am7xxx_device *dev,
 	if (ret < 0)
 		return ret;
 
-	device_info->native_width = h.header_data.devinfo.native_width;
-	device_info->native_height = h.header_data.devinfo.native_height;
+	if (h.packet_type != AM7XXX_PACKET_TYPE_DEVINFO) {
+		error(dev->ctx, "expected packet type: %d, got %d instead!\n",
+		      AM7XXX_PACKET_TYPE_DEVINFO, h.packet_type);
+		errno = ENOTSUP;
+		return -ENOTSUP;
+	}
+
+	dev->device_info = malloc(sizeof(*dev->device_info));
+	if (dev->device_info == NULL) {
+		error(dev->ctx, "cannot allocate a device info (%s)\n",
+		       strerror(errno));
+		return -ENOMEM;
+	}
+	memset(dev->device_info, 0, sizeof(*dev->device_info));
+
+	dev->device_info->native_width = h.header_data.devinfo.native_width;
+	dev->device_info->native_height = h.header_data.devinfo.native_height;
 #if 0
 	/* No reason to expose these in the public API until we know what they mean */
-	device_info->unknown0 = h.header_data.devinfo.unknown0;
-	device_info->unknown1 = h.header_data.devinfo.unknown1;
+	dev->device_info->unknown0 = h.header_data.devinfo.unknown0;
+	dev->device_info->unknown1 = h.header_data.devinfo.unknown1;
 #endif
 
 	return 0;
@@ -780,7 +873,7 @@ AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 	int ret;
 	struct am7xxx_header h = {
 		.packet_type     = AM7XXX_PACKET_TYPE_IMAGE,
-		.unknown0        = 0x00,
+		.direction       = AM7XXX_DIRECTION_OUT,
 		.header_data_len = sizeof(struct am7xxx_image_header),
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
@@ -806,18 +899,18 @@ AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 	return send_data(dev, image, image_size);
 }
 
-AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mode)
+AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode power)
 {
 	int ret;
 	struct am7xxx_header h = {
 		.packet_type     = AM7XXX_PACKET_TYPE_POWER,
-		.unknown0        = 0x00,
+		.direction       = AM7XXX_DIRECTION_OUT,
 		.header_data_len = sizeof(struct am7xxx_power_header),
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
 	};
 
-	switch(mode) {
+	switch(power) {
 	case AM7XXX_POWER_OFF:
 		h.header_data.power.bit2 = 0;
 		h.header_data.power.bit1 = 0;
@@ -828,6 +921,7 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		h.header_data.power.bit2 = 0;
 		h.header_data.power.bit1 = 0;
 		h.header_data.power.bit0 = 1;
+		break;
 
 	case AM7XXX_POWER_MIDDLE:
 		h.header_data.power.bit2 = 0;
@@ -848,7 +942,51 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode mo
 		break;
 
 	default:
-		error(dev->ctx, "Power mode not supported!\n");
+		error(dev->ctx, "Unsupported power mode.\n");
+		return -EINVAL;
+	};
+
+	ret = send_header(dev, &h);
+	if (ret < 0)
+		return ret;
+
+	return 0;
+}
+
+AM7XXX_PUBLIC int am7xxx_set_zoom_mode(am7xxx_device *dev, am7xxx_zoom_mode zoom)
+{
+	int ret;
+	struct am7xxx_header h = {
+		.packet_type     = AM7XXX_PACKET_TYPE_ZOOM,
+		.direction       = AM7XXX_DIRECTION_OUT,
+		.header_data_len = sizeof(struct am7xxx_zoom_header),
+		.unknown2        = 0x3e,
+		.unknown3        = 0x10,
+	};
+
+	switch(zoom) {
+	case AM7XXX_ZOOM_ORIGINAL:
+		h.header_data.zoom.bit1 = 0;
+		h.header_data.zoom.bit0 = 0;
+		break;
+
+	case AM7XXX_ZOOM_H:
+		h.header_data.zoom.bit1 = 0;
+		h.header_data.zoom.bit0 = 1;
+		break;
+
+	case AM7XXX_ZOOM_H_V:
+		h.header_data.zoom.bit1 = 1;
+		h.header_data.zoom.bit0 = 0;
+		break;
+
+	case AM7XXX_ZOOM_TEST:
+		h.header_data.zoom.bit1 = 1;
+		h.header_data.zoom.bit0 = 1;
+		break;
+
+	default:
+		error(dev->ctx, "Unsupported zoom mode.\n");
 		return -EINVAL;
 	};
 

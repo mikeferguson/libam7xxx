@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* You can transform a serializazion block of code which uses put-* into the
+/* You can transform a serialization block of code which uses put-* into the
  * correspondent unserialization block with this vim substitution pattern:
  *
  *   s/put_\([^(]*\)(\([^,]*\),\s*\([^)]*\))/\2 = get_\1(\3)/g
