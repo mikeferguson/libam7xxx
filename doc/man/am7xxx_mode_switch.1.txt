@@ -1,0 +1,57 @@
+AM7XXX_MODE_SWITCH(1)
+=====================
+:doctype: manpage
+
+
+NAME
+----
+am7xxx_mode_switch - change the operational mode of am7xxx based devices
+
+
+SYNOPSIS
+--------
+*am7xxx_mode_switch*
+
+
+DESCRIPTION
+-----------
+am7xxx_mode_switch(1) is a minimal replacement of usb-modeswitch to use with
+am7xxx devices (e.g. Acer C110 or Philips PPX projectors) to switch from the
+mass storage device mode to the generic display mode.
+
+It is handy on systems where usb-modeswitch is not available, like Windows.
+
+
+EXAMPLE OF USE
+--------------
+
+am7xxx_mode_switch
+
+
+EXIT STATUS
+-----------
+*0*::
+    Success
+
+*!0*::
+    Failure (libusb error)
+
+
+AUTHORS
+-------
+Antonio Ospite
+
+
+RESOURCES
+---------
+Main web site: <http://git.ao2.it/libam7xxx.git>
+
+
+COPYING
+-------
+Copyright \(C) 2012  Antonio Ospite <ospite@studenti.unina.it>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
