@@ -26,7 +26,10 @@ Description: library for accessing am7xxx based devices
  .
  Examples of supported devices are:
    - Acer C110
+   - Acer C112
+   - Aiptek PocketCinema T25
    - Philips/SagemCom PicoPix 1020
+   - Philips/SagemCom PicoPix 2055
  .
  This package contains the shared library of libam7xxx.
 
@@ -44,7 +47,10 @@ Description: library for accessing am7xxx based devices -- development files
  .
  Examples of supported devices are:
    - Acer C110
+   - Acer C112
+   - Aiptek PocketCinema T25
    - Philips/SagemCom PicoPix 1020
+   - Philips/SagemCom PicoPix 2055
  .
  This is the development package containing the libraries and header for
  software development with libam7xxx.
@@ -64,7 +70,10 @@ Description: library for accessing am7xxx devices -- utilities and samples
  .
  Examples of supported devices are:
    - Acer C110
+   - Acer C112
+   - Aiptek PocketCinema T25
    - Philips/SagemCom PicoPix 1020
+   - Philips/SagemCom PicoPix 2055
  .
  This package includes utilities and sample programs for libam7xxx.
 
@@ -83,7 +92,10 @@ Description: library for accessing am7xxx devices -- documentation
  .
  Examples of supported devices are:
    - Acer C110
+   - Acer C112
+   - Aiptek PocketCinema T25
    - Philips/SagemCom PicoPix 1020
+   - Philips/SagemCom PicoPix 2055
  .
  This package contains the documentation of the API of libam7xxx.
 
@@ -103,6 +115,9 @@ Description: library for accessing am7xxx devices -- metapackage
  .
  Examples of supported devices are:
    - Acer C110
+   - Acer C112
+   - Aiptek PocketCinema T25
    - Philips/SagemCom PicoPix 1020
+   - Philips/SagemCom PicoPix 2055
  .
  This is the metapackage to install all components of the project.
