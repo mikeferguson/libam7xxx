@@ -1,0 +1,16 @@
+News for v0.1.3:
+================
+
+  * Better documentation
+  * Ported to Windows (compiles with MinGW)
+  * Added a minimal replacement of usb-modeswitch to use on systems where the
+    latter is not available
+  * Added support for Acer C112 (Thanks to Richard Wisenoecker)
+  * Added support for Aiptek PocketCinema T25 (Thanks to Matti Koskinen)
+  * Added some contrib scripts
+  * Added support for setting the projectors zoom mode
+  * Added multi-device support, now more than one projector can be used at the
+    same time on the same system (Tested by Konstantin Lohmann)
+  * Added support for Philips/SagemCom PicoPix PPX 2055
+  * Fixed some problems with the supported Philips/SagemCom PicoPix devices,
+    now these devices are fully working (Thanks to the Certik family)
