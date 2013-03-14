@@ -557,8 +557,8 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 			continue;
 
 		for (j = 0; j < ARRAY_SIZE(supported_devices); j++) {
-			if (desc.idVendor == supported_devices[j].vendor_id
-			    && desc.idProduct == supported_devices[j].product_id) {
+			if (desc.idVendor == supported_devices[j].vendor_id &&
+			    desc.idProduct == supported_devices[j].product_id) {
 
 				if (op == SCAN_OP_BUILD_DEVLIST) {
 					am7xxx_device *new_device;
