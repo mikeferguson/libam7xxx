@@ -7,4 +7,5 @@ libam7xxx.so.0.1 libam7xxx0.1 #MINVER#
  am7xxx_send_image@Base 0.1.0
  am7xxx_set_log_level@Base 0.1.0
  am7xxx_set_power_mode@Base 0.1.0
+ am7xxx_set_zoom_mode@Base 0.1.3
  am7xxx_shutdown@Base 0.1.0
