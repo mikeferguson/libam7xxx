@@ -1,6 +1,274 @@
+2013-03-14 20:23:49 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Release version 0.1.3 (HEAD, master)
+
+2013-03-14 19:48:14 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: switch to avcodec_encode_video2() (origin/master)
+
+2013-03-14 19:30:07 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: remove an unreachable break
+
+2013-03-14 12:28:32 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: rename 'packet' to 'in_packet'
+
+2013-03-14 11:22:05 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: fix coding style
+
+2013-03-14 11:13:16 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* contrib: add the am7xxx-play-window.sh script
+
+2012-12-17 23:54:51 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge branch 'fix-devinfo-for-PicoPix'
+
+2012-12-07 11:59:32 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: make libam7xxx work with Philips/Sagemcom PPX projectors
+
+2012-12-07 11:51:16 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: cache device info in am7xxx_get_device_info()
+
+2012-12-07 12:22:45 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: detect unexpected responses to AM7XXX_PACKET_TYPE_DEVINFO requests
+
+2012-12-04 11:46:12 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Fix an error when compiling with both -O0 and -Wp,-D_FORTIFY_SOURCE=2
+
+2012-11-14 12:31:01 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: don't mention AM7XXX_DIRECTION_OUT in read_header()
+
+2012-11-14 12:08:07 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: add a note on the symmetry of read_header() and send_header()
+
+2012-11-14 12:01:34 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: assign device_list next to its first use
+
+2012-11-14 11:00:58 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: print text description of the 'direction' field
+
+2012-10-14 18:23:04 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: clarify that when AM7XXX_ZOOM_TEST is set no image gets sent
+
+2012-10-14 18:03:54 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: add support for Philips/SagemCom PicoPix PPX 2055
+
+2012-09-17 10:07:55 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* examples: support multiple devices
+
+2012-09-17 10:10:07 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: update Doxygen configuration
+
+2012-07-27 12:57:44 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge branch 'am7xxx_set_zoom_mode'
+
+2012-06-21 10:12:14 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* contrib: add a test image to show how zoom modes work
+
+2012-06-21 10:41:42 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: make the help about power mode more consistent
+
+2012-06-20 15:32:13 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: make the help about power mode more consistent
+
+2012-06-20 13:13:20 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: update signature and documentation of am7xxx_set_power_mode()
+
+2012-06-21 10:32:32 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: support setting the zoom mode
+
+2012-02-20 13:43:03 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: support setting the zoom mode
+
+2012-02-20 13:37:20 +0100 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: implement support for the AM7XXX_PACKET_TYPE_ZOOM
+
+2012-07-08 23:17:20 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge remote-tracking branch 'origin/rettichschnidi'
+
+2012-07-08 22:56:08 +0200 Reto Schneider <github@reto-schneider.ch>
+
+	* Add missing break.
+
+2012-07-06 00:48:31 +0200 Reto Schneider <github@reto-schneider.ch>
+
+	* Fix typo.
+
+2012-06-29 13:22:55 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* contrib: add an example of how to start displaying images automatically
+
+2012-06-21 10:23:28 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* contrib: add other supported devices to 55-am7xxx.rules
+
+2012-06-20 15:01:02 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* doc: update the list of supported devices
+
+2012-06-12 12:48:28 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: rename am7xxx_header.unknown0 to am7xxx_header.direction
+
+2012-06-09 12:21:36 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: add Aiptek PocketCinema T25 to the AM7XXX devices list
+
+2012-06-09 12:19:28 +0200 Matti Koskinen <mjkoskin@kolumbus.fi>
+
+	* am7xxx: add support for Aiptek PocketCinema T25
+
+2012-05-22 16:34:29 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: add info about running am7xxx-play.exe on Windows
+
+2012-05-22 16:33:44 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* HACKING.asciidoc: add info about compiling am7xxx-play for Windows
+
+2012-05-22 16:23:10 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: check if strtok_r is available
+
+2012-05-22 16:21:25 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: check if sigaction is available
+
+2012-05-22 16:16:15 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: add a fallback definition for ENOTSUP
+
+2012-05-22 15:42:26 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx-play: get the framerate from the video stream
+
+2012-05-22 15:29:55 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* mingw_cross_toolchain.cmake: set the MINGW variable to True
+
+2012-05-15 10:35:05 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* HACKING.asciidoc: add info about getting and building libam7xxx
+
+2012-05-14 14:42:44 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc: add Royaltek PJU-2100 to the AM7XXX based devices list
+
+2012-05-13 10:25:52 +0200 Richard Wisenoecker <richard47@gmx.at>
+
+	* am7xxx: add support for Acer C112
+
+2012-05-11 21:52:29 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* README.asciidoc document how to get libam7xx running on MS Windows
+
+2012-05-11 21:50:36 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add a simple usb_mode_switch clone for am7xxx devices
+
+2012-05-10 17:00:27 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* TODO: mention the plan about GStreamer
+
+2012-05-10 16:02:16 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge branch 'mingw-port'
+
+2012-05-10 15:46:47 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* HACKING.asciidoc: add a section to explain Windows cross compilation
+
+2012-05-10 15:29:56 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Add a CMAKE_TOOLCHAIN_FILE to compile with MinGW
+
+2012-05-10 14:58:26 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Don't set -pedantic-errors in CMAKE_C_FLAGS, it breaks check_symbol_exists()
+
+2012-05-10 12:13:03 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: replace mmap() with more portable file stream operations
+
+2012-05-10 12:11:33 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: fix a typo
+
+2012-05-10 12:10:45 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: issue a warning when passing "-f" more than once
+
+2012-05-10 09:34:01 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: don't look for the math library when compiling for Windows
+
+2012-05-10 09:01:40 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: MinGW does not have endian.h, provide fallbacks
+
+2012-05-10 08:16:04 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: fix setting the USB configuration
+
+2012-05-10 08:11:14 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* am7xxx: use hex notation for USB endpoints
+
+2012-05-10 07:57:01 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: use MAP_PRIVATE in the mmap call
+
+2012-05-10 07:49:46 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* HACKING.asciidoc: fix cmake invocation examples
+
+2012-05-10 15:57:19 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* Merge remote-tracking branch 'origin/rettichschnidi' into mingw-port
+
+2012-05-06 23:24:40 +0200 Antonio Ospite <ospite@studenti.unina.it>
+
+	* picoproj: add a note about image dimensions and native resolution
+
+2012-04-08 14:24:43 +0200 Reto Schneider <github@reto-schneider.ch>
+
+	* Fix usage of FIND_PATH, allow $FFMPEG_DIR to be used.
+
+2012-04-07 12:39:43 +0200 Reto Schneider <github@reto-schneider.ch>
+
+	* Stop CMake if function avformat_open_input not available, print an error message. Prevents compile errors later on.
+
+2012-04-07 08:39:33 +0200 Reto Schneider <github@reto-schneider.ch>
+
+	* Make example programs optional.
+
 2012-03-28 13:37:00 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
-	* Release version 0.1.2 (HEAD, master)
+	* Release version 0.1.2 (v0.1.2)
 
 2012-03-28 13:08:23 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
@@ -8,7 +276,7 @@
 
 2012-03-28 10:55:14 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
-	* Release version 0.1.1 (v0.1.1, origin/master)
+	* Release version 0.1.1 (v0.1.1)
 
 2012-03-28 10:43:04 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
@@ -48,7 +316,7 @@
 
 2012-03-26 13:27:43 +0200 Antonio Ospite <ospite@studenti.unina.it>
 
-	* TODO: remove the entry about documenting the API with Doxygen (origin/unstable, unstable)
+	* TODO: remove the entry about documenting the API with Doxygen (origin/unstable)
 
 2012-03-24 00:25:57 +0100 Antonio Ospite <ospite@studenti.unina.it>
 
@@ -96,7 +364,7 @@
 
 2012-03-20 23:39:05 +0100 Reto Schneider <github@reto-schneider.ch>
 
-	* Fix typo: dimesions -> dimensions (origin/rettichschnidi)
+	* Fix typo: dimesions -> dimensions
 
 2012-03-20 23:36:20 +0100 Reto Schneider <github@reto-schneider.ch>
 
