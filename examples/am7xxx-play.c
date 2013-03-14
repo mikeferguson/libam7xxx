@@ -758,7 +758,6 @@ int main(int argc, char *argv[])
 			usage(argv[0]);
 			ret = 0;
 			goto out;
-			break;
 		default: /* '?' */
 			usage(argv[0]);
 			ret = -EINVAL;
