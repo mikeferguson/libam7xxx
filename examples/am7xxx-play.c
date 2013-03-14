@@ -285,9 +285,12 @@ static int am7xxx_play(const char *input_format_string,
 	int out_buf_size;
 	uint8_t *out_buf;
 	int out_picture_size;
+	uint8_t *out_picture;
 	struct SwsContext *sw_scale_ctx;
 	AVPacket in_packet;
+	AVPacket out_packet;
 	int got_picture;
+	int got_packet;
 	int ret = 0;
 
 	ret = video_input_init(&input_ctx, input_format_string, input_path, input_options);
@@ -390,20 +393,26 @@ static int am7xxx_play(const char *input_format_string,
 				  picture_scaled->linesize);
 
 			if (output_ctx.raw_output) {
+				out_picture = out_buf;
 				out_picture_size = out_buf_size;
 			} else {
 				picture_scaled->quality = (output_ctx.codec_ctx)->global_quality;
-				/* TODO: switch to avcodec_encode_video2() eventually */
-				out_picture_size = avcodec_encode_video(output_ctx.codec_ctx,
-									out_buf,
-									out_buf_size,
-									picture_scaled);
-				if (out_picture_size < 0) {
+				av_init_packet(&out_packet);
+				out_packet.data = NULL;
+				out_packet.size = 0;
+				got_packet = 0;
+				ret = avcodec_encode_video2(output_ctx.codec_ctx,
+							    &out_packet,
+							    picture_scaled,
+							    &got_packet);
+				if (ret < 0 || !got_packet) {
 					fprintf(stderr, "cannot encode video\n");
-					ret = out_picture_size;
 					run = 0;
 					goto end_while;
 				}
+
+				out_picture = out_packet.data;
+				out_picture_size = out_packet.size;
 			}
 
 #ifdef DEBUG
@@ -414,7 +423,7 @@ static int am7xxx_play(const char *input_format_string,
 			else
 				snprintf(filename, NAME_MAX, "out.raw");
 			file = fopen(filename, "wb");
-			fwrite(out_buf, 1, out_picture_size, file);
+			fwrite(out_picture, 1, out_picture_size, file);
 			fclose(file);
 #endif
 
@@ -422,7 +431,7 @@ static int am7xxx_play(const char *input_format_string,
 						image_format,
 						(output_ctx.codec_ctx)->width,
 						(output_ctx.codec_ctx)->height,
-						out_buf,
+						out_picture,
 						out_picture_size);
 			if (ret < 0) {
 				perror("am7xxx_send_image");
@@ -431,6 +440,8 @@ static int am7xxx_play(const char *input_format_string,
 			}
 		}
 end_while:
+		if (!output_ctx.raw_output)
+			av_free_packet(&out_packet);
 		av_free_packet(&in_packet);
 	}
 
