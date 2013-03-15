@@ -1,9 +1,8 @@
-libam7xxx (0.1.3-1) UNRELEASED; urgency=low
+libam7xxx (0.1.3-1) unstable; urgency=low
 
   * New upstream release
-  * debian: update libam7xxx0.1.symbols
-  * debian: add patch to add a missing man page
-  * fixup for manpage
+  * debian/libam7xxx0.1.symbols: add the am7xxx_set_zoom_mode symbol
+  * debian/patches: add patch 0001 for a missing man page
   * debian/control: update the list of supported devices
   * debian: add a package for debug symbols
 
