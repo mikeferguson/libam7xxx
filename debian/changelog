@@ -6,8 +6,9 @@ libam7xxx (0.1.3-1) unstable; urgency=low
   * debian/control: update the list of supported devices
   * debian: add a package for debug symbols
   * debian/patches: add 0002-Revert-am7xxx-play-switch-to-avcodec_encode_video2.patch
+  * debian/control: restrict the version also for the other libav libraries
 
- -- Antonio Ospite <ospite@studenti.unina.it>  Mon, 18 Mar 2013 12:37:01 +0100
+ -- Antonio Ospite <ospite@studenti.unina.it>  Mon, 18 Mar 2013 14:04:14 +0100
 
 libam7xxx (0.1.2-1) unstable; urgency=low
 
