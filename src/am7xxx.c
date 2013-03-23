@@ -598,8 +598,28 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 						goto out;
 					}
 
-					libusb_set_configuration((*dev)->usb_device, 2);
-					libusb_claim_interface((*dev)->usb_device, 0);
+					/* XXX, the device is now open, if any
+					 * of the calls below fail we need to
+					 * close it again before bailing out.
+					 */
+
+					ret = libusb_set_configuration((*dev)->usb_device, 2);
+					if (ret < 0) {
+						debug(ctx, "libusb_set_configuration failed\n");
+						debug(ctx, "Cannot set configuration 2\n");
+						goto out_libusb_close;
+					}
+
+					ret = libusb_claim_interface((*dev)->usb_device, 0);
+					if (ret < 0) {
+						debug(ctx, "libusb_claim_interface failed\n");
+						debug(ctx, "Cannot claim interface 0\n");
+out_libusb_close:
+						libusb_close((*dev)->usb_device);
+						(*dev)->usb_device = NULL;
+						goto out;
+					}
+
 					goto out;
 				}
 				current_index++;
