@@ -72,7 +72,7 @@ struct am7xxx_usb_device_descriptor {
 	uint8_t interface_number; /* The bInterfaceNumber of the device */
 };
 
-static struct am7xxx_usb_device_descriptor supported_devices[] = {
+static const struct am7xxx_usb_device_descriptor supported_devices[] = {
 	{
 		.name       = "Acer C110",
 		.vendor_id  = 0x1de1,
