@@ -68,6 +68,8 @@ struct am7xxx_usb_device_descriptor {
 	const char *name;
 	uint16_t vendor_id;
 	uint16_t product_id;
+	uint8_t configuration;    /* The bConfigurationValue of the device */
+	uint8_t interface_number; /* The bInterfaceNumber of the device */
 };
 
 static struct am7xxx_usb_device_descriptor supported_devices[] = {
@@ -75,26 +77,36 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.name       = "Acer C110",
 		.vendor_id  = 0x1de1,
 		.product_id = 0xc101,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Acer C112",
 		.vendor_id  = 0x1de1,
 		.product_id = 0x5501,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       ="Aiptek PocketCinema T25",
 		.vendor_id  = 0x08ca,
 		.product_id = 0x2144,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 1020",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 2055",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x0016,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 };
 
@@ -606,17 +618,21 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 					 * close it again before bailing out.
 					 */
 
-					ret = libusb_set_configuration((*dev)->usb_device, 2);
+					ret = libusb_set_configuration((*dev)->usb_device,
+								       (*dev)->desc->configuration);
 					if (ret < 0) {
 						debug(ctx, "libusb_set_configuration failed\n");
-						debug(ctx, "Cannot set configuration 2\n");
+						debug(ctx, "Cannot set configuration %hhu\n",
+						      (*dev)->desc->configuration);
 						goto out_libusb_close;
 					}
 
-					ret = libusb_claim_interface((*dev)->usb_device, 0);
+					ret = libusb_claim_interface((*dev)->usb_device,
+								     (*dev)->desc->interface_number);
 					if (ret < 0) {
 						debug(ctx, "libusb_claim_interface failed\n");
-						debug(ctx, "Cannot claim interface 0\n");
+						debug(ctx, "Cannot claim interface %hhu\n",
+						      (*dev)->desc->interface_number);
 out_libusb_close:
 						libusb_close((*dev)->usb_device);
 						(*dev)->usb_device = NULL;
@@ -758,7 +774,7 @@ AM7XXX_PUBLIC int am7xxx_close_device(am7xxx_device *dev)
 		return -EINVAL;
 	}
 	if (dev->usb_device) {
-		libusb_release_interface(dev->usb_device, 0);
+		libusb_release_interface(dev->usb_device, dev->desc->interface_number);
 		libusb_close(dev->usb_device);
 		dev->usb_device = NULL;
 	}
