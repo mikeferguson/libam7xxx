@@ -81,16 +81,16 @@ int main(void)
 	if (ret != 0 || (unsigned int)transferred != len) {
 		fprintf(stderr, "ret: %d\ttransferred: %d (expected %u)\n",
 		      ret, transferred, len);
-		goto out_libusb_close;
+		goto out_libusb_release_interface;
 	}
 
 	fprintf(stderr, "OK, command sent!\n");
 
-out_libusb_close:
+out_libusb_release_interface:
 	libusb_release_interface(usb_device, AM7XXX_STORAGE_INTERFACE);
+out_libusb_close:
 	libusb_close(usb_device);
 	usb_device = NULL;
-
 out:
 	libusb_exit(NULL);
 	return ret;
