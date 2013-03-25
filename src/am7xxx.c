@@ -68,33 +68,45 @@ struct am7xxx_usb_device_descriptor {
 	const char *name;
 	uint16_t vendor_id;
 	uint16_t product_id;
+	uint8_t configuration;    /* The bConfigurationValue of the device */
+	uint8_t interface_number; /* The bInterfaceNumber of the device */
 };
 
-static struct am7xxx_usb_device_descriptor supported_devices[] = {
+static const struct am7xxx_usb_device_descriptor supported_devices[] = {
 	{
 		.name       = "Acer C110",
 		.vendor_id  = 0x1de1,
 		.product_id = 0xc101,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Acer C112",
 		.vendor_id  = 0x1de1,
 		.product_id = 0x5501,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       ="Aiptek PocketCinema T25",
 		.vendor_id  = 0x08ca,
 		.product_id = 0x2144,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 1020",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 2055",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x0016,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 };
 
@@ -109,6 +121,7 @@ struct _am7xxx_device {
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
 	am7xxx_device_info *device_info;
 	am7xxx_context *ctx;
+	const struct am7xxx_usb_device_descriptor *desc;
 	am7xxx_device *next;
 };
 
@@ -451,7 +464,8 @@ static void log_message(am7xxx_context *ctx,
 	return;
 }
 
-static am7xxx_device *add_new_device(am7xxx_context *ctx)
+static am7xxx_device *add_new_device(am7xxx_context *ctx,
+				     const struct am7xxx_usb_device_descriptor *desc)
 {
 	am7xxx_device **devices_list;
 	am7xxx_device *new_device;
@@ -469,6 +483,7 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 	memset(new_device, 0, sizeof(*new_device));
 
 	new_device->ctx = ctx;
+	new_device->desc = desc;
 
 	devices_list = &(ctx->devices_list);
 
@@ -565,7 +580,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 					info(ctx, "am7xxx device found, index: %d, name: %s\n",
 					     current_index,
 					     supported_devices[j].name);
-					new_device = add_new_device(ctx);
+					new_device = add_new_device(ctx, &supported_devices[j]);
 					if (new_device == NULL) {
 						/* XXX, the caller may want
 						 * to call am7xxx_shutdown() if
@@ -598,8 +613,32 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 						goto out;
 					}
 
-					libusb_set_configuration((*dev)->usb_device, 2);
-					libusb_claim_interface((*dev)->usb_device, 0);
+					/* XXX, the device is now open, if any
+					 * of the calls below fail we need to
+					 * close it again before bailing out.
+					 */
+
+					ret = libusb_set_configuration((*dev)->usb_device,
+								       (*dev)->desc->configuration);
+					if (ret < 0) {
+						debug(ctx, "libusb_set_configuration failed\n");
+						debug(ctx, "Cannot set configuration %hhu\n",
+						      (*dev)->desc->configuration);
+						goto out_libusb_close;
+					}
+
+					ret = libusb_claim_interface((*dev)->usb_device,
+								     (*dev)->desc->interface_number);
+					if (ret < 0) {
+						debug(ctx, "libusb_claim_interface failed\n");
+						debug(ctx, "Cannot claim interface %hhu\n",
+						      (*dev)->desc->interface_number);
+out_libusb_close:
+						libusb_close((*dev)->usb_device);
+						(*dev)->usb_device = NULL;
+						goto out;
+					}
+
 					goto out;
 				}
 				current_index++;
@@ -735,7 +774,7 @@ AM7XXX_PUBLIC int am7xxx_close_device(am7xxx_device *dev)
 		return -EINVAL;
 	}
 	if (dev->usb_device) {
-		libusb_release_interface(dev->usb_device, 0);
+		libusb_release_interface(dev->usb_device, dev->desc->interface_number);
 		libusb_close(dev->usb_device);
 		dev->usb_device = NULL;
 	}
