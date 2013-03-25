@@ -8,3 +8,5 @@ ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="08ca", ATTRS{idProduct}=="214
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="21e7", ATTRS{idProduct}=="000e", MODE="0660", GROUP="plugdev"
 # Philips/Sagemcom PicoPix 2055
 ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="21e7", ATTRS{idProduct}=="0016", MODE="0660", GROUP="plugdev"
+# Philips/Sagemcom PicoPix 2330
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="21e7", ATTRS{idProduct}=="0019", MODE="0660", GROUP="plugdev"
