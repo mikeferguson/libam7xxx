@@ -221,7 +221,6 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-
 	ret = am7xxx_close_device(dev);
 	if (ret < 0) {
 		perror("am7xxx_close_device");
