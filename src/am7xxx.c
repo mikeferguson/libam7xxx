@@ -688,7 +688,7 @@ AM7XXX_PUBLIC int am7xxx_init(am7xxx_context **ctx)
 	if (ret < 0)
 		goto out_free_context;
 
-	libusb_set_debug((*ctx)->usb_context, 3);
+	libusb_set_debug((*ctx)->usb_context, LIBUSB_LOG_LEVEL_INFO);
 
 	ret = scan_devices(*ctx, SCAN_OP_BUILD_DEVLIST , 0, NULL);
 	if (ret < 0) {
