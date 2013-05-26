@@ -265,7 +265,6 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-
 	if ((unsigned int)width > device_info.native_width ||
 	    (unsigned int)height > device_info.native_height)
 		fprintf(stderr,
