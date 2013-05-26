@@ -69,7 +69,8 @@ if (CMAKE_COMPILER_IS_GNUCC)
     --param=ssp-buffer-size=4)
 
   add_flags(DEBUG_FLAGS
-    -ggdb)
+    -ggdb
+    -DDEBUG=1)
 
   add_flags(RELEASE_FLAGS
     -Wp,-D_FORTIFY_SOURCE=2)
