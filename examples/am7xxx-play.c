@@ -777,7 +777,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (input_path == NULL) {
-		fprintf(stderr, "The -i option must always be passed\n");
+		fprintf(stderr, "The -i option must always be passed\n\n");
+		usage(argv[0]);
 		ret = -EINVAL;
 		goto out;
 	}

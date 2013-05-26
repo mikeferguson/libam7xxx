@@ -168,7 +168,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (filename[0] == '\0') {
-		fprintf(stderr, "An image file MUST be specified.\n");
+		fprintf(stderr, "An image file MUST be specified with the -f option.\n\n");
+		usage(argv[0]);
 		exit_code = EXIT_FAILURE;
 		goto out;
 	}
