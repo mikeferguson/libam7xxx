@@ -762,7 +762,8 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Invalid zoom mode value, must be between %d and %d\n",
 					AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'h':
