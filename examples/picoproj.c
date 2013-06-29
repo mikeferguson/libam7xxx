@@ -160,7 +160,6 @@ int main(int argc, char *argv[])
 		case 'h':
 			usage(argv[0]);
 			exit(EXIT_SUCCESS);
-			break;
 		default: /* '?' */
 			usage(argv[0]);
 			exit(EXIT_FAILURE);
