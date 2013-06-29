@@ -64,12 +64,16 @@ static void log_message(am7xxx_context *ctx,
 #define debug(ctx, ...)   log_message(ctx,  AM7XXX_LOG_DEBUG,   __func__, 0,        __VA_ARGS__)
 #define trace(ctx, ...)   log_message(ctx,  AM7XXX_LOG_TRACE,   NULL,     0,        __VA_ARGS__)
 
+#define AM7XXX_QUIRK_NO_POWER_MODE (1 << 0)
+#define AM7XXX_QUIRK_NO_ZOOM_MODE  (1 << 1)
+
 struct am7xxx_usb_device_descriptor {
 	const char *name;
 	uint16_t vendor_id;
 	uint16_t product_id;
 	uint8_t configuration;    /* The bConfigurationValue of the device */
 	uint8_t interface_number; /* The bInterfaceNumber of the device */
+	unsigned long quirks;
 };
 
 static const struct am7xxx_usb_device_descriptor supported_devices[] = {
@@ -114,6 +118,7 @@ static const struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.product_id = 0x0019,
 		.configuration    = 1,
 		.interface_number = 0,
+		.quirks = AM7XXX_QUIRK_NO_POWER_MODE | AM7XXX_QUIRK_NO_ZOOM_MODE,
 	},
 };
 
@@ -956,6 +961,12 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode po
 		.unknown3        = 0x10,
 	};
 
+	if (dev->desc->quirks & AM7XXX_QUIRK_NO_POWER_MODE) {
+		debug(dev->ctx,
+		      "setting power mode is unsupported on this device\n");
+		return 0;
+	}
+
 	switch(power) {
 	case AM7XXX_POWER_OFF:
 		h.header_data.power.bit2 = 0;
@@ -1009,6 +1020,12 @@ AM7XXX_PUBLIC int am7xxx_set_zoom_mode(am7xxx_device *dev, am7xxx_zoom_mode zoom
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
 	};
+
+	if (dev->desc->quirks & AM7XXX_QUIRK_NO_ZOOM_MODE) {
+		debug(dev->ctx,
+		      "setting zoom mode is unsupported on this device\n");
+		return 0;
+	}
 
 	switch(zoom) {
 	case AM7XXX_ZOOM_ORIGINAL:
