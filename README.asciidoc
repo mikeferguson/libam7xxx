@@ -62,6 +62,9 @@ Examples of devices based on AM7XXX are:
   - CEL-TEC MP-01:
       * http://www.kabelmanie.cz/miniprojektor-cel-tec-mp-01/
 
+  - Top-Height/TEC PP700
+      * http://www.ishopiwin.com/en/appliances-electronics/electronics/projectors/pico-projector-pp-700.html
+
   - Royaltek PJU-2100:
       * http://www.royaltek.com/index.php/pju-2100-pico-projector
   
