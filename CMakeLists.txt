@@ -31,7 +31,9 @@ macro(add_flags var)
   set(${var} "${${var}} ${_flags}")
 endmacro(add_flags)
 
-if (CMAKE_COMPILER_IS_GNUCC)
+string(REGEX MATCH "clang" CMAKE_COMPILER_IS_CLANG "${CMAKE_C_COMPILER}")
+
+if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
   add_definitions(-Wall)
 
   # let CFLAGS env override this
@@ -63,10 +65,8 @@ if (CMAKE_COMPILER_IS_GNUCC)
     -Wswitch-enum
     -Wundef
     -Wunreachable-code
-    -Wunsafe-loop-optimizations
     -Wwrite-strings
-    -fstack-protector
-    --param=ssp-buffer-size=4)
+    -fstack-protector)
 
   add_flags(DEBUG_FLAGS
     -ggdb
@@ -79,10 +79,20 @@ if (CMAKE_COMPILER_IS_GNUCC)
     add_flags(STRICT_FLAGS
       -Werror
       # NOTE: Vanilla libusb-1.0.8 can't live with -pedantic-errors
-      -pedantic-errors
+      -pedantic-errors)
+
+  endif()
+endif()
+
+if (CMAKE_COMPILER_IS_GNUCC)
+  add_flags(CMAKE_C_FLAGS
+    -Wunsafe-loop-optimizations
+    --param=ssp-buffer-size=4)
+
+  if (STRICT_COMPILATION_CHECKS)
+    add_flags(STRICT_FLAGS
       # NOTE: GCC >= 4.6 is needed for -Wunused-but-set-variable
       -Wunused-but-set-variable)
-
   endif()
 endif()
 
