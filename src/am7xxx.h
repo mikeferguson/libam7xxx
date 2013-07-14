@@ -219,7 +219,7 @@ int am7xxx_calc_scaled_image_dimensions(am7xxx_device *dev,
 					unsigned int *scaled_width,
 					unsigned int *scaled_height);
 /**
- * Send an image for display on a am7xxx device.
+ * Send an image for display on an am7xxx device.
  *
  * This is the function that actually makes the device display something.
  * Static pictures can be sent just once and the device will keep showing them
