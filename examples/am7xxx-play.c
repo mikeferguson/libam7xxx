@@ -427,7 +427,7 @@ static int am7xxx_play(const char *input_format_string,
 			fclose(file);
 #endif
 
-			ret = am7xxx_send_image(dev,
+			ret = am7xxx_send_image_async(dev,
 						image_format,
 						(output_ctx.codec_ctx)->width,
 						(output_ctx.codec_ctx)->height,
