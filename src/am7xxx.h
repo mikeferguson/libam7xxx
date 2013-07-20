@@ -242,6 +242,32 @@ int am7xxx_send_image(am7xxx_device *dev,
 		      unsigned int image_size);
 
 /**
+ * Queue transfer of an image for display on an am7xxx device and return immediately.
+ *
+ * This is the function that actually makes the device display something.
+ * Static pictures can be sent just once and the device will keep showing them
+ * until another image get sent or some command resets or turns off the display.
+ * 
+ * @note This _async() variant makes a copy of the image buffer, so the caller
+ * is free to reuse the buffer just after the function returns.
+ *
+ * @param[in] dev A pointer to the structure representing the device to get info of
+ * @param[in] format The format the image is in (see @link am7xxx_image_format @endlink enum)
+ * @param[in] width The width of the image
+ * @param[in] height The height of the image
+ * @param[in] image A buffer holding data in the format specified by the format parameter
+ * @param[in] image_size The size in bytes of the image buffer
+ *
+ * @return 0 on success, a negative value on error
+ */
+int am7xxx_send_image_async(am7xxx_device *dev,
+			    am7xxx_image_format format,
+			    unsigned int width,
+			    unsigned int height,
+			    unsigned char *image,
+			    unsigned int image_size);
+
+/**
  * Set the power mode of an am7xxx device.
  *
  * @note When setting the mode to AM7XXX_POWER_OFF the display can't be turned
