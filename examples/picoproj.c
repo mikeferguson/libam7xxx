@@ -193,7 +193,7 @@ int main(int argc, char *argv[])
 		goto out_close_image_fp;
 	}
 
-	ret = fread(image, size, 1, image_fp);
+	ret = (int)fread(image, size, 1, image_fp);
 	if (ret != 1) {
 		if (feof(image_fp))
 			fprintf(stderr, "Unexpected end of file.\n");
