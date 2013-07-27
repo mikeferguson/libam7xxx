@@ -790,7 +790,7 @@ out:
 
 AM7XXX_PUBLIC int am7xxx_init(am7xxx_context **ctx)
 {
-	int ret = 0;
+	int ret;
 
 	*ctx = malloc(sizeof(**ctx));
 	if (*ctx == NULL) {

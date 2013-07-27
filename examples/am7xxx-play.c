@@ -291,7 +291,7 @@ static int am7xxx_play(const char *input_format_string,
 	AVPacket out_packet;
 	int got_picture;
 	int got_packet;
-	int ret = 0;
+	int ret;
 
 	ret = video_input_init(&input_ctx, input_format_string, input_path, input_options);
 	if (ret < 0) {
@@ -555,7 +555,7 @@ static int set_signal_handler(void (*signal_handler)(int))
 {
 	struct sigaction new_action;
 	struct sigaction old_action;
-	int ret = 0;
+	int ret;
 
 	new_action.sa_handler = signal_handler;
 	sigemptyset(&new_action.sa_mask);
