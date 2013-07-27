@@ -44,8 +44,8 @@ manually with the command:
    --default-product 0x1101 \
    --message-content 55534243087052890000000000000cff020000000000000000000000000000
 
-Alternatively, on systems where libusb works but 'usb_mode_switch' is not
-easily available, the switch can be performed using the 'am7xxx_mode_switch'
+Alternatively, on systems where libusb works but 'usb-modeswitch' is not
+easily available, the switch can be performed using the 'am7xxx-modeswitch'
 example program from libam7xxx.
 
 Examples of devices based on AM7XXX are:
@@ -91,7 +91,7 @@ All the needed files need to be in the same location:
 
   - 'libssp-0.dll' from MinGW;
 
-  - 'am7xxx_mode_switch.exe', 'libam7xxx.dll' and 'picoproj.exe' which can all
+  - 'am7xxx-modeswitch.exe', 'libam7xxx.dll' and 'picoproj.exe' which can all
     be built by following the instructions in the HACKING.asciidoc document
     from libam7xxx.
 
@@ -109,7 +109,7 @@ for both the mass storage device and the display device:
     from now on the virtual CD-ROM can't be accessed anymore until the
     +USBSTOR+ Driver is restored.
 
-  - Run 'am7xxx_mode_switch.exe'
+  - Run 'am7xxx-modeswitch.exe'
 
   - When the new (display) device shows up, run Zadig and install the +WinUSB+
     driver for it too.

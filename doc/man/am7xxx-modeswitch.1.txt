@@ -1,21 +1,21 @@
-AM7XXX_MODE_SWITCH(1)
+AM7XXX-MODESWITCH(1)
 =====================
 :doctype: manpage
 
 
 NAME
 ----
-am7xxx_mode_switch - change the operational mode of am7xxx based devices
+am7xxx-modeswitch - change the operational mode of am7xxx based devices
 
 
 SYNOPSIS
 --------
-*am7xxx_mode_switch*
+*am7xxx-modeswitch*
 
 
 DESCRIPTION
 -----------
-am7xxx_mode_switch(1) is a minimal replacement of usb-modeswitch to use with
+am7xxx-modeswitch(1) is a minimal replacement of usb-modeswitch to use with
 am7xxx devices (e.g. Acer C110 or Philips PPX projectors) to switch from the
 mass storage device mode to the generic display mode.
 
@@ -25,7 +25,7 @@ It is handy on systems where usb-modeswitch is not available, like Windows.
 EXAMPLE OF USE
 --------------
 
-am7xxx_mode_switch
+am7xxx-modeswitch
 
 
 EXIT STATUS

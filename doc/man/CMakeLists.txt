@@ -3,7 +3,7 @@ find_package(Asciidoc)
 if(ASCIIDOC_FOUND)
   add_custom_target(manpages
     ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/am7xxx-play.1.txt -D ${DOC_OUTPUT_PATH}/man
-    COMMAND ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/am7xxx_mode_switch.1.txt -D ${DOC_OUTPUT_PATH}/man
+    COMMAND ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/am7xxx-modeswitch.1.txt -D ${DOC_OUTPUT_PATH}/man
     COMMAND ${ASCIIDOC_A2X_EXECUTABLE} -f manpage ${CMAKE_CURRENT_SOURCE_DIR}/picoproj.1.txt -D ${DOC_OUTPUT_PATH}/man
     WORKING_DIRECTORY ${DOC_OUTPUT_PATH}/man
     COMMENT "Generating man pages with Asciidoc" VERBATIM
@@ -18,7 +18,7 @@ if(ASCIIDOC_FOUND)
 
   install(FILES
     ${DOC_OUTPUT_PATH}/man/am7xxx-play.1
-    ${DOC_OUTPUT_PATH}/man/am7xxx_mode_switch.1
+    ${DOC_OUTPUT_PATH}/man/am7xxx-modeswitch.1
     ${DOC_OUTPUT_PATH}/man/picoproj.1
     DESTINATION "${CMAKE_INSTALL_PREFIX}/share/man/man1/"
     COMPONENT manpages)

@@ -62,16 +62,16 @@ if(BUILD_AM7XXX-PLAY)
     DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
 
-# Build a simple usb_mode_switch clone for am7xxx devices
-option(BUILD_AM7XXX_MODE_SWITCH "Build a simple usb_mode_switch clone for am7xxx devices" TRUE)
-if(BUILD_AM7XXX_MODE_SWITCH)
+# Build a simple usb-modeswitch clone for am7xxx devices
+option(BUILD_am7xxx-modeswitch "Build a simple usbmode-switch clone for am7xxx devices" TRUE)
+if(BUILD_am7xxx-modeswitch)
 
   find_package(libusb-1.0 REQUIRED)
   include_directories(${LIBUSB_1_INCLUDE_DIRS})
 
-  add_executable(am7xxx_mode_switch am7xxx_mode_switch.c)
-  target_link_libraries(am7xxx_mode_switch ${LIBUSB_1_LIBRARIES})
-  install(TARGETS am7xxx_mode_switch
+  add_executable(am7xxx-modeswitch am7xxx-modeswitch.c)
+  target_link_libraries(am7xxx-modeswitch ${LIBUSB_1_LIBRARIES})
+  install(TARGETS am7xxx-modeswitch
     DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
 

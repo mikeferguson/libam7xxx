@@ -1,4 +1,4 @@
-/* am7xxx_mode_switch - a simple usb_mode_switch for am7xxx devices
+/* am7xxx-modeswitch - a simple usb-modeswitch for am7xxx devices
  *
  * Copyright (C) 2012  Antonio Ospite <ospite@studenti.unina.it>
  *
