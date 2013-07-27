@@ -667,7 +667,7 @@ typedef enum {
 static int scan_devices(am7xxx_context *ctx, scan_op op,
 			unsigned int open_device_index, am7xxx_device **dev)
 {
-	int num_devices;
+	ssize_t num_devices;
 	libusb_device** list;
 	unsigned int current_index;
 	int i;
