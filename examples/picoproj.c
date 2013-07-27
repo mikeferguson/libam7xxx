@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 	int width = 800;
 	int height = 480;
 	unsigned char *image;
-	unsigned int size;
+	off_t size;
 	am7xxx_device_info device_info;
 
 	while ((opt = getopt(argc, argv, "d:f:F:l:p:z:W:H:h")) != -1) {
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 			"WARNING: image is %dx%d, not fitting the native resolution, it may be displayed wrongly!\n",
 			width, height);
 
-	ret = am7xxx_send_image(dev, format, width, height, image, size);
+	ret = am7xxx_send_image(dev, format, width, height, image, (unsigned int)size);
 	if (ret < 0) {
 		perror("am7xxx_send_image");
 		exit_code = EXIT_FAILURE;
