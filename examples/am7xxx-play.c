@@ -635,8 +635,8 @@ int main(int argc, char *argv[])
 	unsigned int quality = 95;
 	int log_level = AM7XXX_LOG_INFO;
 	int device_index = 0;
-	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
-	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
+	int power_mode = AM7XXX_POWER_LOW;
+	int zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;

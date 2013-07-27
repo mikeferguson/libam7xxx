@@ -68,8 +68,8 @@ int main(int argc, char *argv[])
 	am7xxx_device *dev;
 	int log_level = AM7XXX_LOG_INFO;
 	int device_index = 0;
-	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
-	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
+	int power_mode = AM7XXX_POWER_LOW;
+	int zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	int width = 800;
 	int height = 480;
