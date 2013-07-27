@@ -78,7 +78,8 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_CLANG)
   if (STRICT_COMPILATION_CHECKS)
     add_flags(STRICT_FLAGS
       -Werror
-      -Wsign-conversion
+      # sign conversion warnings can be very noisy for a very little gain
+      #-Wsign-conversion
       # NOTE: Vanilla libusb-1.0.8 can't live with -pedantic-errors
       -pedantic-errors)
 
