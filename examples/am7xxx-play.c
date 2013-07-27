@@ -440,7 +440,7 @@ static int am7xxx_play(const char *input_format_string,
 			}
 		}
 end_while:
-		if (!output_ctx.raw_output)
+		if (!output_ctx.raw_output && got_packet)
 			av_free_packet(&out_packet);
 		av_free_packet(&in_packet);
 	}
