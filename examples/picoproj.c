@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "am7xxx.h"
 
@@ -58,7 +59,6 @@ static void usage(char *name)
 int main(int argc, char *argv[])
 {
 	int ret;
-	int exit_code = EXIT_SUCCESS;
 	int opt;
 
 	char filename[FILENAME_MAX] = {0};
@@ -83,7 +83,8 @@ int main(int argc, char *argv[])
 			device_index = atoi(optarg);
 			if (device_index < 0) {
 				fprintf(stderr, "Unsupported device index\n");
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'f':
@@ -102,7 +103,8 @@ int main(int argc, char *argv[])
 				break;
 			default:
 				fprintf(stderr, "Unsupported format\n");
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'l':
@@ -125,7 +127,8 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Invalid power mode value, must be between %d and %d\n",
 					AM7XXX_POWER_OFF, AM7XXX_POWER_TURBO);
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'z':
@@ -140,48 +143,53 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Invalid zoom mode value, must be between %d and %d\n",
 					AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'W':
 			width = atoi(optarg);
 			if (width < 0) {
 				fprintf(stderr, "Unsupported width\n");
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'H':
 			height = atoi(optarg);
 			if (height < 0) {
 				fprintf(stderr, "Unsupported height\n");
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'h':
 			usage(argv[0]);
-			exit(EXIT_SUCCESS);
+			ret = 0;
+			goto out;
 		default: /* '?' */
 			usage(argv[0]);
-			exit(EXIT_FAILURE);
+			ret = -EINVAL;
+			goto out;
 		}
 	}
 
 	if (filename[0] == '\0') {
 		fprintf(stderr, "An image file MUST be specified with the -f option.\n\n");
 		usage(argv[0]);
-		exit_code = EXIT_FAILURE;
+		ret = -EINVAL;
 		goto out;
 	}
 
 	image_fp = fopen(filename, "rb");
 	if (image_fp == NULL) {
 		perror("fopen");
-		exit_code = EXIT_FAILURE;
+		ret = -EINVAL;
 		goto out;
 	}
-	if (fstat(fileno(image_fp), &st) < 0) {
+	ret = fstat(fileno(image_fp), &st);
+	if (ret < 0) {
 		perror("fstat");
-		exit_code = EXIT_FAILURE;
 		goto out_close_image_fp;
 	}
 	size = st.st_size;
@@ -189,7 +197,7 @@ int main(int argc, char *argv[])
 	image = malloc(size * sizeof(unsigned char));
 	if (image == NULL) {
 		perror("malloc");
-		exit_code = EXIT_FAILURE;
+		ret = -ENOMEM;
 		goto out_close_image_fp;
 	}
 
@@ -202,13 +210,14 @@ int main(int argc, char *argv[])
 		else
 			fprintf(stderr, "Unexpected error condition.\n");
 
+		if (ret >= 0)
+			ret = -EINVAL;
 		goto out_free_image;
 	}
 
 	ret = am7xxx_init(&ctx);
 	if (ret < 0) {
 		perror("am7xxx_init");
-		exit_code = EXIT_FAILURE;
 		goto out_free_image;
 	}
 
@@ -217,28 +226,24 @@ int main(int argc, char *argv[])
 	ret = am7xxx_open_device(ctx, &dev, 0);
 	if (ret < 0) {
 		perror("am7xxx_open_device");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 
 	ret = am7xxx_close_device(dev);
 	if (ret < 0) {
 		perror("am7xxx_close_device");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 
 	ret = am7xxx_open_device(ctx, &dev, device_index);
 	if (ret < 0) {
 		perror("am7xxx_open_device");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 
 	ret = am7xxx_get_device_info(dev, &device_info);
 	if (ret < 0) {
 		perror("am7xxx_get_device_info");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 	printf("Native resolution: %dx%d\n",
@@ -247,14 +252,12 @@ int main(int argc, char *argv[])
 	ret = am7xxx_set_zoom_mode(dev, zoom);
 	if (ret < 0) {
 		perror("am7xxx_set_zoom_mode");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 
 	ret = am7xxx_set_power_mode(dev, power_mode);
 	if (ret < 0) {
 		perror("am7xxx_set_power_mode");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 
@@ -273,11 +276,10 @@ int main(int argc, char *argv[])
 	ret = am7xxx_send_image(dev, format, width, height, image, (unsigned int)size);
 	if (ret < 0) {
 		perror("am7xxx_send_image");
-		exit_code = EXIT_FAILURE;
 		goto cleanup;
 	}
 
-	exit_code = EXIT_SUCCESS;
+	ret = 0;
 
 cleanup:
 	am7xxx_shutdown(ctx);
@@ -286,10 +288,9 @@ out_free_image:
 	free(image);
 
 out_close_image_fp:
-	ret = fclose(image_fp);
-	if (ret == EOF)
+	if (fclose(image_fp) == EOF)
 		perror("fclose");
 
 out:
-	exit(exit_code);
+	return ret;
 }
