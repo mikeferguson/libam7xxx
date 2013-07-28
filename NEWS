@@ -1,7 +1,7 @@
 News for v0.1.4:
 ================
 
-  * Improved USB device configuration in order to support mode devices
+  * Improved USB device configuration in order to support more devices
   * Added support for Philips/Sagemcom PicoPix 2330 (Thanks to Grégory
     Lemesre)
   * Fixed verbose debug output
