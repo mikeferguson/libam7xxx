@@ -136,7 +136,7 @@ Package: am7xxx
 Section: libs
 Architecture: any
 Depends: ${misc:Depends}, libam7xxx-bin, libam7xxx-dev, libam7xxx0.1,
- libam7xxx-doc
+ libam7xxx-doc (= ${source:Version})
 Description: library for accessing am7xxx devices -- metapackage
  libam7xxx is an Open Source library to communicate via USB with projectors and
  Digital Picture Frames based on the Actions Micro AM7XXX family if ICs.
