@@ -1,3 +1,18 @@
+News for v0.1.4:
+================
+
+  * Improved USB device configuration in order to support mode devices
+  * Added support for Philips/Sagemcom PicoPix 2330 (Thanks to Grégory
+    Lemesre)
+  * Fixed verbose debug output
+  * Confirmed that libam7xxx works with the Top-Height/TEC PP700 projector
+  * Implemented am7xxx_send_image_async()
+  * Made am7xxx-play almost twice faster by using am7xxx_send_image_async()
+  * Improved documentation
+  * Added support for compiling with clang
+  * A lot of little fixes for correctness, robustness and portability
+  * Renamed am7xxx_mode_switch to am7xxx-modeswitch, added an udev rule for it
+
 News for v0.1.3:
 ================
 
