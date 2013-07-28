@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 9), dpkg-dev (>= 1.16.1~), cmake, pkg-config,
  libusb-1.0-0-dev, libxcb1-dev,
  libavdevice-dev (<< 6:9), libavformat-dev (<< 6:9), libavcodec-dev (<< 6:9), libswscale-dev (<< 6:9)
 Build-Depends-Indep: doxygen, asciidoc (>> 8.0.0), xmlto, docbook-xsl (>> 1.72)
-Standards-Version: 3.9.3
+Standards-Version: 3.9.4
 Homepage: http://git.ao2.it/libam7xxx.git
 Vcs-Git: git://git.ao2.it/libam7xxx.git
 Vcs-Browser: http://git.ao2.it/libam7xxx.git
