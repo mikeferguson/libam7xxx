@@ -1,6 +1,6 @@
-From 70d093e78087c821c2c944df062f4a8ba10e2625 Mon Sep 17 00:00:00 2001
+From 25fee52c64caa7230a3c2b03467114e0c84fee67 Mon Sep 17 00:00:00 2001
 From: Antonio Ospite <ospite@studenti.unina.it>
-Date: Mon, 18 Mar 2013 11:06:57 +0100
+Date: Sun, 28 Jul 2013 19:35:41 +0200
 Subject: [PATCH] Revert "am7xxx-play: switch to avcodec_encode_video2()"
 X-Face: z*RaLf`X<@C75u6Ig9}{oW$H;1_\2t5)({*|jhM<pyWR#k60!#=#>/Vb;]yA5<GWI5`6u&+
  ;6b'@y|8w"wB;4/e!7wYYrcqdJFY,~%Gk_4]cq$Ei/7<j&N3ah(m`ku?pX.&+~:_/wC~dwn^)MizBG
@@ -14,13 +14,12 @@ packages.
 
 When this patch will be dropped maybe the package should depend on
 libavcodec54 as the old API may be disabled in the Debian packages.
-
 ---
- examples/am7xxx-play.c |   29 +++++++++--------------------
+ examples/am7xxx-play.c | 29 +++++++++--------------------
  1 file changed, 9 insertions(+), 20 deletions(-)
 
 diff --git a/examples/am7xxx-play.c b/examples/am7xxx-play.c
-index 38812a4..0b1fa65 100644
+index 3230e67..37d1191 100644
 --- a/examples/am7xxx-play.c
 +++ b/examples/am7xxx-play.c
 @@ -285,12 +285,9 @@ static int am7xxx_play(const char *input_format_string,
@@ -33,7 +32,7 @@ index 38812a4..0b1fa65 100644
 -	AVPacket out_packet;
  	int got_picture;
 -	int got_packet;
- 	int ret = 0;
+ 	int ret;
  
  	ret = video_input_init(&input_ctx, input_format_string, input_path, input_options);
 @@ -393,26 +390,20 @@ static int am7xxx_play(const char *input_format_string,
@@ -92,11 +91,11 @@ index 38812a4..0b1fa65 100644
  			}
  		}
  end_while:
--		if (!output_ctx.raw_output)
+-		if (!output_ctx.raw_output && got_packet)
 -			av_free_packet(&out_packet);
  		av_free_packet(&in_packet);
  	}
  
 -- 
-1.7.10.4
+1.8.3.2
 
