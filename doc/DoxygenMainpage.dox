@@ -25,6 +25,8 @@ Check @link am7xxx.h @endlink for the public API documentation.
 - Aiptek PocketCinema T25
 - Philips/SagemCom PicoPix 1020
 - Philips/SagemCom PicoPix 2055
+- Philips/SagemCom PicoPix 2330
+- Top-Height/TEC PP700
 
 @section libam7xxxDesignOverview Design Overview
 

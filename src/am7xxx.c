@@ -64,37 +64,61 @@ static void log_message(am7xxx_context *ctx,
 #define debug(ctx, ...)   log_message(ctx,  AM7XXX_LOG_DEBUG,   __func__, 0,        __VA_ARGS__)
 #define trace(ctx, ...)   log_message(ctx,  AM7XXX_LOG_TRACE,   NULL,     0,        __VA_ARGS__)
 
+#define AM7XXX_QUIRK_NO_POWER_MODE (1 << 0)
+#define AM7XXX_QUIRK_NO_ZOOM_MODE  (1 << 1)
+
 struct am7xxx_usb_device_descriptor {
 	const char *name;
 	uint16_t vendor_id;
 	uint16_t product_id;
+	uint8_t configuration;    /* The bConfigurationValue of the device */
+	uint8_t interface_number; /* The bInterfaceNumber of the device */
+	unsigned long quirks;
 };
 
-static struct am7xxx_usb_device_descriptor supported_devices[] = {
+static const struct am7xxx_usb_device_descriptor supported_devices[] = {
 	{
 		.name       = "Acer C110",
 		.vendor_id  = 0x1de1,
 		.product_id = 0xc101,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Acer C112",
 		.vendor_id  = 0x1de1,
 		.product_id = 0x5501,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       ="Aiptek PocketCinema T25",
 		.vendor_id  = 0x08ca,
 		.product_id = 0x2144,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 1020",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x000e,
+		.configuration    = 2,
+		.interface_number = 0,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 2055",
 		.vendor_id  = 0x21e7,
 		.product_id = 0x0016,
+		.configuration    = 2,
+		.interface_number = 0,
+	},
+	{
+		.name       = "Philips/Sagemcom PicoPix 2330",
+		.vendor_id  = 0x21e7,
+		.product_id = 0x0019,
+		.configuration    = 1,
+		.interface_number = 0,
+		.quirks = AM7XXX_QUIRK_NO_POWER_MODE | AM7XXX_QUIRK_NO_ZOOM_MODE,
 	},
 };
 
@@ -106,9 +130,12 @@ static struct am7xxx_usb_device_descriptor supported_devices[] = {
 
 struct _am7xxx_device {
 	libusb_device_handle *usb_device;
+	struct libusb_transfer *transfer;
+	int transfer_completed;
 	uint8_t buffer[AM7XXX_HEADER_WIRE_SIZE];
 	am7xxx_device_info *device_info;
 	am7xxx_context *ctx;
+	const struct am7xxx_usb_device_descriptor *desc;
 	am7xxx_device *next;
 };
 
@@ -347,6 +374,117 @@ static int send_data(am7xxx_device *dev, uint8_t *buffer, unsigned int len)
 	return 0;
 }
 
+static void send_data_async_complete_cb(struct libusb_transfer *transfer)
+{
+	am7xxx_device *dev = (am7xxx_device *)(transfer->user_data);
+	int *completed = &(dev->transfer_completed);
+	int transferred = transfer->actual_length;
+	int ret;
+
+	if (transferred != transfer->length) {
+		error(dev->ctx, "transferred: %d (expected %u)\n",
+		      transferred, transfer->length);
+	}
+
+	switch (transfer->status) {
+	case LIBUSB_TRANSFER_COMPLETED:
+		ret = 0;
+		break;
+	case LIBUSB_TRANSFER_TIMED_OUT:
+		ret = LIBUSB_ERROR_TIMEOUT;
+		break;
+	case LIBUSB_TRANSFER_STALL:
+		ret = LIBUSB_ERROR_PIPE;
+		break;
+	case LIBUSB_TRANSFER_OVERFLOW:
+		ret = LIBUSB_ERROR_OVERFLOW;
+		break;
+	case LIBUSB_TRANSFER_NO_DEVICE:
+		ret = LIBUSB_ERROR_NO_DEVICE;
+		break;
+	case LIBUSB_TRANSFER_ERROR:
+	case LIBUSB_TRANSFER_CANCELLED:
+		ret = LIBUSB_ERROR_IO;
+		break;
+	default:
+		error(dev->ctx, "unrecognised status code %d", transfer->status);
+		ret = LIBUSB_ERROR_OTHER;
+	}
+
+	if (ret < 0)
+		error(dev->ctx, "libusb transfer failed: %s",
+		      libusb_error_name(ret));
+
+	libusb_free_transfer(transfer);
+	transfer = NULL;
+
+	*completed = 1;
+}
+
+static inline void wait_for_trasfer_completed(am7xxx_device *dev)
+{
+	while (!dev->transfer_completed) {
+		int ret = libusb_handle_events_completed(dev->ctx->usb_context,
+							 &(dev->transfer_completed));
+		if (ret < 0) {
+			if (ret == LIBUSB_ERROR_INTERRUPTED)
+				continue;
+			error(dev->ctx, "libusb_handle_events failed: %s, cancelling transfer and retrying",
+			      libusb_error_name(ret));
+			libusb_cancel_transfer(dev->transfer);
+			continue;
+		}
+	}
+}
+
+static int send_data_async(am7xxx_device *dev, uint8_t *buffer, unsigned int len)
+{
+	int ret;
+	uint8_t *transfer_buffer;
+
+	dev->transfer = libusb_alloc_transfer(0);
+	if (dev->transfer == NULL) {
+		error(dev->ctx, "cannot allocate transfer (%s)\n",
+		      strerror(errno));
+		return -ENOMEM;
+	}
+
+	/* Make a copy of the buffer so the caller can safely reuse it just
+	 * after libusb_submit_transfer() has returned. This technique
+	 * requires more allocations than a proper double-buffering approach
+	 * but it takes a lot less code. */
+	transfer_buffer = malloc(len);
+	if (transfer_buffer == NULL) {
+		error(dev->ctx, "cannot allocate transfer buffer (%s)\n",
+		      strerror(errno));
+		ret = -ENOMEM;
+		goto err;
+	}
+	memcpy(transfer_buffer, buffer, len);
+
+	dev->transfer->flags |= LIBUSB_TRANSFER_FREE_BUFFER;
+	libusb_fill_bulk_transfer(dev->transfer, dev->usb_device, 0x1,
+				  transfer_buffer, len,
+				  send_data_async_complete_cb, dev, 0);
+
+	/* wait for the previous transfer to complete */
+	wait_for_trasfer_completed(dev);
+
+	trace_dump_buffer(dev->ctx, "sending -->", buffer, len);
+
+	dev->transfer_completed = 0;
+	ret = libusb_submit_transfer(dev->transfer);
+	if (ret < 0)
+		goto err;
+
+	return 0;
+
+err:
+	libusb_free_transfer(dev->transfer);
+	dev->transfer = NULL;
+	return ret;
+}
+
 static void serialize_header(struct am7xxx_header *h, uint8_t *buffer)
 {
 	uint8_t **buffer_iterator = &buffer;
@@ -451,7 +589,8 @@ static void log_message(am7xxx_context *ctx,
 	return;
 }
 
-static am7xxx_device *add_new_device(am7xxx_context *ctx)
+static am7xxx_device *add_new_device(am7xxx_context *ctx,
+				     const struct am7xxx_usb_device_descriptor *desc)
 {
 	am7xxx_device **devices_list;
 	am7xxx_device *new_device;
@@ -469,6 +608,8 @@ static am7xxx_device *add_new_device(am7xxx_context *ctx)
 	memset(new_device, 0, sizeof(*new_device));
 
 	new_device->ctx = ctx;
+	new_device->desc = desc;
+	new_device->transfer_completed = 1;
 
 	devices_list = &(ctx->devices_list);
 
@@ -526,7 +667,7 @@ typedef enum {
 static int scan_devices(am7xxx_context *ctx, scan_op op,
 			unsigned int open_device_index, am7xxx_device **dev)
 {
-	int num_devices;
+	ssize_t num_devices;
 	libusb_device** list;
 	unsigned int current_index;
 	int i;
@@ -565,7 +706,7 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 					info(ctx, "am7xxx device found, index: %d, name: %s\n",
 					     current_index,
 					     supported_devices[j].name);
-					new_device = add_new_device(ctx);
+					new_device = add_new_device(ctx, &supported_devices[j]);
 					if (new_device == NULL) {
 						/* XXX, the caller may want
 						 * to call am7xxx_shutdown() if
@@ -598,8 +739,32 @@ static int scan_devices(am7xxx_context *ctx, scan_op op,
 						goto out;
 					}
 
-					libusb_set_configuration((*dev)->usb_device, 2);
-					libusb_claim_interface((*dev)->usb_device, 0);
+					/* XXX, the device is now open, if any
+					 * of the calls below fail we need to
+					 * close it again before bailing out.
+					 */
+
+					ret = libusb_set_configuration((*dev)->usb_device,
+								       (*dev)->desc->configuration);
+					if (ret < 0) {
+						debug(ctx, "libusb_set_configuration failed\n");
+						debug(ctx, "Cannot set configuration %hhu\n",
+						      (*dev)->desc->configuration);
+						goto out_libusb_close;
+					}
+
+					ret = libusb_claim_interface((*dev)->usb_device,
+								     (*dev)->desc->interface_number);
+					if (ret < 0) {
+						debug(ctx, "libusb_claim_interface failed\n");
+						debug(ctx, "Cannot claim interface %hhu\n",
+						      (*dev)->desc->interface_number);
+out_libusb_close:
+						libusb_close((*dev)->usb_device);
+						(*dev)->usb_device = NULL;
+						goto out;
+					}
+
 					goto out;
 				}
 				current_index++;
@@ -625,7 +790,7 @@ out:
 
 AM7XXX_PUBLIC int am7xxx_init(am7xxx_context **ctx)
 {
-	int ret = 0;
+	int ret;
 
 	*ctx = malloc(sizeof(**ctx));
 	if (*ctx == NULL) {
@@ -642,7 +807,7 @@ AM7XXX_PUBLIC int am7xxx_init(am7xxx_context **ctx)
 	if (ret < 0)
 		goto out_free_context;
 
-	libusb_set_debug((*ctx)->usb_context, 3);
+	libusb_set_debug((*ctx)->usb_context, LIBUSB_LOG_LEVEL_INFO);
 
 	ret = scan_devices(*ctx, SCAN_OP_BUILD_DEVLIST , 0, NULL);
 	if (ret < 0) {
@@ -735,7 +900,8 @@ AM7XXX_PUBLIC int am7xxx_close_device(am7xxx_device *dev)
 		return -EINVAL;
 	}
 	if (dev->usb_device) {
-		libusb_release_interface(dev->usb_device, 0);
+		wait_for_trasfer_completed(dev);
+		libusb_release_interface(dev->usb_device, dev->desc->interface_number);
 		libusb_close(dev->usb_device);
 		dev->usb_device = NULL;
 	}
@@ -899,6 +1065,42 @@ AM7XXX_PUBLIC int am7xxx_send_image(am7xxx_device *dev,
 	return send_data(dev, image, image_size);
 }
 
+AM7XXX_PUBLIC int am7xxx_send_image_async(am7xxx_device *dev,
+					  am7xxx_image_format format,
+					  unsigned int width,
+					  unsigned int height,
+					  uint8_t *image,
+					  unsigned int image_size)
+{
+	int ret;
+	struct am7xxx_header h = {
+		.packet_type     = AM7XXX_PACKET_TYPE_IMAGE,
+		.direction       = AM7XXX_DIRECTION_OUT,
+		.header_data_len = sizeof(struct am7xxx_image_header),
+		.unknown2        = 0x3e,
+		.unknown3        = 0x10,
+		.header_data = {
+			.image = {
+				.format     = format,
+				.width      = width,
+				.height     = height,
+				.image_size = image_size,
+			},
+		},
+	};
+
+	ret = send_header(dev, &h);
+	if (ret < 0)
+		return ret;
+
+	if (image == NULL || image_size == 0) {
+		warning(dev->ctx, "Not sending any data, check the 'image' or 'image_size' parameters\n");
+		return 0;
+	}
+
+	return send_data_async(dev, image, image_size);
+}
+
 AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode power)
 {
 	int ret;
@@ -909,6 +1111,12 @@ AM7XXX_PUBLIC int am7xxx_set_power_mode(am7xxx_device *dev, am7xxx_power_mode po
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
 	};
+
+	if (dev->desc->quirks & AM7XXX_QUIRK_NO_POWER_MODE) {
+		debug(dev->ctx,
+		      "setting power mode is unsupported on this device\n");
+		return 0;
+	}
 
 	switch(power) {
 	case AM7XXX_POWER_OFF:
@@ -963,6 +1171,12 @@ AM7XXX_PUBLIC int am7xxx_set_zoom_mode(am7xxx_device *dev, am7xxx_zoom_mode zoom
 		.unknown2        = 0x3e,
 		.unknown3        = 0x10,
 	};
+
+	if (dev->desc->quirks & AM7XXX_QUIRK_NO_ZOOM_MODE) {
+		debug(dev->ctx,
+		      "setting zoom mode is unsupported on this device\n");
+		return 0;
+	}
 
 	switch(zoom) {
 	case AM7XXX_ZOOM_ORIGINAL:

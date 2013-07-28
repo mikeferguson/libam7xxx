@@ -1,0 +1,65 @@
+From dc6b216ffea1e80fd3f43d6144eb679a193f5666 Mon Sep 17 00:00:00 2001
+From: Antonio Ospite <ospite@studenti.unina.it>
+Date: Sun, 28 Jul 2013 01:06:41 +0200
+Subject: [PATCH] Instrument code with fps-meter
+X-Face: z*RaLf`X<@C75u6Ig9}{oW$H;1_\2t5)({*|jhM<pyWR#k60!#=#>/Vb;]yA5<GWI5`6u&+
+ ;6b'@y|8w"wB;4/e!7wYYrcqdJFY,~%Gk_4]cq$Ei/7<j&N3ah(m`ku?pX.&+~:_/wC~dwn^)MizBG
+ !pE^+iDQQ1yC6^,)YDKkxDd!T>\I~93>J<_`<4)A{':UrE
+
+Instrument code with fps-meter:
+http://git.ao2.it/experiments/fps-meter.git/
+---
+ examples/CMakeLists.txt | 2 +-
+ examples/am7xxx-play.c  | 4 ++++
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index c77a812..23af8a9 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ include(CheckSymbolExists)
+-add_definitions("-D_POSIX_C_SOURCE=2") # for getopt()
++add_definitions("-D_POSIX_C_SOURCE=200112L") # for getopt()
+ add_definitions("-D_POSIX_SOURCE") # for sigaction
+ add_definitions("-D_BSD_SOURCE") # for strdup
+ 
+diff --git a/examples/am7xxx-play.c b/examples/am7xxx-play.c
+index 3230e67..17228bf 100644
+--- a/examples/am7xxx-play.c
++++ b/examples/am7xxx-play.c
+@@ -34,6 +34,7 @@
+ #include <libswscale/swscale.h>
+ 
+ #include <am7xxx.h>
++#include "fps-meter.h"
+ 
+ /* On some systems ENOTSUP is not defined, fallback to its value on
+  * linux which is equal to EOPNOTSUPP which is 95
+@@ -292,6 +293,7 @@ static int am7xxx_play(const char *input_format_string,
+ 	int got_picture;
+ 	int got_packet;
+ 	int ret;
++	struct fps_meter_stats stats;
+ 
+ 	ret = video_input_init(&input_ctx, input_format_string, input_path, input_options);
+ 	if (ret < 0) {
+@@ -354,6 +356,7 @@ static int am7xxx_play(const char *input_format_string,
+ 		goto cleanup_out_buf;
+ 	}
+ 
++	fps_meter_init(&stats);
+ 	while (run) {
+ 		/* read packet */
+ 		ret = av_read_frame(input_ctx.format_ctx, &in_packet);
+@@ -438,6 +441,7 @@ static int am7xxx_play(const char *input_format_string,
+ 				run = 0;
+ 				goto end_while;
+ 			}
++			fps_meter_update(&stats);
+ 		}
+ end_while:
+ 		if (!output_ctx.raw_output && got_packet)
+-- 
+1.8.3.2
+

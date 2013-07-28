@@ -19,6 +19,9 @@ On a Debian based system, the dependencies can be installed with this command:
                           libavdevice-dev \
                           libswscale-dev
 
+With libav/ffmpeg version previous than 0.9 this patch is needed:
+http://git.ao2.it/libam7xxx.git/blob_plain/refs/heads/debian:/debian/patches/0002-Revert-am7xxx-play-switch-to-avcodec_encode_video2.patch
+
 The library and the example programs can be compiled following these steps:
 
   $ git clone git://git.ao2.it/libam7xxx.git
@@ -45,6 +48,13 @@ can run:
   $ mkdir build
   $ cd build
   $ cmake -D CMAKE_C_COMPILER=cgcc ../
+  $ make
+
+And for a pre-release check with a different compiler, which never hurts:
+
+  $ mkdir build
+  $ cd build
+  $ cmake -D CMAKE_C_COMPILER=clang -D CMAKE_BUILD_TYPE=debug -D STRICT_COMPILATION_CHECKS=ON ../
   $ make
 
 === Cross Builds
@@ -78,3 +88,8 @@ dynamic analyzer by using a command like:
 
   $ valgrind --leak-check=full --show-reachable=yes --track-origins=yes \
     ./bin/picoproj -W 800 -H 480 -f my_image.jpg
+
+or, for am7xxx-play:
+
+  $ valgrind --leak-check=full --show-reachable=yes --track-origins=yes \
+    ./bin/am7xxx-play -f x11grab -i :0

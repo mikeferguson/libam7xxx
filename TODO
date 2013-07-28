@@ -1,3 +1,6 @@
+- Get rid of atoi()
 - Write a GStreamer sink element based on libam7xxx.
 - Generate language bindings in order to use libam7xxx from other languages
   (this may not be necessary if the GStreamer sink works well enough).
+- If there will ever be an API breakage, consider using more portable types
+  (e.g.  off_t for file sizes, size_t for counters, etc.)

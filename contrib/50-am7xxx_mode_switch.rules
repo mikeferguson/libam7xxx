@@ -1,0 +1,3 @@
+# Rule to call am7xxx_mode_switch, useful when usb-modeswitch is not available.
+# Actions Microelectronics Co. Generic Display Device (Mass storage mode)
+ACTION=="add", SUBSYSTEM=="usb", ATTRS{idVendor}=="1de1", ATTRS{idProduct}=="1101", MODE="0660", GROUP="plugdev", RUN+="am7xxx-modeswitch"

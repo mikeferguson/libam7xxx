@@ -291,7 +291,7 @@ static int am7xxx_play(const char *input_format_string,
 	AVPacket out_packet;
 	int got_picture;
 	int got_packet;
-	int ret = 0;
+	int ret;
 
 	ret = video_input_init(&input_ctx, input_format_string, input_path, input_options);
 	if (ret < 0) {
@@ -427,7 +427,7 @@ static int am7xxx_play(const char *input_format_string,
 			fclose(file);
 #endif
 
-			ret = am7xxx_send_image(dev,
+			ret = am7xxx_send_image_async(dev,
 						image_format,
 						(output_ctx.codec_ctx)->width,
 						(output_ctx.codec_ctx)->height,
@@ -440,7 +440,7 @@ static int am7xxx_play(const char *input_format_string,
 			}
 		}
 end_while:
-		if (!output_ctx.raw_output)
+		if (!output_ctx.raw_output && got_packet)
 			av_free_packet(&out_packet);
 		av_free_packet(&in_packet);
 	}
@@ -555,7 +555,7 @@ static int set_signal_handler(void (*signal_handler)(int))
 {
 	struct sigaction new_action;
 	struct sigaction old_action;
-	int ret = 0;
+	int ret;
 
 	new_action.sa_handler = signal_handler;
 	sigemptyset(&new_action.sa_mask);
@@ -635,8 +635,8 @@ int main(int argc, char *argv[])
 	unsigned int quality = 95;
 	int log_level = AM7XXX_LOG_INFO;
 	int device_index = 0;
-	am7xxx_power_mode power_mode = AM7XXX_POWER_LOW;
-	am7xxx_zoom_mode zoom = AM7XXX_ZOOM_ORIGINAL;
+	int power_mode = AM7XXX_POWER_LOW;
+	int zoom = AM7XXX_ZOOM_ORIGINAL;
 	int format = AM7XXX_IMAGE_FORMAT_JPEG;
 	am7xxx_context *ctx;
 	am7xxx_device *dev;
@@ -762,7 +762,8 @@ int main(int argc, char *argv[])
 			default:
 				fprintf(stderr, "Invalid zoom mode value, must be between %d and %d\n",
 					AM7XXX_ZOOM_ORIGINAL, AM7XXX_ZOOM_TEST);
-				exit(EXIT_FAILURE);
+				ret = -EINVAL;
+				goto out;
 			}
 			break;
 		case 'h':
@@ -777,7 +778,8 @@ int main(int argc, char *argv[])
 	}
 
 	if (input_path == NULL) {
-		fprintf(stderr, "The -i option must always be passed\n");
+		fprintf(stderr, "The -i option must always be passed\n\n");
+		usage(argv[0]);
 		ret = -EINVAL;
 		goto out;
 	}
