@@ -1,0 +1,34 @@
+From 03231a2b8d29e8cef1628cb25335f9583f067496 Mon Sep 17 00:00:00 2001
+From: Antonio Ospite <ospite@studenti.unina.it>
+Date: Sat, 3 Aug 2013 15:14:34 +0200
+Subject: [PATCH] am7xxx: add quirks for Philips/Sagemcom PicoPix 2055
+X-Face: z*RaLf`X<@C75u6Ig9}{oW$H;1_\2t5)({*|jhM<pyWR#k60!#=#>/Vb;]yA5<GWI5`6u&+
+ ;6b'@y|8w"wB;4/e!7wYYrcqdJFY,~%Gk_4]cq$Ei/7<j&N3ah(m`ku?pX.&+~:_/wC~dwn^)MizBG
+ !pE^+iDQQ1yC6^,)YDKkxDd!T>\I~93>J<_`<4)A{':UrE
+
+The Philips/Sagemcom PicoPix 2055 does not support some operations:
+  - setting the power mode confuses the firmware
+  - setting the zoom mode has no effect whatsoever
+
+Disable these operations.
+
+Thanks-to: Luca Bompani
+---
+ src/am7xxx.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/am7xxx.c b/src/am7xxx.c
+index 5b1e35a..b66a4ee 100644
+--- a/src/am7xxx.c
++++ b/src/am7xxx.c
+@@ -111,6 +111,7 @@ static const struct am7xxx_usb_device_descriptor supported_devices[] = {
+ 		.product_id = 0x0016,
+ 		.configuration    = 2,
+ 		.interface_number = 0,
++		.quirks = AM7XXX_QUIRK_NO_POWER_MODE | AM7XXX_QUIRK_NO_ZOOM_MODE,
+ 	},
+ 	{
+ 		.name       = "Philips/Sagemcom PicoPix 2330",
+-- 
+1.8.4.rc1
+
