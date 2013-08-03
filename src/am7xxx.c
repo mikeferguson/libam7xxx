@@ -111,6 +111,7 @@ static const struct am7xxx_usb_device_descriptor supported_devices[] = {
 		.product_id = 0x0016,
 		.configuration    = 2,
 		.interface_number = 0,
+		.quirks = AM7XXX_QUIRK_NO_POWER_MODE | AM7XXX_QUIRK_NO_ZOOM_MODE,
 	},
 	{
 		.name       = "Philips/Sagemcom PicoPix 2330",
