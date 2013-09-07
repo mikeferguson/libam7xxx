@@ -428,11 +428,11 @@ static int am7xxx_play(const char *input_format_string,
 #endif
 
 			ret = am7xxx_send_image_async(dev,
-						image_format,
-						(output_ctx.codec_ctx)->width,
-						(output_ctx.codec_ctx)->height,
-						out_picture,
-						out_picture_size);
+						      image_format,
+						      (output_ctx.codec_ctx)->width,
+						      (output_ctx.codec_ctx)->height,
+						      out_picture,
+						      out_picture_size);
 			if (ret < 0) {
 				perror("am7xxx_send_image");
 				run = 0;
@@ -665,7 +665,7 @@ int main(int argc, char *argv[])
 			 *   draw_mouse=1,framerate=100,video_size=800x480
 			 */
 			subopts = subopts_saved = strdup(optarg);
-			while((subopt = strtok_r(subopts, ",", &subopts))) {
+			while ((subopt = strtok_r(subopts, ",", &subopts))) {
 				char *subopt_name = strtok_r(subopt, "=", &subopt);
 				char *subopt_value = strtok_r(NULL, "", &subopt);
 				if (subopt_value == NULL) {
