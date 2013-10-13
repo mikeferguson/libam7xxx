@@ -20,7 +20,7 @@ On a Debian based system, the dependencies can be installed with this command:
                           libswscale-dev
 
 With libav/ffmpeg version previous than 0.9 this patch is needed:
-http://git.ao2.it/libam7xxx.git/blob_plain/refs/heads/debian:/debian/patches/0002-Revert-am7xxx-play-switch-to-avcodec_encode_video2.patch
+http://git.ao2.it/libam7xxx.git/blob_plain/refs/heads/debian:/debian/patches/0001-Revert-am7xxx-play-switch-to-avcodec_encode_video2.patch
 
 The library and the example programs can be compiled following these steps:
 
