@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: Antonio Ospite <ospite@studenti.unina.it>
 Build-Depends: debhelper (>= 9), dpkg-dev (>= 1.16.1~), cmake, pkg-config,
  libusb-1.0-0-dev, libxcb1-dev,
- libavdevice-dev (<< 6:9), libavformat-dev (<< 6:9), libavcodec-dev (<< 6:9), libswscale-dev (<< 6:9)
+ libavdevice-dev, libavformat-dev, libavcodec-dev, libswscale-dev
 Build-Depends-Indep: doxygen, asciidoc (>> 8.0.0), xmlto, docbook-xsl (>> 1.72)
 Standards-Version: 3.9.4
 Homepage: http://git.ao2.it/libam7xxx.git
