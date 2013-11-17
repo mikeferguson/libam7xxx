@@ -1,3 +1,9 @@
+libam7xxx (0.1.4-2ubuntu1) UNRELEASED; urgency=low
+
+  * debian/control: adjust version numbers for ubuntu
+
+ -- Michael Ferguson <mikef@ee2>  Sat, 16 Nov 2013 18:37:25 -0800
+
 libam7xxx (0.1.4-2) unstable; urgency=low
 
   * debian/patches: add 0002-am7xxx-add-quirks-for-Philips-Sagemcom-PicoPix-2055.patch
