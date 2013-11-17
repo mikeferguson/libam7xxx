@@ -1,0 +1,11 @@
+--- a/src/am7xxx.c
++++ b/src/am7xxx.c
+@@ -808,7 +808,7 @@ AM7XXX_PUBLIC int am7xxx_init(am7xxx_con
+ 	if (ret < 0)
+ 		goto out_free_context;
+ 
+-	libusb_set_debug((*ctx)->usb_context, LIBUSB_LOG_LEVEL_INFO);
++	libusb_set_debug((*ctx)->usb_context, 3);
+ 
+ 	ret = scan_devices(*ctx, SCAN_OP_BUILD_DEVLIST , 0, NULL);
+ 	if (ret < 0) {

@@ -1,3 +1,9 @@
+libam7xxx (0.1.4-2ubuntu2) UNRELEASED; urgency=low
+
+  * debian/patches: patch am7xxx.c for undefined libusb constant
+
+ -- Michael Ferguson <mikef@ee2>  Sat, 16 Nov 2013 18:50:25 -0800
+
 libam7xxx (0.1.4-2ubuntu1) UNRELEASED; urgency=low
 
   * debian/control: adjust version numbers for ubuntu

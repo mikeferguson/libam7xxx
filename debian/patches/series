@@ -1,2 +1,3 @@
 0001-Revert-am7xxx-play-switch-to-avcodec_encode_video2.patch
 0002-am7xxx-add-quirks-for-Philips-Sagemcom-PicoPix-2055.patch
+0003-am7xxx-libusb-undefined.patch
